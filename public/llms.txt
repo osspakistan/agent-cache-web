@@ -1,0 +1,15 @@
+# Agent Cache
+
+> Turn any documentation site into clean, agent-ready markdown docs. Paste a docs URL, get the whole site back as plain markdown files a coding agent can read.
+
+## Product
+
+- [Landing page](/): paste a docs URL, get an agent-ready bundle + ZIP
+- [Health check (JSON)](/health): service uptime endpoint
+- [Feature specs](https://github.com/agentcache/agent-cache): f01-f04 web MVP, f05-f07 CLI + MCP
+
+## Pipeline
+
+- Plain HTTP fetching (`.md` variant first) — no headless browser, no LLM
+- Content extraction: nav/footer junk stripped, code blocks preserved
+- Output: markdown tree mirroring the site, plus `_map.json` and `meta.yaml`

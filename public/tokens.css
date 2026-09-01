@@ -1,0 +1,83 @@
+/* ============================================================
+   agent-cache — design tokens
+   palette sampled from .wtf/02.references/media/zinc.com.png
+   (pixel-counted, not eyeballed)
+
+   ANCHOR HUE: muted blue #5682cd — sampled from zinc's primary button.
+   Deliberately NOT orange/terracotta: that hue reads as Claude/Anthropic
+   and invites "you copied it". Warm tones here are neutral cream only.
+
+     #fffcf4  page cream        (600k px — the dominant surface)
+     #ffffff  card white        (cards sit brighter than the page)
+     #f5f2e9  sunken row        (faq / inset zones)
+     #1e1e1e  near-black        (headings, dark cards)
+     #545250  warm grey         (body copy — NOT pure black)
+     #5682cd  muted blue        (accent + primary) → #3767b9 hover
+     #e4e1da  border
+
+   theme: <html data-theme="light|dark">, persisted in localStorage
+   key "ac-theme" — every page runs the same inline init snippet.
+   ============================================================ */
+:root {
+  --radius: 0.625rem;
+
+  /* surfaces */
+  --background: #fffcf4;
+  --card: #ffffff;
+  --secondary: #f5f2e9;
+  --muted: #f9f6ec;
+
+  /* text */
+  --foreground: #1e1e1e;
+  --body: #545250;
+  --muted-foreground: #777472;
+  --card-foreground: #1e1e1e;
+
+  /* actions */
+  --primary: #5682cd;
+  --primary-hover: #3767b9;
+  --primary-foreground: #ffffff;
+
+  /* accent — one hue, blue. no gold, no orange. */
+  --accent: #3767b9;            /* darker blue: readable on cream as text */
+  --accent-soft: #b9cbea;
+  --accent-wash: #eef2fa;
+  --marker: #dbe5f5;            /* highlight behind headline words */
+
+  /* status */
+  --ok: #4f8a5b;
+
+  /* lines */
+  --border: #e4e1da;
+  --border-soft: #f0eee6;
+  --input: #e4e1da;
+  --ring: #5682cd;
+}
+
+:root[data-theme="dark"] {
+  --background: #1a1917;
+  --card: #232120;
+  --secondary: #232120;
+  --muted: #201f1d;
+
+  --foreground: #f5f2e9;
+  --body: #c4c0b8;
+  --muted-foreground: #8d8a83;
+  --card-foreground: #f5f2e9;
+
+  --primary: #7b9ee0;
+  --primary-hover: #96b3e8;
+  --primary-foreground: #16150f;
+
+  --accent: #8fb0e8;
+  --accent-soft: #2f3d55;
+  --accent-wash: #1e2530;
+  --marker: #2c3a52;
+
+  --ok: #7fb98a;
+
+  --border: #322f2b;
+  --border-soft: #2a2724;
+  --input: #322f2b;
+  --ring: #7b9ee0;
+}
