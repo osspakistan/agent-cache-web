@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import type { NavHierarchy, NavItem, NavSection } from '../../shared/types'
+import type { NavHierarchy, NavItem, NavSection } from '../../lib/utils/types'
 
 export async function extractSiteTopology(docsUrl: string): Promise<NavHierarchy> {
   const url = new URL(docsUrl)

@@ -1,7 +1,7 @@
-import { runConversionEngine } from '../../../modules/engine'
-import { getJobById } from '../../../modules/jobs'
-import { readEventsFromR2 } from '../../../modules/storage/r2'
-import type { AppContext, StreamEvent } from '../../../shared/types'
+import { runConversionEngine } from '../../../features/engine'
+import { getJobById } from '../../../features/jobs'
+import { readEventsFromR2 } from '../../../lib/clients'
+import type { AppContext, StreamEvent } from '../../../lib/utils/types'
 
 /**
  * GET /dingdong/:id/stream — SSE streaming endpoint.

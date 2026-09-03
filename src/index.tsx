@@ -8,7 +8,7 @@
  * Port: .env (Bun auto-loads it) → PORT.
  */
 import { join } from 'node:path'
-import './shared/logger' // initLogger at boot — side-effect import, safe re-entrance
+import './lib/utils/logger' // initLogger at boot — side-effect import, safe re-entrance
 import { evlog } from 'evlog/hono'
 import { serveStatic } from 'hono/bun'
 import { buildApp } from './router/build'

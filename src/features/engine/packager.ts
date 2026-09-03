@@ -1,6 +1,6 @@
 import { zipSync } from 'fflate'
-import type { NavHierarchy } from '../../shared/types'
-import { uploadToR2 } from '../storage/r2'
+import { uploadToR2 } from '../../lib/clients'
+import type { NavHierarchy } from '../../lib/utils/types'
 
 export async function packageJobBundle(
   jobId: string,

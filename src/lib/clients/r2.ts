@@ -1,5 +1,5 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import type { StreamEvent } from '../../shared/types'
+import type { StreamEvent } from '../utils/types'
 
 let s3Client: S3Client | null = null
 
@@ -38,9 +38,6 @@ export function getPublicR2Url(key: string): string | null {
   return `${publicBase}/${key}`
 }
 
-/**
- * Upload an individual file directly to R2.
- */
 export async function uploadToR2(
   key: string,
   content: string | Uint8Array | Buffer,
@@ -59,9 +56,6 @@ export async function uploadToR2(
   )
 }
 
-/**
- * Fetch an object directly from R2.
- */
 export async function getFromR2(key: string): Promise<Uint8Array | null> {
   const client = getR2Client()
   const bucket = getBucketName()
@@ -77,36 +71,42 @@ export async function getFromR2(key: string): Promise<Uint8Array | null> {
     if (!res.Body) return null
     return await res.Body.transformToByteArray()
   } catch (err: unknown) {
-    const code = (err as { name?: string })?.name
-    if (code === 'NoSuchKey' || code === 'NotFound') return null
-    throw err
+    if ((err as { name?: string }).name === 'NoSuchKey') {
+      return null
+    }
+    return null
   }
 }
 
-/**
- * Append or save an event directly to R2 .dingdong/events.jsonl
- */
 export async function appendEventToR2(jobId: string, event: StreamEvent): Promise<void> {
   const eventsKey = `jobs/${jobId}/.dingdong/events.jsonl`
   const logsKey = `jobs/${jobId}/logs.txt`
 
-  // Format log entry
-  const line = JSON.stringify(event) + '\n'
-  const time = new Date(event.timestamp).toISOString().split('T')[1].slice(0, 8)
-  let logText = `[${time}] [${event.type.toUpperCase()}]`
-  if (event.message) logText += ` ${event.message}`
-  if (event.machine) logText += ` MACHINE: ${event.machine}`
-  if (event.human) logText += ` HUMAN: ${event.human}`
-  if (event.current_url) logText += ` (${event.current_url})`
-  logText += '\n'
-
-  // Fetch current buffer from R2 and append
   try {
-    const currentEvents = (await getFromR2(eventsKey)) ?? new Uint8Array(0)
-    const currentLogs = (await getFromR2(logsKey)) ?? new Uint8Array(0)
+    const [existingEvents, existingLogs] = await Promise.all([
+      getFromR2(eventsKey),
+      getFromR2(logsKey),
+    ])
 
-    const newEvents = Buffer.concat([Buffer.from(currentEvents), Buffer.from(line)])
-    const newLogs = Buffer.concat([Buffer.from(currentLogs), Buffer.from(logText)])
+    const line = `${JSON.stringify(event)}\n`
+    const time = new Date(event.timestamp).toISOString().split('T')[1].slice(0, 8)
+    let logText = `[${time}] [${event.type.toUpperCase()}]`
+    if (event.type === 'phase') logText += ` --- Phase: ${event.phase} (${event.message}) ---`
+    else if (event.type === 'progress')
+      logText += ` [${event.done}/${event.total}] ${event.current_url}`
+    else if (event.type === 'log') logText += ` ${event.message}`
+    else if (event.type === 'complete') logText += ` SUCCESS: ${event.message}`
+    else if (event.type === 'error')
+      logText += ` ERROR: machine=${event.machine} human=${event.human}`
+    logText += '\n'
+
+    const newEvents = existingEvents
+      ? Buffer.concat([existingEvents, Buffer.from(line, 'utf8')])
+      : Buffer.from(line, 'utf8')
+
+    const newLogs = existingLogs
+      ? Buffer.concat([existingLogs, Buffer.from(logText, 'utf8')])
+      : Buffer.from(logText, 'utf8')
 
     await Promise.all([
       uploadToR2(eventsKey, newEvents, 'text/plain; charset=utf-8'),
@@ -117,9 +117,6 @@ export async function appendEventToR2(jobId: string, event: StreamEvent): Promis
   }
 }
 
-/**
- * Read all events recorded for a job directly from R2.
- */
 export async function readEventsFromR2(jobId: string): Promise<StreamEvent[]> {
   const eventsKey = `jobs/${jobId}/.dingdong/events.jsonl`
   const bytes = await getFromR2(eventsKey)
@@ -133,16 +130,13 @@ export async function readEventsFromR2(jobId: string): Promise<StreamEvent[]> {
     try {
       events.push(JSON.parse(line))
     } catch {
-      // Ignore corrupted line
+      // ignore
     }
   }
 
   return events
 }
 
-/**
- * Read raw logs recorded for a job directly from R2.
- */
 export async function readRawLogsFromR2(jobId: string): Promise<string> {
   const logsKey = `jobs/${jobId}/logs.txt`
   const bytes = await getFromR2(logsKey)

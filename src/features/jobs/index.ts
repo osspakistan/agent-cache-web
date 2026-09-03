@@ -1,10 +1,10 @@
-import { generateJobId } from '../../shared/id'
-import type { JobRecord } from '../../shared/types'
-import { createJob, getJobById, initDb, listCompletedJobs, updateJob } from './db'
+import { createJob, getJobById, initDb, listCompletedJobs, updateJob } from '../../lib/clients'
+import { generateJobId } from '../../lib/utils/id'
+import type { JobRecord } from '../../lib/utils/types'
 
 export async function createNewJob(inputUrl: string): Promise<JobRecord> {
   await initDb()
-  const id = generateJobId()
+  const id = generateJobId(inputUrl)
   const r2_prefix = `jobs/${id}`
 
   const job = await createJob({

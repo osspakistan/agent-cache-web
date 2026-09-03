@@ -1,6 +1,6 @@
-import { getJobById } from '../../../modules/jobs'
-import { getFromR2, getPublicR2Url } from '../../../modules/storage/r2'
-import type { AppContext } from '../../../shared/types'
+import { getJobById } from '../../../features/jobs'
+import { getFromR2, getPublicR2Url } from '../../../lib/clients'
+import type { AppContext } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id') || ''

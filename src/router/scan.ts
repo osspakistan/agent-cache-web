@@ -25,7 +25,7 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
-import type { AppHandler, JSXNode } from '../shared/types'
+import type { AppHandler, JSXNode } from '../lib/utils/types'
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 export type AsyncHandler = AppHandler

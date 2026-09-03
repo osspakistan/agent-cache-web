@@ -1,5 +1,5 @@
-import { createNewJob } from '../../modules/jobs'
-import type { AppContext } from '../../shared/types'
+import { createNewJob } from '../../features/jobs'
+import type { AppContext } from '../../lib/utils/types'
 
 /**
  * POST /jobs/create — creates the job record in Turso DB + disk, then redirects to /dingdong/ac-{id}

@@ -1,9 +1,9 @@
 import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
-import { initDb, listCompletedJobs } from '../../modules/jobs'
-import type { AppContext } from '../../shared/types'
+import { initDb, listCompletedJobs } from '../../features/jobs'
+import type { AppContext } from '../../lib/utils/types'
 
-export const GET = async (c: AppContext) => {
+export const GET = async (_c: AppContext) => {
   await initDb()
   const jobs = await listCompletedJobs(50)
 

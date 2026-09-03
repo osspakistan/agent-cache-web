@@ -1,7 +1,7 @@
 import { JSDOM } from 'jsdom'
 import TurndownService from 'turndown'
-import type { NavHierarchy, StreamEvent } from '../../shared/types'
-import { uploadToR2 } from '../storage/r2'
+import { uploadToR2 } from '../../lib/clients'
+import type { NavHierarchy, StreamEvent } from '../../lib/utils/types'
 
 const turndown = new TurndownService({
   headingStyle: 'atx',

@@ -1,4 +1,4 @@
-import type { StrategyType } from '../../shared/types'
+import type { StrategyType } from '../../lib/utils/types'
 
 export interface LadderDecision {
   strategy: StrategyType

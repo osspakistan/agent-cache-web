@@ -1,4 +1,4 @@
-import type { AppContext } from '../shared/types'
+import type { AppContext } from '../lib/utils/types'
 
 /** GET /health — JSON. Used by uptime checks; proves route.ts convention. */
 export const GET = (c: AppContext) =>

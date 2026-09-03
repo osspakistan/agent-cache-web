@@ -4,7 +4,7 @@ import { statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import type { EvlogVariables } from 'evlog/hono'
 import type { Hono, MiddlewareHandler } from 'hono'
-import type { AppContext, JSXNode } from '../shared/types'
+import type { AppContext, JSXNode } from '../lib/utils/types'
 import {
   type ErrorComponent,
   type LayoutComponent,

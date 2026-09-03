@@ -1,8 +1,8 @@
 import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
-import { getJobById } from '../../../modules/jobs'
-import { getFromR2, getPublicR2Url } from '../../../modules/storage/r2'
-import type { AppContext, NavHierarchy } from '../../../shared/types'
+import { getJobById } from '../../../features/jobs'
+import { getFromR2, getPublicR2Url } from '../../../lib/clients'
+import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id') || ''
@@ -143,14 +143,14 @@ export const GET = async (c: AppContext) => {
             "
           >
             <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
                 <span
                   class="mono"
                   style="font-size: 11.5px; color: var(--accent-ink); font-weight: 600;"
                 >
                   {id}
                 </span>
-                <span style="font-size: 11.5px; color: var(--ink-soft);">·</span>
+
                 <a
                   href={job.resolved_url || job.input_url}
                   target="_blank"

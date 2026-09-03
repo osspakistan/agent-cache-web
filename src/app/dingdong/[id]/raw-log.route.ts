@@ -1,5 +1,5 @@
-import { readRawLogsFromR2 } from '../../../modules/storage/r2'
-import type { AppContext } from '../../../shared/types'
+import { readRawLogsFromR2 } from '../../../lib/clients'
+import type { AppContext } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id') || ''

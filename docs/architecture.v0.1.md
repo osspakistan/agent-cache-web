@@ -159,18 +159,22 @@ src/
 │   │   ├── ladder.ts                  <-- Acquisition ladder strategy selector
 │   │   ├── crawler.ts                 <-- Worker pool & HTML purifier
 │   │   └── packager.ts                <-- Numeric indexer, INDEX.md & ZIP maker
-│   ├── storage/
-│   │   ├── disk.ts                    <-- Local filesystem journal & workspace manager
-│   │   └── r2.ts                      <-- Cloudflare R2 S3-client sync & object retrieval
 │   └── jobs/
 │       ├── index.ts                   <-- Job service (create, get, list, update)
-│       └── db.ts                      <-- Turso / libSQL schema & query client
+│       └── db.ts                      <-- Turso / libSQL schema & query execution
 │
-├── shared/
-│   ├── id.ts                          <-- Nanoid generator: ac-{8-char}
-│   ├── errors.ts                      <-- Dual-layer error system (machine vs human witty)
-│   ├── logger.ts                      <-- evlog request logger
-│   └── types.ts                       <-- Global TypeScript interfaces
+├── lib/                               <-- Shared Foundation Layer
+│   ├── clients/                       <-- Singleton infrastructure clients
+│   │   ├── index.ts                   <-- Facade export for clients
+│   │   ├── turso.ts                   <-- Singleton Turso / libSQL connection
+│   │   ├── r2.ts                      <-- Singleton Cloudflare R2 S3 connection
+│   │   └── r2-storage.ts              <-- Cloudflare R2 operations (upload, get, append events)
+│   ├── utils/                         <-- Pure utilities & contracts
+│   │   ├── id.ts                      <-- Domain-based ID generator ({domain.ext}-{4hex})
+│   │   ├── errors.ts                  <-- Dual-layer error system (machine vs human witty)
+│   │   ├── logger.ts                  <-- evlog request logger
+│   │   └── types.ts                   <-- Global TypeScript interfaces
+│   └── logic/                         <-- Shared cross-cutting pure business helpers
 │
 └── index.tsx                          <-- Application entrypoint (Bun.serve + Hono)
 ```
