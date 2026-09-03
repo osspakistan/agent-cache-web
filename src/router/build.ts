@@ -98,6 +98,9 @@ export async function buildApp(
         return htmlResponse(c, html)
       }
       app.on(method, file.path, wrapped)
+      if (file.path !== '/' && !file.path.endsWith('/')) {
+        app.on(method, `${file.path}/`, wrapped)
+      }
     }
   }
 

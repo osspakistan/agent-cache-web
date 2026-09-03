@@ -1,18 +1,15 @@
+import { createNewJob } from '../../modules/jobs'
 import type { AppContext } from '../../shared/types'
 
 /**
- * POST /jobs/create — the pill form's target (v2 preview stub's real replacement).
- * Scaffold state: captures the URL and returns the early-access note.
- * When the job pipeline lands: validate URL (f01) → modules/jobs.create() →
- * return job-status fragment instead.
+ * POST /jobs/create — creates the job record in Turso DB + disk, then redirects to /dingdong/ac-{id}
  */
 export const POST = async (c: AppContext) => {
   const log = c.get('log')
   const form = await c.req.parseBody()
-  const url = String(form.docs ?? '').trim()
-  log.set({ url })
+  const rawUrl = String(form.docs ?? '').trim()
 
-  if (!url) {
+  if (!rawUrl) {
     return c.html(
       <p class="exp-note" role="alert">
         <b>paste a docs url first.</b>
@@ -21,23 +18,27 @@ export const POST = async (c: AppContext) => {
     )
   }
 
-  // No-JS path: redirect back home (fragment target is replaced only via htmx)
-  if (!c.req.header('HX-Request')) {
-    return c.redirect(`/?captured=${encodeURIComponent(url)}`, 303)
-  }
+  log.set({ url: rawUrl })
 
-  // TODO(pipeline): modules/jobs.create(url) → return job-status fragment
-  return c.html(
-    <p class="exp-note">
-      <b>url captured</b> ·{' '}
-      <span class="mono" style="color:var(--ink)">
-        {url}
-      </span>{' '}
-      · the web app ships with the backend. ping{' '}
-      <a href="mailto:hi@agent-cache.dev" style="color:var(--accent-ink)">
-        hi@agent-cache.dev
-      </a>{' '}
-      for early access.
-    </p>,
-  )
+  try {
+    const job = await createNewJob(rawUrl)
+    const targetUrl = `/dingdong/${job.id}`
+
+    if (c.req.header('HX-Request')) {
+      // HTMX client-side redirect
+      c.header('HX-Redirect', targetUrl)
+      return c.text('', 200)
+    }
+
+    // Standard no-JS form redirect
+    return c.redirect(targetUrl, 303)
+  } catch (err: any) {
+    console.error('[Jobs/Create] Failed to create job:', err)
+    return c.html(
+      <p class="exp-note" role="alert">
+        <b>Failed to start extraction:</b> {err?.message || 'Server error'}
+      </p>,
+      500,
+    )
+  }
 }

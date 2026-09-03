@@ -1,8 +1,8 @@
 import type { Context } from 'hono'
+import { Nav } from '../components/nav'
 import { Batteries } from './_sections/batteries'
 import { Demo } from './_sections/demo'
 import { GetStarted } from './_sections/get-started'
-import { Header } from './_sections/header'
 import { Hero } from './_sections/hero'
 import { Integration } from './_sections/integration'
 import { Manifesto } from './_sections/manifesto'
@@ -15,8 +15,8 @@ export const GET = (c: Context) => {
   const captured = c.req.query('captured')
   return (
     <>
+      <Nav active="home" />
       <div class="wrap">
-        <Header />
         <main>
           <Hero captured={captured} />
           <Demo />
