@@ -53,6 +53,7 @@ export async function uploadToR2(
       Body: typeof content === 'string' ? Buffer.from(content) : content,
       ContentType: contentType,
     }),
+    { abortSignal: AbortSignal.timeout(10000) },
   )
 }
 
@@ -66,6 +67,7 @@ export async function getFromR2(key: string): Promise<Uint8Array | null> {
         Bucket: bucket,
         Key: key,
       }),
+      { abortSignal: AbortSignal.timeout(10000) },
     )
 
     if (!res.Body) return null

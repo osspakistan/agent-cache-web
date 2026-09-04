@@ -2,16 +2,50 @@ import { zipSync } from 'fflate'
 import { uploadToR2 } from '../../lib/clients'
 import type { NavHierarchy } from '../../lib/utils/types'
 
-export async function packageJobBundle(
-  jobId: string,
-  productName: string,
-  docsUrl: string,
-  hierarchy: NavHierarchy,
-  extractedFiles: Map<string, Uint8Array>,
-): Promise<number> {
-  const r2FinalPrefix = `jobs/${jobId}/final`
+export interface PackageBundleOptions {
+  jobId: string
+  productName: string
+  docsUrl: string
+  hierarchy: NavHierarchy
+  extractedFiles: Map<string, Uint8Array>
+  companionLlmsFullUrl?: string
+}
 
-  // 1. Generate local INDEX.md in each section
+export interface PackageBundleResult {
+  zipSizeBytes: number
+  hasCompanionLlmsFull: boolean
+}
+
+export async function packageJobBundle(opts: PackageBundleOptions): Promise<PackageBundleResult> {
+  const { jobId, productName, docsUrl, hierarchy, extractedFiles, companionLlmsFullUrl } = opts
+  const r2FinalPrefix = `jobs/${jobId}/final`
+  let hasCompanionLlmsFull = false
+
+  // 1. Fetch and store companion llms-full.txt if available
+  if (companionLlmsFullUrl) {
+    try {
+      const fullRes = await fetch(companionLlmsFullUrl, {
+        headers: { 'User-Agent': 'agent-cache/1.0' },
+        signal: AbortSignal.timeout(10000),
+      })
+      if (fullRes.ok) {
+        const fullText = await fullRes.text()
+        if (fullText.length > 50) {
+          const fullBytes = Buffer.from(fullText, 'utf8')
+          await uploadToR2(`${r2FinalPrefix}/llms-full.txt`, fullBytes, 'text/plain; charset=utf-8')
+          extractedFiles.set('llms-full.txt', fullBytes)
+          hasCompanionLlmsFull = true
+        }
+      }
+    } catch (err) {
+      console.warn(
+        `[Packager] Failed to fetch companion llms-full.txt from ${companionLlmsFullUrl}:`,
+        err,
+      )
+    }
+  }
+
+  // 2. Generate local INDEX.md in each section
   for (let sIdx = 0; sIdx < hierarchy.sections.length; sIdx++) {
     const sec = hierarchy.sections[sIdx]
     const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
@@ -31,9 +65,14 @@ export async function packageJobBundle(
     extractedFiles.set(`${secFolder}/INDEX.md`, secBytes)
   }
 
-  // 2. Generate master root INDEX.md
+  // 3. Generate master root INDEX.md
   let masterIndex = `# ${productName} Documentation\n\n`
   masterIndex += `> Auto-generated agent-ready mirror of [${docsUrl}](${docsUrl})\n\n`
+
+  if (hasCompanionLlmsFull) {
+    masterIndex += `> 💡 **Companion File**: [llms-full.txt](llms-full.txt) is included in the root archive as a vendor single-file dump.\n\n`
+  }
+
   masterIndex += `## Table of Contents\n\n`
 
   for (let sIdx = 0; sIdx < hierarchy.sections.length; sIdx++) {
@@ -51,12 +90,13 @@ export async function packageJobBundle(
   await uploadToR2(`${r2FinalPrefix}/INDEX.md`, masterBytes, 'text/markdown; charset=utf-8')
   extractedFiles.set('INDEX.md', masterBytes)
 
-  // 3. Write meta.yaml and _map.json directly to R2
+  // 4. Write meta.yaml and _map.json directly to R2
   const metaYaml = `name: "${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"
 title: "${productName} Docs"
 url: "${docsUrl}"
 created_at: "${new Date().toISOString()}"
 version: "1.0.0"
+companion_llms_full: ${hasCompanionLlmsFull}
 `
   const metaBytes = Buffer.from(metaYaml, 'utf8')
   await uploadToR2(`${r2FinalPrefix}/meta.yaml`, metaBytes, 'text/yaml; charset=utf-8')
@@ -67,7 +107,7 @@ version: "1.0.0"
   await uploadToR2(`${r2FinalPrefix}/_map.json`, mapBytes, 'application/json; charset=utf-8')
   extractedFiles.set('_map.json', mapBytes)
 
-  // 4. Create ZIP bundle from memory map using fflate
+  // 5. Create ZIP bundle from memory map using fflate
   const zipEntries: Record<string, Uint8Array> = {}
   for (const [path, bytes] of extractedFiles.entries()) {
     zipEntries[path] = bytes
@@ -79,5 +119,8 @@ version: "1.0.0"
   // Upload ZIP directly to R2
   await uploadToR2(zipKey, zipped, 'application/zip')
 
-  return zipped.byteLength
+  return {
+    zipSizeBytes: zipped.byteLength,
+    hasCompanionLlmsFull,
+  }
 }

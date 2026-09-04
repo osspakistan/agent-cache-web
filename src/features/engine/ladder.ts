@@ -2,7 +2,10 @@ import type { StrategyType } from '../../lib/utils/types'
 
 export interface LadderDecision {
   strategy: StrategyType
-  llmsUrl?: string
+  hasLlmsFull: boolean
+  llmsFullUrl?: string
+  hasLlmsTxt: boolean
+  llmsTxtUrl?: string
   gitRepo?: { owner: string; repo: string; branch: string; docsPath: string }
   directMdSampleUrl?: string
   sitemapUrl?: string
@@ -11,23 +14,48 @@ export interface LadderDecision {
 export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDecision> {
   const url = new URL(docsUrl)
   const origin = url.origin
+  const pathPrefix = url.pathname.replace(/\/$/, '')
 
-  // 1. Tier 1: Check llms-full.txt or llms.txt
-  try {
-    const checkLlms = await fetch(`${origin}/llms-full.txt`, {
-      method: 'GET',
-      headers: { 'User-Agent': 'agent-cache-probe/1.0' },
-      signal: AbortSignal.timeout(4000),
-    })
-    if (checkLlms.ok && (checkLlms.headers.get('content-type') || '').includes('text')) {
-      return {
-        strategy: 'llms-txt',
-        llmsUrl: `${origin}/llms-full.txt`,
+  let hasLlmsFull = false
+  let llmsFullUrl: string | undefined
+  let hasLlmsTxt = false
+  let llmsTxtUrl: string | undefined
+
+  // 1. Probe companion llms-full.txt (bonus download for R2/bundle, never replaces structure)
+  for (const candidate of [`${origin}/llms-full.txt`, `${origin}${pathPrefix}/llms-full.txt`]) {
+    try {
+      const res = await fetch(candidate, {
+        method: 'HEAD',
+        headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+        signal: AbortSignal.timeout(3000),
+      })
+      const cType = res.headers.get('content-type') || ''
+      if (res.ok && (cType.includes('text') || cType.includes('markdown') || !cType)) {
+        hasLlmsFull = true
+        llmsFullUrl = candidate
+        break
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
-  // 2. Tier 2: Check Open-Source GitHub repository in page footer/navbar
+  // 2. Probe llms.txt (for structured link discovery)
+  for (const candidate of [`${origin}/llms.txt`, `${origin}${pathPrefix}/llms.txt`]) {
+    try {
+      const res = await fetch(candidate, {
+        method: 'HEAD',
+        headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+        signal: AbortSignal.timeout(3000),
+      })
+      const cType = res.headers.get('content-type') || ''
+      if (res.ok && (cType.includes('text') || cType.includes('markdown') || !cType)) {
+        hasLlmsTxt = true
+        llmsTxtUrl = candidate
+        break
+      }
+    } catch {}
+  }
+
+  // 3. Tier 1: Check Open-Source GitHub repository in page footer/navbar
   try {
     const pageRes = await fetch(docsUrl, {
       headers: {
@@ -52,9 +80,12 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
         )
 
         if (treeRes.ok) {
-          const treeData: any = await treeRes.json()
+          interface GitHubTreeResponse {
+            tree?: Array<{ path: string; type: string }>
+          }
+          const treeData = (await treeRes.json()) as GitHubTreeResponse
           const mdFiles = (treeData.tree || []).filter(
-            (f: any) =>
+            (f) =>
               f.type === 'blob' &&
               (f.path.endsWith('.md') || f.path.endsWith('.mdx')) &&
               (f.path.startsWith('docs/') || f.path.startsWith('content/docs/')),
@@ -63,6 +94,10 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
           if (mdFiles.length > 5) {
             return {
               strategy: 'github-raw-markdown',
+              hasLlmsFull,
+              llmsFullUrl,
+              hasLlmsTxt,
+              llmsTxtUrl,
               gitRepo: {
                 owner,
                 repo,
@@ -76,7 +111,7 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
     }
   } catch {}
 
-  // 3. Tier 3: Probe direct .md endpoint (Mintlify / GitBook standard)
+  // 4. Tier 2: Probe direct .md endpoint (Mintlify / GitBook standard)
   try {
     const testPath = url.pathname.length > 1 ? url.pathname.replace(/\/$/, '') : '/overview'
     const mdProbeUrl = `${origin}${testPath}.md`
@@ -89,14 +124,22 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
     if (mdRes.ok && (cType.includes('text/markdown') || cType.includes('text/plain'))) {
       return {
         strategy: 'direct-raw-md',
+        hasLlmsFull,
+        llmsFullUrl,
+        hasLlmsTxt,
+        llmsTxtUrl,
         directMdSampleUrl: mdProbeUrl,
       }
     }
   } catch {}
 
-  // 4. Tier 4: Fallback to HTML Purification
+  // 5. Tier 3: Fallback to HTML Purification
   return {
     strategy: 'html-purify',
+    hasLlmsFull,
+    llmsFullUrl,
+    hasLlmsTxt,
+    llmsTxtUrl,
     sitemapUrl: `${origin}/sitemap.xml`,
   }
 }

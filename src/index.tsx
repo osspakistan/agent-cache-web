@@ -30,4 +30,5 @@ console.log(`[agent-cache-web] routes registered, listening on :${PORT}`)
 export default {
   port: PORT,
   fetch: app.fetch,
+  idleTimeout: 255, // Max Bun idle timeout (seconds) for streaming SSE
 }

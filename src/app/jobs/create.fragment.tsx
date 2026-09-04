@@ -1,3 +1,4 @@
+import { startJobEngine } from '../../features/engine'
 import { createNewJob } from '../../features/jobs'
 import type { AppContext } from '../../lib/utils/types'
 
@@ -22,6 +23,9 @@ export const POST = async (c: AppContext) => {
 
   try {
     const job = await createNewJob(rawUrl)
+    startJobEngine(job).catch((err) =>
+      console.error('[Jobs/Create] Background engine runner error:', err),
+    )
     const targetUrl = `/dingdong/${job.id}`
 
     if (c.req.header('HX-Request')) {
@@ -32,11 +36,12 @@ export const POST = async (c: AppContext) => {
 
     // Standard no-JS form redirect
     return c.redirect(targetUrl, 303)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[Jobs/Create] Failed to create job:', err)
+    const message = err instanceof Error ? err.message : 'Server error'
     return c.html(
       <p class="exp-note" role="alert">
-        <b>Failed to start extraction:</b> {err?.message || 'Server error'}
+        <b>Failed to start extraction:</b> {message}
       </p>,
       500,
     )

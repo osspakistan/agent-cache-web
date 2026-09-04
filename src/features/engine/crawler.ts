@@ -69,8 +69,16 @@ export async function crawlAndExtractPages(
 
     let markdown = ''
     try {
-      if (strategy === 'direct-raw-md') {
-        const mdUrl = task.url.endsWith('.md') ? task.url : `${task.url.replace(/\/$/, '')}.md`
+      if (task.url.endsWith('.md') || task.url.endsWith('.mdx')) {
+        const res = await fetch(task.url, {
+          headers: { 'User-Agent': 'agent-cache/1.0' },
+          signal: AbortSignal.timeout(6000),
+        })
+        if (res.ok) {
+          markdown = await res.text()
+        }
+      } else if (strategy === 'direct-raw-md') {
+        const mdUrl = `${task.url.replace(/\/$/, '')}.md`
         const res = await fetch(mdUrl, {
           headers: { 'User-Agent': 'agent-cache/1.0' },
           signal: AbortSignal.timeout(6000),
@@ -81,7 +89,7 @@ export async function crawlAndExtractPages(
       }
 
       if (!markdown) {
-        // HTML fallback with Turndown
+        // HTML fetch with Turndown purification
         const res = await fetch(task.url, {
           headers: {
             'User-Agent':
@@ -90,21 +98,27 @@ export async function crawlAndExtractPages(
           signal: AbortSignal.timeout(8000),
         })
         if (res.ok) {
-          const html = await res.text()
-          const dom = new JSDOM(html)
-          const doc = dom.window.document
+          const contentType = res.headers.get('content-type') || ''
+          const text = await res.text()
 
-          // Strip noise elements
-          const elementsToRemove = doc.querySelectorAll(
-            'script, style, nav, header, footer, aside, noscript, svg',
-          )
-          elementsToRemove.forEach((el) => {
-            el.remove()
-          })
+          if (contentType.includes('markdown') || contentType.includes('text/plain')) {
+            markdown = text
+          } else {
+            const dom = new JSDOM(text)
+            const doc = dom.window.document
 
-          const mainContent =
-            doc.querySelector('main, article, [role="main"], .content') || doc.body
-          markdown = turndown.turndown(mainContent ? mainContent.innerHTML : html)
+            // Strip noise elements
+            const elementsToRemove = doc.querySelectorAll(
+              'script, style, nav, header, footer, aside, noscript, svg',
+            )
+            elementsToRemove.forEach((el) => {
+              el.remove()
+            })
+
+            const mainContent =
+              doc.querySelector('main, article, [role="main"], .content') || doc.body
+            markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+          }
         }
       }
     } catch (err) {
@@ -125,8 +139,12 @@ section: "${task.secTitle.replace(/"/g, '\\"')}"
     const fullContent = frontmatter + markdown
     const fileBytes = Buffer.from(fullContent, 'utf8')
 
-    // 1. Upload directly to R2
-    await uploadToR2(r2Key, fileBytes, 'text/markdown; charset=utf-8')
+    // 1. Upload directly to R2 with error isolation
+    try {
+      await uploadToR2(r2Key, fileBytes, 'text/markdown; charset=utf-8')
+    } catch (err) {
+      console.warn(`[Crawler] Failed to upload page ${r2Key} to R2:`, err)
+    }
 
     // 2. Track in bundle map
     filesMap.set(relativePath.replace(/^final\//, ''), fileBytes)

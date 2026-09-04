@@ -97,7 +97,7 @@ export const GET = async (c: AppContext) => {
           </div>
 
           <div id="terminal-lines">
-            {events.map((ev, idx) => {
+            {events.map((ev) => {
               let color = '#a6a29a'
               if (ev.type === 'phase') color = '#7b9ee0'
               if (ev.type === 'progress') color = '#7fb98a'
@@ -105,7 +105,10 @@ export const GET = async (c: AppContext) => {
               if (ev.type === 'complete') color = '#b9cbea'
 
               return (
-                <div key={`${ev.timestamp}-${idx}`} style={`color: ${color}; margin-bottom: 4px;`}>
+                <div
+                  key={`${ev.timestamp}-${ev.type}-${ev.done ?? ''}-${ev.current_url || ''}`}
+                  style={`color: ${color}; margin-bottom: 4px;`}
+                >
                   <span style="color: #63605c; margin-right: 10px;">
                     {new Date(ev.timestamp).toLocaleTimeString()}
                   </span>

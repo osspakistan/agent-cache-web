@@ -1,4 +1,4 @@
-import { appendEventToR2, getPublicR2Url, updateJob, uploadToR2 } from '../../lib/clients'
+import { getPublicR2Url, updateJob, uploadToR2 } from '../../lib/clients'
 import { AppError, ErrorFactory } from '../../lib/utils/errors'
 import type { JobRecord, StreamEvent } from '../../lib/utils/types'
 import { crawlAndExtractPages } from './crawler'
@@ -12,14 +12,103 @@ export interface RunEngineOptions {
   onEvent?: (event: StreamEvent) => void | Promise<void>
 }
 
+const activeJobs = new Map<string, Promise<void>>()
+const jobSubscribers = new Map<string, Set<(event: StreamEvent) => void>>()
+
+export function subscribeToJob(jobId: string, callback: (event: StreamEvent) => void): () => void {
+  let subs = jobSubscribers.get(jobId)
+  if (!subs) {
+    subs = new Set()
+    jobSubscribers.set(jobId, subs)
+  }
+  subs.add(callback)
+  return () => {
+    const s = jobSubscribers.get(jobId)
+    if (s) {
+      s.delete(callback)
+      if (s.size === 0) jobSubscribers.delete(jobId)
+    }
+  }
+}
+
+export function startJobEngine(job: JobRecord): Promise<void> {
+  const existing = activeJobs.get(job.id)
+  if (existing) return existing
+
+  const p = (async () => {
+    try {
+      await runConversionEngine({
+        job,
+        onEvent: (event) => {
+          const subs = jobSubscribers.get(job.id)
+          if (subs) {
+            for (const cb of subs) {
+              try {
+                cb(event)
+              } catch {}
+            }
+          }
+        },
+      })
+    } finally {
+      activeJobs.delete(job.id)
+    }
+  })()
+
+  activeJobs.set(job.id, p)
+  return p
+}
+
 export async function runConversionEngine(opts: RunEngineOptions): Promise<void> {
   const { job } = opts
+  const allEvents: StreamEvent[] = []
+  let lastFlush = Date.now()
+  let isFlushing = false
+  const flushEventsToR2 = async () => {
+    if (allEvents.length === 0 || isFlushing) return
+    isFlushing = true
+    try {
+      const jsonl = `${allEvents.map((e) => JSON.stringify(e)).join('\n')}\n`
+      let logsText = ''
+      for (const event of allEvents) {
+        const time = new Date(event.timestamp).toISOString().split('T')[1].slice(0, 8)
+        let logText = `[${time}] [${event.type.toUpperCase()}]`
+        if (event.type === 'phase') logText += ` --- Phase: ${event.phase} (${event.message}) ---`
+        else if (event.type === 'progress')
+          logText += ` [${event.done}/${event.total}] ${event.current_url}`
+        else if (event.type === 'log') logText += ` ${event.message}`
+        else if (event.type === 'complete') logText += ` SUCCESS: ${event.message}`
+        else if (event.type === 'error')
+          logText += ` ERROR: machine=${event.machine} human=${event.human}`
+        logsText += `${logText}\n`
+      }
+      await Promise.all([
+        uploadToR2(
+          `jobs/${job.id}/.dingdong/events.jsonl`,
+          jsonl,
+          'application/x-ndjson; charset=utf-8',
+        ),
+        uploadToR2(`jobs/${job.id}/logs.txt`, logsText, 'text/plain; charset=utf-8'),
+      ])
+      lastFlush = Date.now()
+    } finally {
+      isFlushing = false
+    }
+  }
 
   const emit = async (event: StreamEvent) => {
-    // Record to R2 append-only ledger
-    await appendEventToR2(job.id, event)
+    allEvents.push(event)
     if (opts.onEvent) {
-      await opts.onEvent(event)
+      try {
+        await opts.onEvent(event)
+      } catch {}
+    }
+    // Only block on phase/error/complete flushes; progress emits are instant and non-blocking
+    if (event.type !== 'progress') {
+      await flushEventsToR2().catch((err) => console.warn('[Engine] R2 ledger flush error:', err))
+    } else if (Date.now() - lastFlush > 3000) {
+      // Fire-and-forget debounced background sync
+      flushEventsToR2().catch(() => {})
     }
   }
 
@@ -33,12 +122,21 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
     })
 
     const resolved = await resolveTargetDocs(job.input_url)
-    await emit({
-      type: 'log',
-      level: 'info',
-      message: `Resolved canonical docs endpoint: ${resolved.docsUrl} (${resolved.productName})`,
-      timestamp: Date.now(),
-    })
+    if (resolved.resolvedVia === 'tavily') {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `🧠 Target domain protected or ambiguous. Resolved canonical docs via Tavily: ${resolved.docsUrl}`,
+        timestamp: Date.now(),
+      })
+    } else {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `Resolved canonical docs endpoint: ${resolved.docsUrl} (${resolved.productName})`,
+        timestamp: Date.now(),
+      })
+    }
 
     await updateJob(job.id, {
       resolved_url: resolved.docsUrl,
@@ -58,6 +156,24 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       timestamp: Date.now(),
     })
 
+    if (decision.hasLlmsFull) {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `🎁 Discovered vendor llms-full.txt (${decision.llmsFullUrl}) — bundling as companion bonus`,
+        timestamp: Date.now(),
+      })
+    }
+
+    if (decision.hasLlmsTxt) {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `🗺️ Discovered vendor llms.txt (${decision.llmsTxtUrl}) — mapping link topology`,
+        timestamp: Date.now(),
+      })
+    }
+
     await uploadToR2(
       `jobs/${job.id}/.dingdong/01-probe.json`,
       JSON.stringify(decision, null, 2),
@@ -72,7 +188,9 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       timestamp: Date.now(),
     })
 
-    const hierarchy = await extractSiteTopology(resolved.docsUrl)
+    const hierarchy = await extractSiteTopology(resolved.docsUrl, {
+      llmsTxtUrl: decision.llmsTxtUrl,
+    })
     await uploadToR2(
       `jobs/${job.id}/.dingdong/03-nav-tree.json`,
       JSON.stringify(hierarchy, null, 2),
@@ -127,20 +245,30 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       timestamp: Date.now(),
     })
 
-    const zipSizeBytes = await packageJobBundle(
-      job.id,
-      resolved.productName,
-      resolved.docsUrl,
+    const pkgResult = await packageJobBundle({
+      jobId: job.id,
+      productName: resolved.productName,
+      docsUrl: resolved.docsUrl,
       hierarchy,
       extractedFiles,
-    )
+      companionLlmsFullUrl: decision.llmsFullUrl,
+    })
+
+    if (pkgResult.hasCompanionLlmsFull) {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `Included vendor companion llms-full.txt in root archive and R2`,
+        timestamp: Date.now(),
+      })
+    }
 
     // Mark Complete in Turso DB
     const now = Date.now()
     await updateJob(job.id, {
       status: 'complete',
       page_count: totalItems,
-      zip_size_bytes: zipSizeBytes,
+      zip_size_bytes: pkgResult.zipSizeBytes,
       completed_at: now,
     })
 
@@ -151,7 +279,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       docs_url: `/docs/${job.id}`,
       zip_url: publicZipUrl,
       product_name: resolved.productName,
-      message: `Documentation mirrored successfully (${totalItems} files, ${(zipSizeBytes / 1024).toFixed(1)} KB)`,
+      message: `Documentation mirrored successfully (${totalItems} files, ${(pkgResult.zipSizeBytes / 1024).toFixed(1)} KB)`,
       timestamp: now,
     })
   } catch (err: unknown) {
@@ -177,5 +305,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       human: appError.human,
       timestamp: Date.now(),
     })
+  } finally {
+    await flushEventsToR2().catch(() => {})
   }
 }

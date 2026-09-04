@@ -105,13 +105,24 @@ export const GET = async (c: AppContext) => {
     )
   }
 
-  // Load _map.json directly from Cloudflare R2
+  // Load _map.json and meta.yaml directly from Cloudflare R2
   let mapData: NavHierarchy | null = null
-  const mapBytes = await getFromR2(`jobs/${id}/final/_map.json`)
+  let hasCompanionLlms = false
+
+  const [mapBytes, metaBytes] = await Promise.all([
+    getFromR2(`jobs/${id}/final/_map.json`),
+    getFromR2(`jobs/${id}/final/meta.yaml`),
+  ])
+
   if (mapBytes) {
     try {
       mapData = JSON.parse(Buffer.from(mapBytes).toString('utf8'))
     } catch {}
+  }
+
+  if (metaBytes) {
+    const metaStr = Buffer.from(metaBytes).toString('utf8')
+    hasCompanionLlms = metaStr.includes('companion_llms_full: true')
   }
 
   const directR2Download = getPublicR2Url(`jobs/${id}/bundle.zip`) || `/docs/${id}/download`
@@ -174,36 +185,67 @@ export const GET = async (c: AppContext) => {
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; border-top: 1px solid var(--border-soft); padding-top: 16px; flex-wrap: wrap; gap: 12px;">
-              <a
-                href={directR2Download}
-                class="secondary"
-                style="
-                  margin: 0;
-                  background: var(--primary);
-                  color: var(--primary-foreground);
-                  border-color: var(--primary);
-                  font-weight: 500;
-                  padding: 6px 16px;
-                  font-size: 13px;
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 6px;
-                "
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a
+                  href={directR2Download}
+                  class="secondary"
+                  style="
+                    margin: 0;
+                    background: var(--primary);
+                    color: var(--primary-foreground);
+                    border-color: var(--primary);
+                    font-weight: 500;
+                    padding: 6px 16px;
+                    font-size: 13px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                  "
                 >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Download ZIP ({(job.zip_size_bytes / 1024).toFixed(0)} KB)
-              </a>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download ZIP ({(job.zip_size_bytes / 1024).toFixed(0)} KB)
+                </a>
+
+                {hasCompanionLlms && (
+                  <a
+                    href={getPublicR2Url(`jobs/${id}/final/llms-full.txt`) || '#'}
+                    target="_blank"
+                    class="secondary"
+                    style="
+                      margin: 0;
+                      background: var(--card);
+                      color: var(--ink);
+                      border-color: var(--border);
+                      font-weight: 500;
+                      padding: 6px 14px;
+                      font-size: 13px;
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                    rel="noopener"
+                  >
+                    <span
+                      class="mono"
+                      style="font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-weight: 600;"
+                    >
+                      companion
+                    </span>
+                    llms-full.txt
+                  </a>
+                )}
+              </div>
 
               <a
                 href={`/dingdong/${id}`}

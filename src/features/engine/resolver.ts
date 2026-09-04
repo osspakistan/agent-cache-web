@@ -7,10 +7,65 @@ export interface ResolveResult {
   title: string
   description: string
   logoUrl: string | null
+  resolvedVia?: 'direct' | 'tavily'
 }
 
 const COMMON_DOCS_SUBDOMAINS = ['docs', 'developer', 'developers', 'help', 'api']
 const COMMON_DOCS_PATHS = ['/docs', '/documentation', '/api-reference', '/developers', '/guide']
+const TAVILY_API_KEY =
+  process.env.TAVILY_API_KEY || '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'
+
+export async function resolveViaTavily(siteUrl: string): Promise<string | null> {
+  const prompt = `Find the official developer or API documentation for ${siteUrl}. Return only the documentation URL.`
+  try {
+    const res = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TAVILY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        query: prompt,
+        include_answer: 'basic',
+        search_depth: 'advanced',
+      }),
+      signal: AbortSignal.timeout(6000),
+    })
+
+    if (!res.ok) return null
+
+    interface TavilyResponse {
+      answer?: string
+      results?: Array<{ url: string }>
+    }
+    const data = (await res.json()) as TavilyResponse
+    // 1. Extract URLs explicitly mentioned in Tavily's concise answer
+    const rawAnswerMatches =
+      (data.answer || '').match(
+        /(https?:\/\/[^\s)\],]+|[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s)\],]*)?)/gi,
+      ) || []
+    for (let u of rawAnswerMatches) {
+      u = u.replace(/[.,);]+$/, '')
+      if (!/^https?:\/\//i.test(u)) u = `https://${u}`
+      if (/docs|developer|guide|api/i.test(u)) return u
+    }
+
+    // 2. Filter search result candidates
+    const resultUrls = (data.results || [])
+      .filter(
+        (r) =>
+          !/github\.com|apidog\.com|youtube|reddit|medium|stackoverflow|linkedin|twitter|facebook/i.test(
+            r.url,
+          ),
+      )
+      .map((r) => r.url.replace(/[.,);]+$/, ''))
+
+    if (resultUrls.length > 0) return resultUrls[0]
+  } catch {
+    return null
+  }
+  return null
+}
 
 export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult> {
   let target = rawInput.trim()
@@ -23,11 +78,12 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
   const domainParts = hostname.replace(/^www\./, '').split('.')
   const defaultProductName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1)
 
-  // 1. If user gave direct docs path/subdomain, probe it directly
   let docsUrl = target
   let title = `${defaultProductName} Documentation`
   let description = `Official documentation and API reference for ${defaultProductName}.`
   let logoUrl: string | null = null
+  let resolvedVia: 'direct' | 'tavily' = 'direct'
+  let directProbeSuccess = false
 
   try {
     const res = await fetch(target, {
@@ -40,6 +96,7 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
     })
 
     if (res.ok) {
+      directProbeSuccess = true
       const html = await res.text()
       const dom = new JSDOM(html)
       const doc = dom.window.document
@@ -92,14 +149,22 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
       }
     }
   } catch (err) {
-    console.warn(`[Resolver] Initial probe failed on ${target}, using fallback defaults:`, err)
+    console.warn(`[Resolver] Initial probe failed on ${target}:`, err)
   }
 
-  // Derive cleaner product name from Title if possible
-  if (title?.includes('|')) {
-    const part = title.split('|')[0].trim()
-    if (part.length < 30) {
-      // e.g. "Hono - Web Framework" -> "Hono"
+  // Fallback to Tavily if direct probe failed, returned non-200, or didn't find docs path
+  const isGenericRoot = !/docs|documentation|api|developer|guide/i.test(docsUrl)
+  if (!directProbeSuccess || isGenericRoot) {
+    const tavilyTarget = await resolveViaTavily(target)
+    if (tavilyTarget && tavilyTarget !== target) {
+      docsUrl = tavilyTarget
+      resolvedVia = 'tavily'
+      try {
+        const tavilyUrl = new URL(tavilyTarget)
+        const tavilyHost = tavilyUrl.hostname.replace(/^www\./, '')
+        const tParts = tavilyHost.split('.')
+        title = `${tParts[0].charAt(0).toUpperCase() + tParts[0].slice(1)} Documentation`
+      } catch {}
     }
   }
 
@@ -110,5 +175,6 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
     title,
     description,
     logoUrl,
+    resolvedVia,
   }
 }
