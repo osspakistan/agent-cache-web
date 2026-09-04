@@ -70,20 +70,22 @@ export const GET = async (c: AppContext) => {
             </p>
 
             {job.error_machine && (
-              <div style="background: var(--secondary); border: 1px solid var(--border); padding: 14px 18px; border-radius: 6px; margin-bottom: 24px;">
-                <span
+              <details style="margin-bottom: 24px;">
+                <summary
                   class="mono"
-                  style="font-size: 11px; color: var(--ink-soft); display: block; margin-bottom: 4px;"
+                  style="font-size: 11.5px; color: var(--ink-soft); cursor: pointer; margin-bottom: 8px;"
                 >
-                  TECHNICAL LOG
-                </span>
-                <code
-                  class="mono"
-                  style="font-size: 12.5px; color: #991b1b; word-break: break-all;"
-                >
-                  {job.error_machine}
-                </code>
-              </div>
+                  Technical diagnostics log ▸
+                </summary>
+                <div style="background: var(--secondary); border: 1px solid var(--border); padding: 12px 16px; border-radius: 6px;">
+                  <code
+                    class="mono"
+                    style="font-size: 12px; color: #991b1b; word-break: break-all; white-space: pre-wrap;"
+                  >
+                    {job.error_machine}
+                  </code>
+                </div>
+              </details>
             )}
 
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">

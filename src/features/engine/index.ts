@@ -1,5 +1,5 @@
 import { getPublicR2Url, updateJob, uploadToR2 } from '../../lib/clients'
-import { AppError, ErrorFactory } from '../../lib/utils/errors'
+import { ErrorFactory } from '../../lib/utils/errors'
 import type { JobRecord, StreamEvent } from '../../lib/utils/types'
 import { crawlAndExtractPages } from './crawler'
 import { probeAcquisitionLadder } from './ladder'
@@ -285,13 +285,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
   } catch (err: unknown) {
     console.error(`[Engine] Fatal error processing job ${job.id}:`, err)
 
-    let appError: AppError
-    if (err instanceof AppError) {
-      appError = err
-    } else {
-      const msg = err instanceof Error ? err.message : 'Unknown crawler engine error'
-      appError = ErrorFactory.internal(msg, undefined, err)
-    }
+    const appError = ErrorFactory.fromUnknown(err, job.resolved_url || job.input_url)
 
     await updateJob(job.id, {
       status: 'failed',

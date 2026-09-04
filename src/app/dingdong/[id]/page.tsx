@@ -175,12 +175,20 @@ export const GET = async (c: AppContext) => {
                 {job.error_human || 'Could not complete documentation mirror.'}
               </h3>
               {job.error_machine && (
-                <p
-                  class="mono"
-                  style="margin: 8px 0 0; font-size: 12px; color: #7f1d1d; opacity: 0.85;"
-                >
-                  Machine error: {job.error_machine}
-                </p>
+                <details style="margin-top: 10px;">
+                  <summary
+                    class="mono"
+                    style="font-size: 11px; color: #991b1b; cursor: pointer; text-decoration: underline;"
+                  >
+                    technical details ▸
+                  </summary>
+                  <p
+                    class="mono"
+                    style="margin: 6px 0 0; font-size: 11.5px; color: #7f1d1d; word-break: break-all; background: #fee2e2; padding: 8px 12px; border-radius: 4px;"
+                  >
+                    {job.error_machine}
+                  </p>
+                </details>
               )}
             </div>
           ) : (

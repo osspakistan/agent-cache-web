@@ -129,11 +129,49 @@ export const ErrorFactory = {
     })
   },
 
+  connectionDropped(url: string, rawReason?: string): AppError {
+    const cleanReason = (rawReason ?? '')
+      .replace(/For more information, pass `verbose: true`.*$/i, '')
+      .trim()
+    return new AppError({
+      code: 'FETCH_FAILED',
+      statusCode: 502,
+      machine: `Connection closed abruptly by remote server (${url}): ${cleanReason || 'ECONNRESET'}`,
+      human: `The remote documentation server abruptly closed the connection. It may be blocking automated requests or temporarily overloaded. Try feeding us a direct documentation subdomain instead.`,
+      details: { url, rawReason },
+    })
+  },
+
+  fromUnknown(err: unknown, url?: string): AppError {
+    if (err instanceof AppError) return err
+    const rawMsg = err instanceof Error ? err.message : String(err)
+
+    if (/socket connection was closed|ECONNRESET|connection reset/i.test(rawMsg)) {
+      return ErrorFactory.connectionDropped(url ?? 'target', rawMsg)
+    }
+    if (/timeout|timed out|AbortError/i.test(rawMsg)) {
+      return ErrorFactory.timeout(url ?? 'target', 10000)
+    }
+    if (/ENOTFOUND|getaddrinfo/i.test(rawMsg)) {
+      return ErrorFactory.dnsFailure(url ?? 'target', err)
+    }
+    if (/403|Cloudflare|Forbidden/i.test(rawMsg)) {
+      return ErrorFactory.botBlocked(url ?? 'target')
+    }
+
+    const cleanMsg = rawMsg.replace(/For more information, pass `verbose: true`.*$/i, '').trim()
+
+    return ErrorFactory.internal(cleanMsg, undefined, err)
+  },
+
   internal(machineMessage: string, humanMessage?: string, cause?: unknown): AppError {
+    const cleanMsg = machineMessage
+      .replace(/For more information, pass `verbose: true`.*$/i, '')
+      .trim()
     return new AppError({
       code: 'INTERNAL_ERROR',
       statusCode: 500,
-      machine: machineMessage,
+      machine: cleanMsg,
       human:
         humanMessage ??
         `Our backend machinery threw a gear trying to process that. The log has been preserved for the nerds to inspect.`,
