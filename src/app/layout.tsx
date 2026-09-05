@@ -43,7 +43,7 @@ const Layout: LayoutComponent = ({ children }) => {
           />
           <link rel="stylesheet" href="/tokens.css" />
           <link rel="stylesheet" href="/css/fonts.css" />
-          <link rel="stylesheet" href="/css/landing.css" />
+          <link rel="stylesheet" href="/css/app.css" />
           <script
             dangerouslySetInnerHTML={{
               __html: `(function(){var t=localStorage.getItem('ac-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();`,
@@ -51,6 +51,29 @@ const Layout: LayoutComponent = ({ children }) => {
           />
           <script type="module" src="/js/htmx.esm.min.js"></script>
           <script src="/js/app.js" defer></script>
+          {process.env.DEV_HOT_RELOAD === 'true' && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  (function() {
+                    function connect() {
+                      const ws = new WebSocket('ws://' + location.hostname + ':10902');
+                      ws.onmessage = function(e) {
+                        if (e.data === 'reload') {
+                          console.log('[hot-reload] Reloading page...');
+                          location.reload();
+                        }
+                      };
+                      ws.onclose = function() {
+                        setTimeout(connect, 1000);
+                      };
+                    }
+                    connect();
+                  })();
+                `,
+              }}
+            />
+          )}
         </head>
         <body>{children}</body>
       </html>

@@ -1,7 +1,9 @@
+import { DocumentationTreeSection } from '../../../components/doc-tree'
 import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
 import { getFromR2, getPublicR2Url } from '../../../lib/clients'
+import { formatBytes } from '../../../lib/utils'
 import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
@@ -58,12 +60,12 @@ export const GET = async (c: AppContext) => {
               class="mono"
               style="font-size: 12px; color: #b91c1c; text-transform: uppercase; font-weight: 600;"
             >
-              Extraction Halted · {id}
+              Export stopped · {id}
             </span>
             <h2 style="font-size: 24px; margin: 8px 0 12px; color: #991b1b;">
               {job.product_name
-                ? `${job.product_name} Mirror Incomplete`
-                : 'Documentation Mirror Failed'}
+                ? `Couldn't export ${job.product_name}`
+                : 'Documentation export failed'}
             </h2>
             <p style="color: #7f1d1d; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
               {job.error_human || 'Could not complete the documentation extraction.'}
@@ -109,12 +111,11 @@ export const GET = async (c: AppContext) => {
 
   // Load _map.json and meta.yaml directly from Cloudflare R2
   let mapData: NavHierarchy | null = null
-  let hasCompanionLlms = false
 
-  const [mapBytes, metaBytes] = await Promise.all([
-    getFromR2(`jobs/${id}/final/_map.json`),
-    getFromR2(`jobs/${id}/final/meta.yaml`),
-  ])
+  let mapBytes = await getFromR2(`jobs/${id}/final/_map.json`)
+  if (!mapBytes) {
+    mapBytes = await getFromR2(`jobs/${id}/.dingdong/03-nav-tree.json`)
+  }
 
   if (mapBytes) {
     try {
@@ -122,12 +123,10 @@ export const GET = async (c: AppContext) => {
     } catch {}
   }
 
-  if (metaBytes) {
-    const metaStr = Buffer.from(metaBytes).toString('utf8')
-    hasCompanionLlms = metaStr.includes('companion_llms_full: true')
-  }
-
-  const directR2Download = getPublicR2Url(`jobs/${id}/bundle.zip`) || `/docs/${id}/download`
+  const directR2Download =
+    getPublicR2Url(`jobs/${id}/${id}.zip`) ||
+    getPublicR2Url(`jobs/${id}/bundle.zip`) ||
+    `/docs/${id}/download`
 
   return (
     <>
@@ -156,13 +155,23 @@ export const GET = async (c: AppContext) => {
             "
           >
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-                <span
-                  class="mono"
-                  style="font-size: 11.5px; color: var(--accent-ink); font-weight: 600;"
-                >
-                  {id}
-                </span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  {job.logo_url && (
+                    <img
+                      src={job.logo_url}
+                      alt=""
+                      style="width: 18px; height: 18px; border-radius: 4px; object-fit: contain;"
+                      onerror="this.style.display='none'"
+                    />
+                  )}
+                  <span
+                    class="mono"
+                    style="font-size: 12px; color: var(--accent-ink); font-weight: 600;"
+                  >
+                    {job.product_name || id}
+                  </span>
+                </div>
 
                 <a
                   href={job.resolved_url || job.input_url}
@@ -177,12 +186,16 @@ export const GET = async (c: AppContext) => {
                 </a>
               </div>
 
-              <h1 style="font-size: clamp(24px, 4vw, 32px); margin: 0 0 8px; color: var(--ink);">
-                {job.product_name || 'Documentation'}
+              <h1 style="font-size: clamp(22px, 3.5vw, 30px); margin: 0 0 10px; color: var(--ink); line-height: 1.3;">
+                {job.title ||
+                  (job.product_name ? `${job.product_name} Documentation` : 'Documentation')}
               </h1>
 
-              <p style="color: var(--ink-body); font-size: 14.5px; line-height: 1.6; margin: 0; max-width: 68ch;">
-                {job.description || job.title || 'Agent-ready mirror of official documentation.'}
+              <p style="color: var(--ink-body); font-size: 14.5px; line-height: 1.6; margin: 0; max-width: 72ch;">
+                {job.description ||
+                  (job.product_name
+                    ? `Official documentation and API reference for ${job.product_name}.`
+                    : 'Full site exported to clean markdown for coding agents.')}
               </p>
             </div>
 
@@ -190,6 +203,7 @@ export const GET = async (c: AppContext) => {
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <a
                   href={directR2Download}
+                  download={`${id}.zip`}
                   class="secondary"
                   style="
                     margin: 0;
@@ -216,37 +230,8 @@ export const GET = async (c: AppContext) => {
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  Download ZIP ({(job.zip_size_bytes / 1024).toFixed(0)} KB)
+                  Get ZIP bundle ({formatBytes(job.zip_size_bytes).full})
                 </a>
-
-                {hasCompanionLlms && (
-                  <a
-                    href={getPublicR2Url(`jobs/${id}/final/llms-full.txt`) || '#'}
-                    target="_blank"
-                    class="secondary"
-                    style="
-                      margin: 0;
-                      background: var(--card);
-                      color: var(--ink);
-                      border-color: var(--border);
-                      font-weight: 500;
-                      padding: 6px 14px;
-                      font-size: 13px;
-                      display: inline-flex;
-                      align-items: center;
-                      gap: 6px;
-                    "
-                    rel="noopener"
-                  >
-                    <span
-                      class="mono"
-                      style="font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-weight: 600;"
-                    >
-                      companion
-                    </span>
-                    llms-full.txt
-                  </a>
-                )}
               </div>
 
               <a
@@ -333,89 +318,25 @@ export const GET = async (c: AppContext) => {
               Archive Size
             </span>
             <b class="mono" style="font-size: 24px; color: var(--ink); margin-top: 4px;">
-              {(job.zip_size_bytes / 1024).toFixed(1)}{' '}
-              <span style="font-size: 14px; font-weight: normal;">KB</span>
+              {formatBytes(job.zip_size_bytes).value}{' '}
+              <span style="font-size: 14px; font-weight: normal;">
+                {formatBytes(job.zip_size_bytes).unit}
+              </span>
             </b>
             <span style="font-size: 12px; color: var(--ink-soft); margin-top: 2px;">
-              Cloudflare R2 CDN
+              offline ZIP bundle
             </span>
           </div>
         </div>
 
-        {/* Interactive Navigation Tree */}
-        <section style="padding: 0 0 48px;">
-          <h2 style="font-size: 20px; margin-bottom: 16px;">
-            Documentation Structure ({mapData?.sections.length || 0}{' '}
-            {(mapData?.sections.length ?? 0) === 1 ? 'Section' : 'Sections'})
-          </h2>
-
-          {mapData?.sections ? (
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              {mapData.sections.map((sec, sIdx) => (
-                <details
-                  key={sec.slug}
-                  open
-                  class="panel"
-                  style="
-                    display: block;
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius);
-                    padding: 12px 18px;
-                    background: var(--card);
-                  "
-                >
-                  <summary
-                    style="
-                      font-family: var(--sans);
-                      font-weight: 600;
-                      cursor: pointer;
-                      color: var(--ink);
-                      display: flex;
-                      justify-content: space-between;
-                      user-select: none;
-                    "
-                  >
-                    <span>
-                      <span class="mono" style="color: var(--accent-ink); margin-right: 8px;">
-                        {String(sIdx + 1).padStart(2, '0')}
-                      </span>
-                      {sec.title}
-                    </span>
-                    <span
-                      class="mono"
-                      style="font-size: 12px; color: var(--ink-soft); font-weight: normal;"
-                    >
-                      {sec.items.length} pages
-                    </span>
-                  </summary>
-
-                  <ul style="margin: 12px 0 4px; padding-left: 18px; list-style-type: none;">
-                    {sec.items.map((it, iIdx) => (
-                      <li key={it.url} style="margin-bottom: 6px; font-size: 14px;">
-                        <span
-                          class="mono"
-                          style="color: var(--ink-soft); font-size: 12px; margin-right: 8px;"
-                        >
-                          {String(iIdx + 1).padStart(2, '0')}.
-                        </span>
-                        <a
-                          href={it.url}
-                          target="_blank"
-                          style="color: var(--ink); text-decoration: none;"
-                          rel="noopener"
-                        >
-                          {it.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              ))}
-            </div>
-          ) : (
+        {/* Interactive Multi-Nested Documentation Tree & ASCII Map */}
+        {mapData ? (
+          <DocumentationTreeSection productName={job.product_name || 'docs'} hierarchy={mapData} />
+        ) : (
+          <section style="padding: 0 0 48px;">
             <p style="color: var(--ink-soft);">No map manifest generated.</p>
-          )}
-        </section>
+          </section>
+        )}
       </div>
       <Footer />
     </>

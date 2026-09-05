@@ -46,7 +46,17 @@ export const GET = async (c: AppContext) => {
               >
                 {id} · live terminal
               </span>
-              <h1 style="margin: 8px 0 12px;">{job.product_name || 'Mirroring Documentation'}</h1>
+              <h1 style="margin: 8px 0 12px;">
+                {job.title ||
+                  (job.product_name
+                    ? `${job.product_name} Documentation`
+                    : 'Packaging documentation')}
+              </h1>
+              {job.description && (
+                <p style="color: var(--ink-soft); font-size: 14.5px; line-height: 1.5; margin: 0 0 12px; max-width: 65ch;">
+                  {job.description}
+                </p>
+              )}
               <p class="lede" style="margin: 0; font-size: 15.5px;">
                 Target:{' '}
                 <span class="mono" style="color: var(--ink);">
@@ -92,7 +102,7 @@ export const GET = async (c: AppContext) => {
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffbd2e; display: inline-block;"></span>
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #27c93f; display: inline-block;"></span>
             <span style="margin-left: 8px; font-size: 11.5px; color: #8d8a83;">
-              agent-cache-engine — cloudflare r2 event ledger
+              agent-cache-engine — job [{id}] · {job.input_url}
             </span>
           </div>
 
@@ -201,7 +211,6 @@ export const GET = async (c: AppContext) => {
           )}
         </div>
       </div>
-      <Footer />
 
       {/* Client-Side SSE Listener */}
       <script
@@ -212,14 +221,47 @@ export const GET = async (c: AppContext) => {
             const termWin = document.getElementById("terminal-window");
             const actionBox = document.getElementById("action-box");
 
+            // Cap the terminal buffer to max 120 lines in DOM to guarantee constant memory
+            const MAX_LINES = 120;
+            let scrollPending = false;
+
+            function requestTerminalScroll() {
+              if (scrollPending) return;
+              scrollPending = true;
+              requestAnimationFrame(() => {
+                if (termWin) termWin.scrollTop = termWin.scrollHeight;
+                scrollPending = false;
+              });
+            }
+
+            // Set of event keys to prevent duplicates between initial server render and SSE playback
+            const seenEvents = new Set();
+            if (term) {
+              const existing = term.querySelectorAll("[data-key]");
+              for (const el of existing) {
+                const k = el.getAttribute("data-key");
+                if (k) seenEvents.add(k);
+              }
+            }
+
             if ("${job.status}" !== "complete" && "${job.status}" !== "failed") {
               const es = new EventSource(\`/dingdong/\${jobId}/stream\`);
 
               es.onmessage = (e) => {
                 try {
                   const ev = JSON.parse(e.data);
+                  const key = \`\${ev.timestamp}-\${ev.type}-\${ev.done ?? ''}-\${ev.current_url || ''}-\${ev.message || ''}\`;
+                  if (seenEvents.has(key)) return;
+                  seenEvents.add(key);
+
+                  // Keep memory strictly bounded
+                  while (term && term.children.length >= MAX_LINES) {
+                    term.removeChild(term.firstChild);
+                  }
+
                   const div = document.createElement("div");
                   div.style.marginBottom = "4px";
+                  div.setAttribute("data-key", key);
 
                   let color = "#9ca3af";
                   if (ev.type === "phase") color = "#60a5fa";
@@ -232,30 +274,34 @@ export const GET = async (c: AppContext) => {
                   const text = ev.message || ev.human || (ev.type === "progress" ? \`[\${ev.done}/\${ev.total}] \${ev.current_url}\` : JSON.stringify(ev));
 
                   div.innerHTML = \`<span style="color: #4b5563; margin-right: 8px;">\${time}</span> \${text}\`;
-                  term.appendChild(div);
-                  termWin.scrollTop = termWin.scrollHeight;
+                  if (term) term.appendChild(div);
+                  requestTerminalScroll();
 
                   if (ev.type === "complete") {
-                    actionBox.innerHTML = \`
-                      <div style="background: var(--paper-2, #f5f4ef); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                          <b style="color: var(--ink);">Documentation Ready!</b>
-                          <p style="margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--dim-ink);">\${ev.message || "Extraction complete."}</p>
+                    if (actionBox) {
+                      actionBox.innerHTML = \`
+                        <div style="background: var(--paper-2, #f5f4ef); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                          <div>
+                            <b style="color: var(--ink);">Documentation Ready!</b>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--dim-ink);">\${ev.message || "Extraction complete."}</p>
+                          </div>
+                          <a href="/docs/\${jobId}" class="btn btn-primary" style="padding: 0.6rem 1.2rem; text-decoration: none;">
+                            Open Docs & Download ZIP →
+                          </a>
                         </div>
-                        <a href="/docs/\${jobId}" class="btn btn-primary" style="padding: 0.6rem 1.2rem; text-decoration: none;">
-                          Open Docs & Download ZIP →
-                        </a>
-                      </div>
-                    \`;
+                      \`;
+                    }
                     es.close();
                   } else if (ev.type === "error") {
-                    actionBox.innerHTML = \`
-                      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1.25rem;">
-                        <b style="color: #b91c1c;">Extraction Failed</b>
-                        <p style="margin: 0.4rem 0 0; color: #7f1d1d; font-size: 0.95rem;">\${ev.human || "Extraction failed."}</p>
-                        \${ev.machine ? \`<p class="mono" style="margin-top: 0.5rem; font-size: 0.8rem; color: #991b1b; opacity: 0.8;">Detail: \${ev.machine}</p>\` : ""}
-                      </div>
-                    \`;
+                    if (actionBox) {
+                      actionBox.innerHTML = \`
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1.25rem;">
+                          <b style="color: #b91c1c;">Extraction Failed</b>
+                          <p style="margin: 0.4rem 0 0; color: #7f1d1d; font-size: 0.95rem;">\${ev.human || "Extraction failed."}</p>
+                          \${ev.machine ? \`<p class="mono" style="margin-top: 0.5rem; font-size: 0.8rem; color: #991b1b; opacity: 0.8;">Detail: \${ev.machine}</p>\` : ""}
+                        </div>
+                      \`;
+                    }
                     es.close();
                   }
                 } catch (err) {
@@ -263,9 +309,48 @@ export const GET = async (c: AppContext) => {
                 }
               };
 
+              let retryTimer = null;
               es.onerror = () => {
-                console.log("SSE connection closed or completed.");
-                es.close();
+                // If the stream dropped temporarily, do not kill the UI. Check job status after 2s.
+                if (retryTimer) return;
+                retryTimer = setTimeout(async () => {
+                  retryTimer = null;
+                  try {
+                    const res = await fetch(\`/api/jobs/\${jobId}\`);
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (data.job?.status === "complete") {
+                        if (actionBox) {
+                          actionBox.innerHTML = \`
+                            <div style="background: var(--paper-2, #f5f4ef); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                              <div>
+                                <b style="color: var(--ink);">Documentation Ready!</b>
+                                <p style="margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--dim-ink);">Extraction complete.</p>
+                              </div>
+                              <a href="/docs/\${jobId}" class="btn btn-primary" style="padding: 0.6rem 1.2rem; text-decoration: none;">
+                                Open Docs & Download ZIP →
+                              </a>
+                            </div>
+                          \`;
+                        }
+                        es.close();
+                        return;
+                      }
+                      if (data.job?.status === "failed") {
+                        if (actionBox) {
+                          actionBox.innerHTML = \`
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 1.25rem;">
+                              <b style="color: #b91c1c;">Extraction Failed</b>
+                              <p style="margin: 0.4rem 0 0; color: #7f1d1d; font-size: 0.95rem;">\${data.job.error_human || "Extraction failed."}</p>
+                            </div>
+                          \`;
+                        }
+                        es.close();
+                        return;
+                      }
+                    }
+                  } catch {}
+                }, 2500);
               };
             }
           `,

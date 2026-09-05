@@ -11,7 +11,7 @@ export function Footer() {
         </p>
         <p>
           Agent Cache fetches the entire site, strips it down to content, and organizes it the way
-          agents read: plain markdown, in folders that mirror the site.{' '}
+          agents read: plain markdown, in folders that match the site structure.{' '}
           <span class="dim">No summaries. No lost pages.</span>
         </p>
         <div class="markbig" style="padding: 40px 0 16px;">

@@ -1,6 +1,7 @@
 import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { initDb, listCompletedJobs } from '../../features/jobs'
+import { formatBytes } from '../../lib/utils'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = async (_c: AppContext) => {
@@ -11,18 +12,18 @@ export const GET = async (_c: AppContext) => {
     <>
       <Nav active="docs" />
       <div class="wrap">
-        <header style="padding: 32px 0 24px;">
+        <header style="">
           <span
             class="mono"
             style="font-size: 13px; color: var(--accent-ink); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;"
           >
-            Community Library
+            Packaged Docs
           </span>
-          <h1 style="margin: 8px 0 16px;">Mirrored Documentation</h1>
+          <h1 style="margin: 8px 0 16px;">Ready-to-use doc bundles.</h1>
           <p class="lede" style="margin-bottom: 32px;">
-            Full documentation sites converted to agent-first markdown.{' '}
+            Download full doc sites pre-converted for coding agents.{' '}
             <span class="dim">
-              Browse hierarchies, inspect audit trails, or download indexed ZIP bundles.
+              Drop them in your repo and stop watching your agent hallucinate outdated APIs.
             </span>
           </p>
         </header>
@@ -33,10 +34,10 @@ export const GET = async (_c: AppContext) => {
             style="display: block; padding: 48px 24px; text-align: center; margin-bottom: 48px;"
           >
             <p class="lede" style="margin: 0 0 16px;">
-              No documentation mirrors created yet.
+              No bundles yet.
             </p>
             <a href="/" class="secondary">
-              Create the First Docs Cache →
+              Bundle your first docs site →
             </a>
           </div>
         ) : (
@@ -58,41 +59,50 @@ export const GET = async (_c: AppContext) => {
                 "
               >
                 <div>
-                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+                      {j.logo_url && (
+                        <img
+                          src={j.logo_url}
+                          alt=""
+                          style="width: 16px; height: 16px; border-radius: 3px; object-fit: contain; flex-shrink: 0;"
+                          onerror="this.style.display='none'"
+                        />
+                      )}
+                      <span
+                        class="mono"
+                        style="font-size: 11.5px; color: var(--accent-ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                      >
+                        {j.product_name ||
+                          (j.resolved_url
+                            ? new URL(j.resolved_url).hostname.replace(/^www\./, '')
+                            : j.id)}
+                      </span>
+                    </div>
                     <span
                       class="mono"
-                      style="font-size: 11.5px; color: var(--accent-ink); font-weight: 500;"
-                    >
-                      {j.resolved_url
-                        ? new URL(j.resolved_url).hostname.replace(/^www\./, '')
-                        : j.id}
-                    </span>
-                    <span
-                      class="mono"
-                      style="font-size: 11.5px; color: var(--ink-soft); background: var(--secondary); padding: 2px 8px; border-radius: 999px;"
+                      style="font-size: 11.5px; color: var(--ink-soft); background: var(--secondary); padding: 2px 8px; border-radius: 999px; flex-shrink: 0;"
                     >
                       {j.page_count} {j.page_count === 1 ? 'page' : 'pages'}
                     </span>
                   </div>
 
-                  <h3 style="font-family: var(--sans); font-size: 18px; font-weight: 600; margin: 0 0 8px;">
+                  <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35;">
                     <a href={`/docs/${j.id}`} style="color: var(--ink); text-decoration: none;">
                       <span
                         style="position: absolute; inset: 0; z-index: 1;"
                         aria-hidden="true"
                       ></span>
-                      {j.product_name || 'Documentation'}
+                      {j.title || (j.product_name ? `${j.product_name} Documentation` : j.id)}
                     </a>
                   </h3>
 
-                  <p style="font-size: 14px; color: var(--ink-body); line-height: 1.5; margin: 0 0 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                    {j.description || j.title || j.input_url}
-                  </p>
+                  <div style="min-height: 24px; margin-bottom: 16px;"></div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 8px;">
                   <span class="mono" style="font-size: 12px; color: var(--ink-soft);">
-                    {(j.zip_size_bytes / 1024).toFixed(0)} KB ZIP
+                    {formatBytes(j.zip_size_bytes).full} ZIP
                   </span>
                   <span
                     class="mono"

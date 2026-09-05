@@ -10,10 +10,219 @@ export interface ResolveResult {
   resolvedVia?: 'direct' | 'tavily'
 }
 
-const COMMON_DOCS_SUBDOMAINS = ['docs', 'developer', 'developers', 'help', 'api']
-const COMMON_DOCS_PATHS = ['/docs', '/documentation', '/api-reference', '/developers', '/guide']
+const COMMON_DOCS_SUBDOMAINS = [
+  'docs',
+  'doc',
+  'developer',
+  'developers',
+  'api',
+  'apis',
+  'help',
+  'guide',
+  'guides',
+  'learn',
+  'reference',
+  'manual',
+]
+
+const GENERIC_WORDS = new Set([
+  'docs',
+  'documentation',
+  'doc',
+  'guide',
+  'guides',
+  'api',
+  'apis',
+  'api reference',
+  'reference',
+  'developer',
+  'developers',
+  'help',
+  'home',
+  'overview',
+  'introduction',
+  'getting started',
+  'get started',
+  'index',
+  'welcome',
+])
+
 const TAVILY_API_KEY =
   process.env.TAVILY_API_KEY || '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'
+
+export function getRootWebsiteUrl(inputUrl: string): string {
+  try {
+    const parsed = new URL(inputUrl)
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    const parts = hostname.split('.')
+    let apex = hostname
+
+    if (parts.length > 2) {
+      if (COMMON_DOCS_SUBDOMAINS.includes(parts[0])) {
+        apex = parts.slice(1).join('.')
+      } else {
+        const secondTld = parts[parts.length - 2]
+        const commonSecondTlds = ['co', 'com', 'org', 'net', 'edu', 'gov']
+        if (commonSecondTlds.includes(secondTld) && parts.length > 3) {
+          apex = parts.slice(-3).join('.')
+        } else {
+          apex = parts.slice(-2).join('.')
+        }
+      }
+    }
+
+    return `${parsed.protocol}//${apex}/`
+  } catch {
+    return inputUrl
+  }
+}
+
+interface ExtractedHead {
+  title?: string
+  description?: string
+  ogSiteName?: string
+  appName?: string
+  favicon?: string
+}
+
+function cleanCandidate(s: string | null | undefined): string | null {
+  if (!s) return null
+  let c = s.trim().replace(/^[\s\-–—|:•·]+|[\s\-–—|:•·]+$/g, '')
+  c = c.replace(/\s+(docs|documentation|developer docs|api reference)$/i, '').trim()
+  if (!c || GENERIC_WORDS.has(c.toLowerCase())) return null
+  return c
+}
+
+function extractBrandFromTitle(title: string | undefined): string | null {
+  if (!title) return null
+  const parts = title
+    .split(/\s+[-–—|:•·]\s+/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+  if (parts.length === 1) {
+    const colParts = title.split(/\s*[:]\s*/)
+    if (colParts.length > 1) {
+      const b = cleanCandidate(colParts[0])
+      if (b && b.length <= 30) return b
+    }
+    return cleanCandidate(parts[0])
+  }
+
+  // Scan right-to-left (e.g. "Introduction - Context.dev")
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const cand = cleanCandidate(parts[i])
+    if (
+      cand &&
+      !cand.toLowerCase().includes('web framework built on') &&
+      !cand.toLowerCase().includes('your last next') &&
+      !cand.toLowerCase().includes('getting started with')
+    ) {
+      if (cand.length <= 30 && !cand.includes(' ')) {
+        return cand
+      }
+    }
+  }
+
+  for (const part of parts) {
+    const cand = cleanCandidate(part)
+    if (cand && cand.length <= 25) return cand
+  }
+
+  return cleanCandidate(parts[0])
+}
+
+function extractBrandFromHostname(hostname: string): string {
+  const clean = hostname.toLowerCase().replace(/^www\./, '')
+  const parts = clean.split('.')
+  const filtered = parts.filter(
+    (p) =>
+      !COMMON_DOCS_SUBDOMAINS.includes(p) &&
+      !['com', 'dev', 'org', 'io', 'net', 'co', 'ai', 'app', 'sh'].includes(p),
+  )
+  const candidate = filtered[0] || parts[0]
+  return candidate.charAt(0).toUpperCase() + candidate.slice(1)
+}
+
+function extractHeadFromHtml(html: string, baseUrl: string): ExtractedHead {
+  try {
+    const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i)
+    const headHtml = headMatch ? `<head>${headMatch[1]}</head>` : html.slice(0, 100000)
+    const dom = new JSDOM(headHtml)
+    const doc = dom.window.document
+
+    const rawTitle = doc.querySelector('title')?.textContent?.trim()
+    const ogTitle = doc
+      .querySelector('meta[property="og:title"], meta[content][property="og:title"]')
+      ?.getAttribute('content')
+      ?.trim()
+    const twitterTitle = doc
+      .querySelector('meta[name="twitter:title"], meta[content][name="twitter:title"]')
+      ?.getAttribute('content')
+      ?.trim()
+
+    const rawDesc = doc
+      .querySelector('meta[name="description"], meta[content][name="description"]')
+      ?.getAttribute('content')
+      ?.trim()
+    const ogDesc = doc
+      .querySelector('meta[property="og:description"], meta[content][property="og:description"]')
+      ?.getAttribute('content')
+      ?.trim()
+    const twitterDesc = doc
+      .querySelector('meta[name="twitter:description"], meta[content][name="twitter:description"]')
+      ?.getAttribute('content')
+      ?.trim()
+
+    const ogSiteName = doc
+      .querySelector('meta[property="og:site_name"], meta[content][property="og:site_name"]')
+      ?.getAttribute('content')
+      ?.trim()
+    const appName =
+      doc
+        .querySelector('meta[name="application-name"], meta[content][name="application-name"]')
+        ?.getAttribute('content')
+        ?.trim() ||
+      doc
+        .querySelector(
+          'meta[name="apple-mobile-web-app-title"], meta[content][name="apple-mobile-web-app-title"]',
+        )
+        ?.getAttribute('content')
+        ?.trim()
+
+    const faviconHref =
+      doc.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href') ||
+      doc.querySelector('link[rel*="icon"]')?.getAttribute('href')
+
+    let favicon: string | undefined
+    if (faviconHref) {
+      try {
+        favicon = new URL(faviconHref, baseUrl).href
+      } catch {}
+    }
+
+    const decode = (s: string | null | undefined): string | undefined => {
+      if (!s) return undefined
+      return s
+        .replace(/&amp;/g, '&')
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ')
+        .trim()
+    }
+
+    return {
+      title: decode(ogTitle || twitterTitle || rawTitle),
+      description: decode(ogDesc || rawDesc || twitterDesc),
+      ogSiteName: decode(ogSiteName),
+      appName: decode(appName),
+      favicon,
+    }
+  } catch {
+    return {}
+  }
+}
 
 export async function resolveViaTavily(siteUrl: string): Promise<string | null> {
   const prompt = `Find the official developer or API documentation for ${siteUrl}. Return only the documentation URL.`
@@ -39,7 +248,6 @@ export async function resolveViaTavily(siteUrl: string): Promise<string | null> 
       results?: Array<{ url: string }>
     }
     const data = (await res.json()) as TavilyResponse
-    // 1. Extract URLs explicitly mentioned in Tavily's concise answer
     const rawAnswerMatches =
       (data.answer || '').match(
         /(https?:\/\/[^\s)\],]+|[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s)\],]*)?)/gi,
@@ -50,7 +258,6 @@ export async function resolveViaTavily(siteUrl: string): Promise<string | null> 
       if (/docs|developer|guide|api/i.test(u)) return u
     }
 
-    // 2. Filter search result candidates
     const resultUrls = (data.results || [])
       .filter(
         (r) =>
@@ -75,103 +282,205 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
 
   const parsed = new URL(target)
   const hostname = parsed.hostname.toLowerCase()
-  const domainParts = hostname.replace(/^www\./, '').split('.')
-  const defaultProductName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1)
+  const rootUrl = getRootWebsiteUrl(target)
 
   let docsUrl = target
-  let title = `${defaultProductName} Documentation`
-  let description = `Official documentation and API reference for ${defaultProductName}.`
-  let logoUrl: string | null = null
   let resolvedVia: 'direct' | 'tavily' = 'direct'
-  let directProbeSuccess = false
+  let targetHtml = ''
+  let rootHtml = ''
 
   try {
-    const res = await fetch(target, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      signal: AbortSignal.timeout(8000),
-    })
+    const [targetRes, rootRes] = await Promise.allSettled([
+      fetch(target, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: AbortSignal.timeout(8000),
+      }),
+      target !== rootUrl
+        ? fetch(rootUrl, {
+            headers: {
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+              Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
+            signal: AbortSignal.timeout(8000),
+          })
+        : Promise.resolve(null),
+    ])
 
-    if (res.ok) {
-      directProbeSuccess = true
-      const html = await res.text()
-      const dom = new JSDOM(html)
-      const doc = dom.window.document
-
-      // Extract metadata
-      const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
-      const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
-      const docTitle = doc.querySelector('title')?.textContent
-      const favicon = doc.querySelector('link[rel*="icon"]')?.getAttribute('href')
-
-      if (ogTitle) title = ogTitle
-      else if (docTitle) title = docTitle.trim()
-
-      if (ogDesc) description = ogDesc
-
-      if (favicon) {
-        logoUrl = new URL(favicon, target).href
+    if (targetRes.status === 'fulfilled' && targetRes.value?.ok) {
+      targetHtml = await targetRes.value.text()
+      if (targetRes.value.url && targetRes.value.url !== target) {
+        docsUrl = targetRes.value.url
       }
-
-      // Check if current page is already docs or if it links to /docs
-      const isAlreadyDocs =
-        /docs|documentation|api-reference|developers|guide/i.test(parsed.pathname) ||
-        COMMON_DOCS_SUBDOMAINS.some((sub) => hostname.startsWith(`${sub}.`))
-
-      if (!isAlreadyDocs) {
-        // Look for outbound documentation link in HTML
-        const links = Array.from(doc.querySelectorAll('a[href]'))
-        for (const link of links) {
-          const href = link.getAttribute('href') || ''
-          const text = (link.textContent || '').trim().toLowerCase()
-
-          if (
-            text === 'docs' ||
-            text === 'documentation' ||
-            text === 'api reference' ||
-            text === 'developers' ||
-            text === 'guides' ||
-            COMMON_DOCS_PATHS.some((p) => href.startsWith(p)) ||
-            (href.includes('docs.') && href.includes(domainParts.slice(-2).join('.')))
-          ) {
-            try {
-              const candidate = new URL(href, target).href
-              docsUrl = candidate
-              break
-            } catch {
-              // Ignore invalid link
-            }
-          }
-        }
-      }
+    }
+    if (rootRes.status === 'fulfilled' && rootRes.value && rootRes.value.ok) {
+      rootHtml = await rootRes.value.text()
     }
   } catch (err) {
     console.warn(`[Resolver] Initial probe failed on ${target}:`, err)
   }
 
-  // Fallback to Tavily if direct probe failed, returned non-200, or didn't find docs path
+  // If target wasn't docs, search for outbound documentation link in targetHtml
+  const isAlreadyDocs =
+    /docs|documentation|api-reference|developers|guide/i.test(parsed.pathname) ||
+    COMMON_DOCS_SUBDOMAINS.some((sub) => hostname.startsWith(`${sub}.`))
+
+  if (!isAlreadyDocs && targetHtml) {
+    try {
+      const dom = new JSDOM(targetHtml)
+      const doc = dom.window.document
+      const links = Array.from(doc.querySelectorAll('a[href]'))
+      const candidates: { url: string; score: number }[] = []
+
+      for (const link of links) {
+        const href = link.getAttribute('href') || ''
+        const text = (link.textContent || '').trim().toLowerCase()
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) continue
+
+        let fullUrl: string
+        try {
+          fullUrl = new URL(href, target).href
+        } catch {
+          continue
+        }
+
+        let score = 0
+        const parsedLink = new URL(fullUrl)
+        const linkHost = parsedLink.hostname.toLowerCase()
+        const linkPath = parsedLink.pathname.toLowerCase().replace(/\/$/, '')
+
+        // Subdomain docs (e.g. docs.stripe.com) is the gold standard
+        if (COMMON_DOCS_SUBDOMAINS.some((sub) => linkHost.startsWith(`${sub}.`))) {
+          score += 100
+        }
+
+        // Exact link anchor text
+        if (text === 'documentation' || text === 'docs') score += 80
+        else if (text === 'api reference' || text === 'developers' || text === 'developer docs')
+          score += 60
+        else if (text.includes('doc') || text.includes('developer')) score += 40
+
+        // Path matches
+        if (linkPath === '/docs' || linkPath === '/documentation' || linkPath === '/api-reference')
+          score += 50
+        else if (linkPath.startsWith('/docs/') || linkPath.startsWith('/documentation/'))
+          score += 30
+        else if (linkPath === '/guides' || linkPath === '/guide') score += 15
+        else if (linkPath.startsWith('/guides/') || linkPath.startsWith('/guide/')) score += 5 // specific article/blog
+
+        if (score > 0) {
+          candidates.push({ url: fullUrl, score })
+        }
+      }
+
+      if (candidates.length > 0) {
+        candidates.sort((a, b) => b.score - a.score)
+        docsUrl = candidates[0].url
+      }
+    } catch {}
+  }
+
+  // Fallback to Tavily if direct probe failed, or didn't find docs path
   const isGenericRoot = !/docs|documentation|api|developer|guide/i.test(docsUrl)
-  if (!directProbeSuccess || isGenericRoot) {
+  if (!targetHtml || isGenericRoot) {
     const tavilyTarget = await resolveViaTavily(target)
     if (tavilyTarget && tavilyTarget !== target) {
       docsUrl = tavilyTarget
       resolvedVia = 'tavily'
-      try {
-        const tavilyUrl = new URL(tavilyTarget)
-        const tavilyHost = tavilyUrl.hostname.replace(/^www\./, '')
-        const tParts = tavilyHost.split('.')
-        title = `${tParts[0].charAt(0).toUpperCase() + tParts[0].slice(1)} Documentation`
-      } catch {}
     }
   }
+
+  // Ensure trailing slash for directory documentation paths (e.g. /docs -> /docs/)
+  try {
+    const parsedDocs = new URL(docsUrl)
+    if (
+      !parsedDocs.pathname.endsWith('/') &&
+      !/\.[a-z0-9]+$/i.test(parsedDocs.pathname) &&
+      (parsedDocs.pathname.includes('/docs') ||
+        parsedDocs.pathname.includes('/documentation') ||
+        parsedDocs.pathname.includes('/guide'))
+    ) {
+      docsUrl = `${docsUrl}/`
+    }
+  } catch {}
+
+  // If docsUrl resolved to a different endpoint, fetch its HTML for accurate page title/metadata
+  let finalDocsHtml = targetHtml
+  if (docsUrl !== target) {
+    try {
+      const dRes = await fetch(docsUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: AbortSignal.timeout(6000),
+      })
+      if (dRes.ok) {
+        finalDocsHtml = await dRes.text()
+      }
+    } catch {}
+  }
+
+  // Extract <head> metadata from docs HTML and root HTML
+  const docsHead = finalDocsHtml ? extractHeadFromHtml(finalDocsHtml, docsUrl) : {}
+  const rootHead = rootHtml ? extractHeadFromHtml(rootHtml, rootUrl) : {}
+
+  // 1. Resolve clean brand / product name from root website first
+  let productName: string | null = null
+  for (const candidate of [
+    rootHead.ogSiteName,
+    rootHead.appName,
+    docsHead.ogSiteName,
+    docsHead.appName,
+  ]) {
+    const c = cleanCandidate(candidate)
+    if (c) {
+      productName = c
+      break
+    }
+  }
+
+  if (!productName) {
+    for (const t of [rootHead.title, docsHead.title]) {
+      const b = extractBrandFromTitle(t)
+      if (b) {
+        productName = b
+        break
+      }
+    }
+  }
+
+  if (!productName) {
+    productName = extractBrandFromHostname(new URL(rootUrl).hostname)
+  }
+
+  // 2. Resolve original title from ROOT website first (never generic "Docs" from docs subdomain)
+  let title = rootHead.title
+  if (!title || GENERIC_WORDS.has(title.toLowerCase())) {
+    title = docsHead.title
+  }
+  if (!title || GENERIC_WORDS.has(title.toLowerCase())) {
+    title = `${productName} Documentation`
+  }
+
+  // 3. Resolve original meta description from ROOT website first
+  let description = rootHead.description || docsHead.description
+  if (!description) {
+    description = `Official documentation and API reference for ${productName}.`
+  }
+
+  // 4. Resolve logo URL from ROOT website first
+  const logoUrl = rootHead.favicon || docsHead.favicon || null
 
   return {
     originUrl: target,
     docsUrl,
-    productName: defaultProductName,
+    productName,
     title,
     description,
     logoUrl,

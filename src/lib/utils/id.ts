@@ -5,8 +5,24 @@ import { customAlphabet } from 'nanoid'
  */
 const generateHexSuffix = customAlphabet('0123456789abcdef', 4)
 
+const COMMON_DOCS_PREFIXES = [
+  'docs.',
+  'doc.',
+  'developer.',
+  'developers.',
+  'api.',
+  'apis.',
+  'help.',
+  'guide.',
+  'guides.',
+  'learn.',
+  'reference.',
+  'manual.',
+]
+
 /**
- * Extract clean hostname (e.g. "htmx.org" or "hono.dev") from any URL input.
+ * Extract clean root domain (e.g. "stripe.com", "htmx.org" or "hono.dev") from any URL input,
+ * always stripping docs/developer/api subdomains so IDs are always generated from root.
  */
 export function extractDomainSlug(inputUrl: string): string {
   try {
@@ -15,7 +31,13 @@ export function extractDomainSlug(inputUrl: string): string {
       urlStr = `https://${urlStr}`
     }
     const parsed = new URL(urlStr)
-    const host = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    let host = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    for (const prefix of COMMON_DOCS_PREFIXES) {
+      if (host.startsWith(prefix) && host.length > prefix.length) {
+        host = host.slice(prefix.length)
+        break
+      }
+    }
     // Ensure only valid URL-safe characters
     const clean = host.replace(/[^a-z0-9.-]/g, '')
     return clean || 'docs'

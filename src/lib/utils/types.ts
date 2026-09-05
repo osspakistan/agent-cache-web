@@ -56,16 +56,20 @@ export interface NavItem {
   url: string
   file?: string
   order?: number
+  slug?: string
+  items?: NavItem[]
 }
 
 export interface NavSection {
   title: string
   slug: string
+  tab?: string
   order: number
   items: NavItem[]
 }
 
 export interface NavHierarchy {
   title: string
+  tabs?: string[]
   sections: NavSection[]
 }

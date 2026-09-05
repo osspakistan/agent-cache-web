@@ -5,6 +5,8 @@ import type { NavHierarchy } from '../../lib/utils/types'
 export interface PackageBundleOptions {
   jobId: string
   productName: string
+  title?: string
+  description?: string
   docsUrl: string
   hierarchy: NavHierarchy
   extractedFiles: Map<string, Uint8Array>
@@ -17,7 +19,16 @@ export interface PackageBundleResult {
 }
 
 export async function packageJobBundle(opts: PackageBundleOptions): Promise<PackageBundleResult> {
-  const { jobId, productName, docsUrl, hierarchy, extractedFiles, companionLlmsFullUrl } = opts
+  const {
+    jobId,
+    productName,
+    title,
+    description,
+    docsUrl,
+    hierarchy,
+    extractedFiles,
+    companionLlmsFullUrl,
+  } = opts
   const r2FinalPrefix = `jobs/${jobId}/final`
   let hasCompanionLlmsFull = false
 
@@ -46,15 +57,51 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
   }
 
   // 2. Generate local INDEX.md in each section
+  const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
+  const tabIndexMap = new Map<string, number>()
+  if (hasTabs && hierarchy.tabs) {
+    hierarchy.tabs.forEach((t, idx) => {
+      tabIndexMap.set(t, idx + 1)
+    })
+  }
+
+  function getSecFolder(sec: (typeof hierarchy.sections)[0], sIdx: number): string {
+    let folder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+    if (hasTabs && sec.tab) {
+      const tIdx = tabIndexMap.get(sec.tab) || 1
+      const tabFolder = `${String(tIdx).padStart(2, '0')}-${sec.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      folder = `${tabFolder}/${folder}`
+    }
+    return folder
+  }
+
+  function renderItemsToc(
+    items: (typeof hierarchy.sections)[0]['items'],
+    parentFolder: string,
+    indent: string,
+  ): string {
+    let result = ''
+    items.forEach((it, iIdx) => {
+      const slug = it.slug || it.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const hasChildren = Boolean(it.items && it.items.length > 0)
+      if (hasChildren) {
+        const nestedFolder = `${parentFolder}/${String(iIdx + 1).padStart(2, '0')}-${slug}`
+        result += `${indent}- [${it.title}](${nestedFolder}/index.md)\n`
+        result += renderItemsToc(it.items || [], nestedFolder, `${indent}  `)
+      } else {
+        const fileRef = `${parentFolder}/${String(iIdx + 1).padStart(2, '0')}-${slug}.md`
+        result += `${indent}- [${it.title}](${fileRef})\n`
+      }
+    })
+    return result
+  }
+
   for (let sIdx = 0; sIdx < hierarchy.sections.length; sIdx++) {
     const sec = hierarchy.sections[sIdx]
-    const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+    const secFolder = getSecFolder(sec, sIdx)
 
     let secIndex = `# ${sec.title}\n\n`
-    sec.items.forEach((it, iIdx) => {
-      const fileRef = `${String(iIdx + 1).padStart(2, '0')}-${it.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.md`
-      secIndex += `- [${it.title}](${fileRef})\n`
-    })
+    secIndex += renderItemsToc(sec.items, '.', '')
 
     const secBytes = Buffer.from(secIndex, 'utf8')
     await uploadToR2(
@@ -66,7 +113,10 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
   }
 
   // 3. Generate master root INDEX.md
-  let masterIndex = `# ${productName} Documentation\n\n`
+  let masterIndex = `# ${title || `${productName} Documentation`}\n\n`
+  if (description) {
+    masterIndex += `> ${description}\n>\n`
+  }
   masterIndex += `> Auto-generated agent-ready mirror of [${docsUrl}](${docsUrl})\n\n`
 
   if (hasCompanionLlmsFull) {
@@ -75,15 +125,30 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
 
   masterIndex += `## Table of Contents\n\n`
 
-  for (let sIdx = 0; sIdx < hierarchy.sections.length; sIdx++) {
-    const sec = hierarchy.sections[sIdx]
-    const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
-    masterIndex += `### ${sIdx + 1}. [${sec.title}](${secFolder}/INDEX.md)\n\n`
-    sec.items.forEach((it, iIdx) => {
-      const fileRef = `${secFolder}/${String(iIdx + 1).padStart(2, '0')}-${it.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.md`
-      masterIndex += `- [${it.title}](${fileRef})\n`
-    })
-    masterIndex += `\n`
+  if (hasTabs && hierarchy.tabs) {
+    for (const tab of hierarchy.tabs) {
+      const tabSections = hierarchy.sections
+        .map((sec, sIdx) => ({ sec, sIdx }))
+        .filter((entry) => entry.sec.tab === tab)
+
+      if (tabSections.length > 0) {
+        masterIndex += `## ${tab}\n\n`
+        tabSections.forEach(({ sec, sIdx }, localIdx) => {
+          const secFolder = getSecFolder(sec, sIdx)
+          masterIndex += `### ${localIdx + 1}. [${sec.title}](${secFolder}/INDEX.md)\n\n`
+          masterIndex += renderItemsToc(sec.items, secFolder, '')
+          masterIndex += `\n`
+        })
+      }
+    }
+  } else {
+    for (let sIdx = 0; sIdx < hierarchy.sections.length; sIdx++) {
+      const sec = hierarchy.sections[sIdx]
+      const secFolder = getSecFolder(sec, sIdx)
+      masterIndex += `### ${sIdx + 1}. [${sec.title}](${secFolder}/INDEX.md)\n\n`
+      masterIndex += renderItemsToc(sec.items, secFolder, '')
+      masterIndex += `\n`
+    }
   }
 
   const masterBytes = Buffer.from(masterIndex, 'utf8')
@@ -92,7 +157,8 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
 
   // 4. Write meta.yaml and _map.json directly to R2
   const metaYaml = `name: "${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"
-title: "${productName} Docs"
+title: "${(title || `${productName} Docs`).replace(/"/g, '\\"')}"
+description: "${(description || '').replace(/"/g, '\\"')}"
 url: "${docsUrl}"
 created_at: "${new Date().toISOString()}"
 version: "1.0.0"
@@ -114,10 +180,13 @@ companion_llms_full: ${hasCompanionLlmsFull}
   }
 
   const zipped = zipSync(zipEntries, { level: 6 })
-  const zipKey = `jobs/${jobId}/bundle.zip`
+  const zipKey = `jobs/${jobId}/${jobId}.zip`
 
-  // Upload ZIP directly to R2
-  await uploadToR2(zipKey, zipped, 'application/zip')
+  // Upload ZIP directly to R2 named after jobId, plus bundle.zip alias
+  await Promise.all([
+    uploadToR2(zipKey, zipped, 'application/zip'),
+    uploadToR2(`jobs/${jobId}/bundle.zip`, zipped, 'application/zip'),
+  ])
 
   return {
     zipSizeBytes: zipped.byteLength,

@@ -22,7 +22,7 @@ export function Nav(props: { active?: 'home' | 'docs' | 'dingdong' }) {
                   : 'color: var(--ink-soft);'
               }`}
             >
-              mirror
+              add
             </a>
             <a
               href="/docs"
@@ -33,7 +33,7 @@ export function Nav(props: { active?: 'home' | 'docs' | 'dingdong' }) {
                   : 'color: var(--ink-soft);'
               }`}
             >
-              directory
+              library
             </a>
           </nav>
         </div>

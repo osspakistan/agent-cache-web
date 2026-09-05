@@ -24,78 +24,172 @@ export type CrawlProgressCallback = (event: StreamEvent) => Promise<void>
 export async function crawlAndExtractPages(
   jobId: string,
   hierarchy: NavHierarchy,
-  strategy: string,
+  _strategy: string,
   onProgress: CrawlProgressCallback,
 ): Promise<Map<string, Uint8Array>> {
   let doneCount = 0
 
-  // Count total pages
+  // Count total pages recursively
+  function countPages(items: (typeof hierarchy.sections)[0]['items']): number {
+    let count = 0
+    for (const it of items) {
+      count++
+      if (it.items && it.items.length > 0) {
+        count += countPages(it.items)
+      }
+    }
+    return count
+  }
+
   let totalPages = 0
   for (const sec of hierarchy.sections) {
-    totalPages += sec.items.length
+    totalPages += countPages(sec.items)
   }
 
   const concurrency = 8
-  const queue: {
+  const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
+  const tabIndexMap = new Map<string, number>()
+  if (hasTabs && hierarchy.tabs) {
+    hierarchy.tabs.forEach((t, idx) => {
+      tabIndexMap.set(t, idx + 1)
+    })
+  }
+
+  interface CrawlTask {
+    tab?: string
+    tabIndex?: number
     secIndex: number
     secTitle: string
     secSlug: string
-    itemIndex: number
     itemTitle: string
     url: string
-  }[] = []
+    folderPath: string
+    fileName: string
+  }
+
+  const queue: CrawlTask[] = []
+
+  function enqueueItems(
+    items: (typeof hierarchy.sections)[0]['items'],
+    parentFolder: string,
+    sec: (typeof hierarchy.sections)[0],
+    sIdx: number,
+    tIdx?: number,
+  ) {
+    items.forEach((item, iIdx) => {
+      const slug = item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const hasChildren = Boolean(item.items && item.items.length > 0)
+
+      if (hasChildren) {
+        const nestedFolder = `${parentFolder}/${String(iIdx + 1).padStart(2, '0')}-${slug}`
+        // Index page for folder
+        queue.push({
+          tab: sec.tab,
+          tabIndex: tIdx,
+          secIndex: sIdx + 1,
+          secTitle: sec.title,
+          secSlug: sec.slug,
+          itemTitle: item.title,
+          url: item.url,
+          folderPath: nestedFolder,
+          fileName: 'index.md',
+        })
+        enqueueItems(item.items || [], nestedFolder, sec, sIdx, tIdx)
+      } else {
+        queue.push({
+          tab: sec.tab,
+          tabIndex: tIdx,
+          secIndex: sIdx + 1,
+          secTitle: sec.title,
+          secSlug: sec.slug,
+          itemTitle: item.title,
+          url: item.url,
+          folderPath: parentFolder,
+          fileName: `${String(iIdx + 1).padStart(2, '0')}-${slug}.md`,
+        })
+      }
+    })
+  }
 
   hierarchy.sections.forEach((sec, sIdx) => {
-    sec.items.forEach((item, iIdx) => {
-      queue.push({
-        secIndex: sIdx + 1,
-        secTitle: sec.title,
-        secSlug: sec.slug,
-        itemIndex: iIdx + 1,
-        itemTitle: item.title,
-        url: item.url,
-      })
-    })
+    const tIdx = sec.tab ? tabIndexMap.get(sec.tab) : undefined
+    let baseSecFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+    if (sec.tab && tIdx) {
+      const tabFolder = `${String(tIdx).padStart(2, '0')}-${sec.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      baseSecFolder = `${tabFolder}/${baseSecFolder}`
+    }
+    enqueueItems(sec.items, baseSecFolder, sec, sIdx, tIdx)
   })
 
   // In-flight bundle map for instant ZIP creation (avoids disk!)
   const filesMap = new Map<string, Uint8Array>()
 
-  async function processItem(task: (typeof queue)[0]) {
-    const secFolder = `${String(task.secIndex).padStart(2, '0')}-${task.secSlug}`
-    const fileName = `${String(task.itemIndex).padStart(2, '0')}-${task.itemTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.md`
-    const relativePath = `final/${secFolder}/${fileName}`
+  async function processItem(task: CrawlTask) {
+    const relativePath = `final/${task.folderPath}/${task.fileName}`
     const r2Key = `jobs/${jobId}/${relativePath}`
 
     let markdown = ''
     try {
+      // 1. Direct fetch if URL ends in .md or .mdx
       if (task.url.endsWith('.md') || task.url.endsWith('.mdx')) {
         const res = await fetch(task.url, {
           headers: { 'User-Agent': 'agent-cache/1.0' },
-          signal: AbortSignal.timeout(6000),
-        })
-        if (res.ok) {
-          markdown = await res.text()
-        }
-      } else if (strategy === 'direct-raw-md') {
-        const mdUrl = `${task.url.replace(/\/$/, '')}.md`
-        const res = await fetch(mdUrl, {
-          headers: { 'User-Agent': 'agent-cache/1.0' },
-          signal: AbortSignal.timeout(6000),
+          signal: AbortSignal.timeout(8000),
         })
         if (res.ok) {
           markdown = await res.text()
         }
       }
 
+      // 2. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
       if (!markdown) {
-        // HTML fetch with Turndown purification
+        try {
+          const res = await fetch(task.url, {
+            headers: {
+              'User-Agent': 'agent-cache/1.0',
+              Accept: 'text/markdown, text/plain;q=0.9, text/html;q=0.8, */*;q=0.1',
+            },
+            signal: AbortSignal.timeout(8000),
+          })
+          if (res.ok) {
+            const contentType = res.headers.get('content-type') || ''
+            const text = await res.text()
+            if (contentType.includes('markdown') || contentType.includes('text/plain')) {
+              markdown = text
+            }
+          }
+        } catch {}
+      }
+
+      // 3. Try .md URL suffix (works for Mintlify, GitBook, Zed docs)
+      if (!markdown) {
+        try {
+          const mdUrl = `${task.url.replace(/\/$/, '')}.md`
+          const res = await fetch(mdUrl, {
+            headers: {
+              'User-Agent': 'agent-cache/1.0',
+              Accept: 'text/markdown, text/plain, */*',
+            },
+            signal: AbortSignal.timeout(8000),
+          })
+          if (res.ok) {
+            const contentType = res.headers.get('content-type') || ''
+            const text = await res.text()
+            if (contentType.includes('markdown') || contentType.includes('text/plain')) {
+              markdown = text
+            }
+          }
+        } catch {}
+      }
+
+      // 4. Fallback: HTML fetch with Turndown purification
+      if (!markdown) {
         const res = await fetch(task.url, {
           headers: {
             'User-Agent':
               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0 Safari/537.36',
           },
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(10000),
         })
         if (res.ok) {
           const contentType = res.headers.get('content-type') || ''
@@ -105,19 +199,23 @@ export async function crawlAndExtractPages(
             markdown = text
           } else {
             const dom = new JSDOM(text)
-            const doc = dom.window.document
+            try {
+              const doc = dom.window.document
 
-            // Strip noise elements
-            const elementsToRemove = doc.querySelectorAll(
-              'script, style, nav, header, footer, aside, noscript, svg',
-            )
-            elementsToRemove.forEach((el) => {
-              el.remove()
-            })
+              // Strip noise elements
+              const elementsToRemove = doc.querySelectorAll(
+                'script, style, nav, header, footer, aside, noscript, svg',
+              )
+              elementsToRemove.forEach((el) => {
+                el.remove()
+              })
 
-            const mainContent =
-              doc.querySelector('main, article, [role="main"], .content') || doc.body
-            markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+              const mainContent =
+                doc.querySelector('main, article, [role="main"], .content') || doc.body
+              markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+            } finally {
+              dom.window.close()
+            }
           }
         }
       }
@@ -160,11 +258,18 @@ section: "${task.secTitle.replace(/"/g, '\\"')}"
     })
   }
 
-  // Run with bounded concurrency pool
-  for (let i = 0; i < queue.length; i += concurrency) {
-    const batch = queue.slice(i, i + concurrency)
-    await Promise.all(batch.map((t) => processItem(t)))
-  }
+  // Run with continuous worker pool (never stalls on single slow/huge pages)
+  let nextIdx = 0
+  const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+    while (nextIdx < queue.length) {
+      const currentTask = queue[nextIdx++]
+      if (currentTask) {
+        await processItem(currentTask)
+      }
+    }
+  })
+
+  await Promise.all(workers)
 
   return filesMap
 }

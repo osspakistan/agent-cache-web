@@ -115,6 +115,13 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
   try {
     // Phase 1: Target Docs Origin Resolver
     await emit({
+      type: 'log',
+      level: 'info',
+      message: `🚀 Running extraction job [${job.id}] for: ${job.input_url}`,
+      timestamp: Date.now(),
+    })
+
+    await emit({
       type: 'phase',
       phase: 'probing',
       message: `Analyzing target URL: ${job.input_url}`,
@@ -190,6 +197,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
 
     const hierarchy = await extractSiteTopology(resolved.docsUrl, {
       llmsTxtUrl: decision.llmsTxtUrl,
+      onProgress: emit,
     })
     await uploadToR2(
       `jobs/${job.id}/.dingdong/03-nav-tree.json`,
@@ -197,19 +205,36 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       'application/json; charset=utf-8',
     )
 
+    function countRecursiveItems(items: (typeof hierarchy.sections)[0]['items']): number {
+      let count = 0
+      for (const it of items) {
+        count++
+        if (it.items && it.items.length > 0) {
+          count += countRecursiveItems(it.items)
+        }
+      }
+      return count
+    }
+
     let totalItems = 0
     for (const s of hierarchy.sections) {
-      totalItems += s.items.length
+      totalItems += countRecursiveItems(s.items)
     }
 
     if (totalItems === 0) {
       throw ErrorFactory.zeroPages(resolved.docsUrl)
     }
 
+    const tabsCount = hierarchy.tabs ? hierarchy.tabs.length : 0
+    const topologySummary =
+      tabsCount > 1
+        ? `${totalItems} documentation pages across ${tabsCount} tabs and ${hierarchy.sections.length} sections`
+        : `${totalItems} documentation pages across ${hierarchy.sections.length} sections`
+
     await emit({
       type: 'log',
       level: 'info',
-      message: `Discovered ${totalItems} documentation pages across ${hierarchy.sections.length} sections`,
+      message: `Discovered ${topologySummary}`,
       timestamp: Date.now(),
     })
 
@@ -241,13 +266,15 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
     await emit({
       type: 'phase',
       phase: 'packaging',
-      message: `Assembling numeric tree, INDEX.md, and bundle.zip in Cloudflare R2...`,
+      message: `Assembling numeric tree, INDEX.md, and ${job.id}.zip in Cloudflare R2...`,
       timestamp: Date.now(),
     })
 
     const pkgResult = await packageJobBundle({
       jobId: job.id,
       productName: resolved.productName,
+      title: resolved.title,
+      description: resolved.description,
       docsUrl: resolved.docsUrl,
       hierarchy,
       extractedFiles,
@@ -272,7 +299,10 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       completed_at: now,
     })
 
-    const publicZipUrl = getPublicR2Url(`jobs/${job.id}/bundle.zip`) || `/docs/${job.id}/download`
+    const publicZipUrl =
+      getPublicR2Url(`jobs/${job.id}/${job.id}.zip`) ||
+      getPublicR2Url(`jobs/${job.id}/bundle.zip`) ||
+      `/docs/${job.id}/download`
 
     await emit({
       type: 'complete',

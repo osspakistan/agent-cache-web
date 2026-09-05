@@ -21,119 +21,128 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
   let hasLlmsTxt = false
   let llmsTxtUrl: string | undefined
 
-  // 1. Probe companion llms-full.txt (bonus download for R2/bundle, never replaces structure)
-  for (const candidate of [`${origin}/llms-full.txt`, `${origin}${pathPrefix}/llms-full.txt`]) {
-    try {
-      const res = await fetch(candidate, {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'agent-cache-probe/1.0' },
-        signal: AbortSignal.timeout(3000),
-      })
-      const cType = res.headers.get('content-type') || ''
-      if (res.ok && (cType.includes('text') || cType.includes('markdown') || !cType)) {
-        hasLlmsFull = true
-        llmsFullUrl = candidate
-        break
-      }
-    } catch {}
-  }
+  // 1. Concurrently probe companion llms-full.txt and llms.txt (parallel fast HEAD requests)
+  const probeTasks: Promise<void>[] = []
 
-  // 2. Probe llms.txt (for structured link discovery)
-  for (const candidate of [`${origin}/llms.txt`, `${origin}${pathPrefix}/llms.txt`]) {
-    try {
-      const res = await fetch(candidate, {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'agent-cache-probe/1.0' },
-        signal: AbortSignal.timeout(3000),
-      })
-      const cType = res.headers.get('content-type') || ''
-      if (res.ok && (cType.includes('text') || cType.includes('markdown') || !cType)) {
-        hasLlmsTxt = true
-        llmsTxtUrl = candidate
-        break
-      }
-    } catch {}
-  }
-
-  // 3. Tier 1: Check Open-Source GitHub repository in page footer/navbar
-  try {
-    const pageRes = await fetch(docsUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0 Safari/537.36',
-      },
-      signal: AbortSignal.timeout(5000),
-    })
-    if (pageRes.ok) {
-      const html = await pageRes.text()
-      const match = html.match(/github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_.-]+)/i)
-      if (match && !match[1].toLowerCase().includes('github')) {
-        const owner = match[1]
-        const repo = match[2].replace(/\.git$/i, '').replace(/["'].*$/, '')
-
-        // Check if repo has docs/ directory via GitHub trees
-        const treeRes = await fetch(
-          `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`,
-          {
-            headers: { 'User-Agent': 'agent-cache-bot' },
+  // Companion llms-full.txt probe
+  probeTasks.push(
+    (async () => {
+      for (const candidate of [`${origin}/llms-full.txt`, `${origin}${pathPrefix}/llms-full.txt`]) {
+        try {
+          const res = await fetch(candidate, {
+            headers: { 'User-Agent': 'agent-cache-probe/1.0' },
             signal: AbortSignal.timeout(4000),
+          })
+          const cType = res.headers.get('content-type') || ''
+          const text = await res.text()
+          if (
+            res.ok &&
+            text.trim().length > 10 &&
+            (cType.includes('text') || cType.includes('markdown') || !cType)
+          ) {
+            hasLlmsFull = true
+            llmsFullUrl = candidate
+            break
+          }
+        } catch {}
+      }
+    })(),
+  )
+
+  // Structured llms.txt probe
+  probeTasks.push(
+    (async () => {
+      for (const candidate of [`${origin}/llms.txt`, `${origin}${pathPrefix}/llms.txt`]) {
+        try {
+          const res = await fetch(candidate, {
+            headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+            signal: AbortSignal.timeout(4000),
+          })
+          const cType = res.headers.get('content-type') || ''
+          const text = await res.text()
+          if (
+            res.ok &&
+            text.trim().length > 10 &&
+            (cType.includes('text') || cType.includes('markdown') || !cType)
+          ) {
+            hasLlmsTxt = true
+            llmsTxtUrl = candidate
+            break
+          }
+        } catch {}
+      }
+    })(),
+  )
+
+  // 2. Tier 1: Probe direct .md endpoint & content negotiation (Mintlify / GitBook / Cloudflare / Hono standard)
+  let isDirectMd = false
+  let directMdSampleUrl: string | undefined
+
+  const mdProbeTask = (async () => {
+    // 2a. Check content negotiation on docsUrl itself
+    try {
+      const acceptRes = await fetch(docsUrl, {
+        headers: {
+          'User-Agent': 'agent-cache-probe/1.0',
+          Accept: 'text/markdown, text/plain',
+        },
+        signal: AbortSignal.timeout(4000),
+      })
+      const acceptType = acceptRes.headers.get('content-type') || ''
+      if (
+        acceptRes.ok &&
+        (acceptType.includes('text/markdown') || acceptType.includes('text/plain'))
+      ) {
+        isDirectMd = true
+        directMdSampleUrl = docsUrl
+        return
+      }
+    } catch {}
+
+    // 2b. Check candidate .md paths
+    const mdCandidates = [
+      url.pathname.length > 1 ? `${origin}${url.pathname.replace(/\/$/, '')}.md` : '',
+      `${origin}/index.md`,
+      `${origin}/introduction.md`,
+      `${origin}/quickstart.md`,
+      `${origin}/docs.md`,
+      `${origin}/overview.md`,
+    ].filter(Boolean)
+
+    for (const mdProbeUrl of mdCandidates) {
+      try {
+        const mdRes = await fetch(mdProbeUrl, {
+          headers: {
+            'User-Agent': 'agent-cache-probe/1.0',
+            Accept: 'text/markdown, text/plain, */*',
           },
-        )
-
-        if (treeRes.ok) {
-          interface GitHubTreeResponse {
-            tree?: Array<{ path: string; type: string }>
-          }
-          const treeData = (await treeRes.json()) as GitHubTreeResponse
-          const mdFiles = (treeData.tree || []).filter(
-            (f) =>
-              f.type === 'blob' &&
-              (f.path.endsWith('.md') || f.path.endsWith('.mdx')) &&
-              (f.path.startsWith('docs/') || f.path.startsWith('content/docs/')),
-          )
-
-          if (mdFiles.length > 5) {
-            return {
-              strategy: 'github-raw-markdown',
-              hasLlmsFull,
-              llmsFullUrl,
-              hasLlmsTxt,
-              llmsTxtUrl,
-              gitRepo: {
-                owner,
-                repo,
-                branch: 'main',
-                docsPath: mdFiles[0].path.startsWith('content/docs/') ? 'content/docs' : 'docs',
-              },
-            }
-          }
+          signal: AbortSignal.timeout(3000),
+        })
+        const cType = mdRes.headers.get('content-type') || ''
+        if (mdRes.ok && (cType.includes('text/markdown') || cType.includes('text/plain'))) {
+          isDirectMd = true
+          directMdSampleUrl = mdProbeUrl
+          return
         }
-      }
+      } catch {}
     }
-  } catch {}
+  })()
 
-  // 4. Tier 2: Probe direct .md endpoint (Mintlify / GitBook standard)
-  try {
-    const testPath = url.pathname.length > 1 ? url.pathname.replace(/\/$/, '') : '/overview'
-    const mdProbeUrl = `${origin}${testPath}.md`
-    const mdRes = await fetch(mdProbeUrl, {
-      headers: { 'User-Agent': 'agent-cache-bot' },
-      signal: AbortSignal.timeout(4000),
-    })
+  // Run probes concurrently
+  await Promise.all([...probeTasks, mdProbeTask])
 
-    const cType = mdRes.headers.get('content-type') || ''
-    if (mdRes.ok && (cType.includes('text/markdown') || cType.includes('text/plain'))) {
-      return {
-        strategy: 'direct-raw-md',
-        hasLlmsFull,
-        llmsFullUrl,
-        hasLlmsTxt,
-        llmsTxtUrl,
-        directMdSampleUrl: mdProbeUrl,
-      }
+  if (isDirectMd) {
+    return {
+      strategy: 'direct-raw-md',
+      hasLlmsFull,
+      llmsFullUrl,
+      hasLlmsTxt,
+      llmsTxtUrl,
+      directMdSampleUrl,
     }
-  } catch {}
+  }
 
-  // 5. Tier 3: Fallback to HTML Purification
+  // 3. Fallback: HTML Purification
   return {
     strategy: 'html-purify',
     hasLlmsFull,
