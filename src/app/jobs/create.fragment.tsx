@@ -75,41 +75,70 @@ async function probeDomainReachability(
       const text = await probeRes.text()
       const lower = text.toLowerCase()
 
-      let landerProvider = ''
-      if (
-        finalUrl.includes('godaddy') ||
-        lower.includes('godaddy') ||
-        lower.includes('window.location.href="/lander"')
-      ) {
-        landerProvider = 'GoDaddy'
-      } else if (finalUrl.includes('sedo') || lower.includes('sedo')) {
-        landerProvider = 'Sedo'
-      } else if (finalUrl.includes('dan.com') || lower.includes('dan.com')) {
-        landerProvider = 'Dan.com'
-      } else if (finalUrl.includes('afternic') || lower.includes('afternic')) {
-        landerProvider = 'Afternic'
-      } else if (finalUrl.includes('hugedomains') || lower.includes('hugedomains')) {
-        landerProvider = 'HugeDomains'
-      } else if (finalUrl.includes('namecheap') || lower.includes('namecheap')) {
-        landerProvider = 'Namecheap'
-      } else if (finalUrl.includes('porkbun') || lower.includes('porkbun')) {
-        landerProvider = 'Porkbun'
+      let dynamicLanderName = ''
+      let isParked = false
+
+      // Check if the page is a tiny JS redirect stub (e.g. window.location.href = "/lander" or external broker)
+      const jsRedirect = text.match(
+        /window\.location\.(?:href|replace)\s*=\s*["']([^"']+)["']/i,
+      )?.[1]
+      let candidateUrl = probeRes.url
+
+      if (jsRedirect) {
+        try {
+          const resolvedJsUrl = new URL(jsRedirect, targetUrl).href
+          // Follow the JS redirect destination
+          const subProbe = await fetch(resolvedJsUrl, {
+            headers: {
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+            },
+            signal: AbortSignal.timeout(2500),
+            redirect: 'follow',
+          })
+          candidateUrl = subProbe.url
+          isParked = true
+        } catch {}
       }
 
-      const isParked =
-        Boolean(landerProvider) ||
-        finalUrl.includes('parking') ||
-        lower.includes("window.location.href='/lander'") ||
-        lower.includes('domain is for sale') ||
-        lower.includes('buy this domain') ||
-        lower.includes('parked domain') ||
-        lower.includes('domain has expired') ||
-        lower.includes('is available for purchase') ||
-        lower.includes('inquire about this domain')
+      // Check URL destination host if it redirected to an external domain
+      try {
+        const destHost = new URL(candidateUrl).hostname.toLowerCase()
+        if (destHost && destHost !== host && !destHost.endsWith(`.${host}`)) {
+          // It redirected to an external parking broker/marketplace!
+          const hostParts = destHost.replace(/^www\./, '').split('.')
+          const rawBrand = hostParts.length >= 2 ? hostParts[hostParts.length - 2] : hostParts[0]
+          dynamicLanderName = rawBrand.charAt(0).toUpperCase() + rawBrand.slice(1)
+          isParked = true
+        }
+      } catch {}
+
+      // Generic parking / for-sale semantic signals
+      if (
+        !isParked &&
+        (finalUrl.includes('parking') ||
+          lower.includes('domain is for sale') ||
+          lower.includes('buy this domain') ||
+          lower.includes('parked domain') ||
+          lower.includes('domain has expired') ||
+          lower.includes('is available for purchase') ||
+          lower.includes('inquire about this domain') ||
+          lower.includes('domain marketplace'))
+      ) {
+        isParked = true
+        // Try extracting brand from page title or meta site_name if present
+        const titleMatch = text.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim()
+        if (titleMatch && (titleMatch.includes(' - ') || titleMatch.includes(' | '))) {
+          const brand = titleMatch.split(/[-|]/).pop()?.trim()
+          if (brand && brand.length < 25) {
+            dynamicLanderName = brand
+          }
+        }
+      }
 
       if (isParked) {
-        const lotName = landerProvider
-          ? `${landerProvider} parking lot`
+        const lotName = dynamicLanderName
+          ? `${dynamicLanderName} parking lot`
           : "domain squatter's for-sale lot"
         return {
           ok: false,
