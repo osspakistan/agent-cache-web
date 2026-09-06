@@ -4,30 +4,43 @@
  * htmx: POST /jobs/create, swap replaces the form with the response fragment.
  * No-JS: real form POST → server decides (fragment handler handles both).
  */
-export function PillForm(props: { id?: string; placeholder?: string }) {
+export function PillForm(props: {
+  id?: string
+  placeholder?: string
+  defaultValue?: string
+  errorMessage?: string
+}) {
   return (
-    <form
-      class="pill"
-      method="post"
-      action="/jobs/create"
-      hx-post="/jobs/create"
-      hx-target="this"
-      hx-swap="outerHTML"
-    >
-      <input
-        type="text"
-        name="docs"
-        inputmode="url"
-        autocomplete="url"
-        autocapitalize="none"
-        spellcheck={false}
-        required
-        placeholder={props.placeholder ?? 'paste a docs url, e.g. docs.example.com'}
-        aria-label="documentation URL"
-      />
-      <button type="submit" aria-label="generate">
-        →
-      </button>
-    </form>
+    <div class="pill-wrap">
+      <form
+        class="pill"
+        method="post"
+        action="/jobs/create"
+        hx-post="/jobs/create"
+        hx-target="closest .pill-wrap"
+        hx-swap="outerHTML"
+      >
+        <input
+          type="text"
+          name="docs"
+          inputmode="url"
+          autocomplete="url"
+          autocapitalize="none"
+          spellcheck={false}
+          required
+          value={props.defaultValue ?? ''}
+          placeholder={props.placeholder ?? 'paste a docs url, e.g. docs.example.com'}
+          aria-label="documentation URL"
+        />
+        <button type="submit" aria-label="generate">
+          →
+        </button>
+      </form>
+      {props.errorMessage && (
+        <p class="exp-note" role="alert" style="color: #dc2626; margin-top: 8px;">
+          <b>invalid url</b> · {props.errorMessage}
+        </p>
+      )}
+    </div>
   )
 }
