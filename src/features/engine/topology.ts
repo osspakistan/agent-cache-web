@@ -738,30 +738,80 @@ export async function extractSiteTopology(
         const lines = text.split('\n')
         let currentSection = 'Overview'
 
+        // If the llms.txt links to section index files (e.g. /llms/get-started.txt, /llms/build.txt),
+        // fetch those section files to discover the complete official taxonomy
+        const subIndexLinks: { title: string; url: string }[] = []
         for (const line of lines) {
-          const trimmed = line.trim()
-          if (trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
-            currentSection = trimmed.replace(/^#+\s*/, '').trim()
-            continue
-          }
-
-          const m = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/.exec(trimmed)
+          const m = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/.exec(line.trim())
           if (m) {
+            const rawHref = m[2].trim()
+            if (rawHref.includes('/llms/') && rawHref.endsWith('.txt')) {
+              try {
+                const subUrl = new URL(rawHref, baseDocsUrl).href
+                if (isWithinScope(subUrl)) {
+                  subIndexLinks.push({ title: m[1].trim(), url: subUrl })
+                }
+              } catch {}
+            }
+          }
+        }
+
+        if (subIndexLinks.length > 0) {
+          for (const subIndex of subIndexLinks) {
             try {
-              const rawHref = m[2].trim()
-              const linkTitle = m[1].trim()
-              const fullUrl = new URL(rawHref, baseDocsUrl).href
-              if (isWithinScope(fullUrl) && !fullUrl.endsWith('.txt')) {
-                const norm = normalizeUrl(fullUrl)
-                if (!discoveredMap.has(norm)) {
-                  discoveredMap.set(norm, {
-                    title: linkTitle,
-                    url: fullUrl,
-                    sectionName: currentSection,
-                  })
+              const subRes = await fetch(subIndex.url, {
+                headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+                signal: AbortSignal.timeout(4000),
+              })
+              if (subRes.ok) {
+                const subText = await subRes.text()
+                for (const subLine of subText.split('\n')) {
+                  const m = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/.exec(subLine.trim())
+                  if (m) {
+                    try {
+                      const fullUrl = new URL(m[2].trim(), baseDocsUrl).href
+                      if (isWithinScope(fullUrl) && !fullUrl.endsWith('.txt')) {
+                        const norm = normalizeUrl(fullUrl)
+                        if (!discoveredMap.has(norm)) {
+                          discoveredMap.set(norm, {
+                            title: m[1].trim(),
+                            url: fullUrl,
+                            sectionName: subIndex.title,
+                          })
+                        }
+                      }
+                    } catch {}
+                  }
                 }
               }
             } catch {}
+          }
+        } else {
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (trimmed.startsWith('## ') || trimmed.startsWith('### ')) {
+              currentSection = trimmed.replace(/^#+\s*/, '').trim()
+              continue
+            }
+
+            const m = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/.exec(trimmed)
+            if (m) {
+              try {
+                const rawHref = m[2].trim()
+                const linkTitle = m[1].trim()
+                const fullUrl = new URL(rawHref, baseDocsUrl).href
+                if (isWithinScope(fullUrl) && !fullUrl.endsWith('.txt')) {
+                  const norm = normalizeUrl(fullUrl)
+                  if (!discoveredMap.has(norm)) {
+                    discoveredMap.set(norm, {
+                      title: linkTitle,
+                      url: fullUrl,
+                      sectionName: currentSection,
+                    })
+                  }
+                }
+              } catch {}
+            }
           }
         }
         if (discoveredMap.size >= 4) break
@@ -935,7 +985,38 @@ export async function extractSiteTopology(
       itemTitle = lastSeg.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
     }
 
+    // Normalize section names to avoid subtle case/variation duplicates
+    const lowerSec = secName.toLowerCase().trim()
+    if (
+      lowerSec === 'getting started' ||
+      lowerSec === 'get-started' ||
+      lowerSec === 'get started'
+    ) {
+      secName = 'Get started'
+    } else if (lowerSec === 'api reference' || lowerSec === 'api-reference') {
+      secName = 'API reference'
+    } else if (
+      lowerSec === 'sdks and tools' ||
+      lowerSec === 'sdks & tools' ||
+      lowerSec === 'sdks'
+    ) {
+      secName = 'SDKs and tools'
+    } else {
+      // Clean leading/trailing punctuation and title case cleanly
+      secName = secName.trim()
+    }
+
     let groupList = groupMap.get(secName)
+    if (!groupList) {
+      // Also check case-insensitively in case of existing key with different casing
+      for (const existingKey of groupMap.keys()) {
+        if (existingKey.toLowerCase() === secName.toLowerCase()) {
+          secName = existingKey
+          groupList = groupMap.get(existingKey)
+          break
+        }
+      }
+    }
     if (!groupList) {
       groupList = []
       groupMap.set(secName, groupList)

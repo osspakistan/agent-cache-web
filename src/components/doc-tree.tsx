@@ -40,34 +40,45 @@ export function buildHierarchyTree(hierarchy: NavHierarchy): TreeNode[] {
     }
   }
 
+  const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
+  const tabIndexMap = new Map<string, number>()
+  if (hasTabs && hierarchy.tabs) {
+    hierarchy.tabs.forEach((t, idx) => {
+      tabIndexMap.set(t, idx + 1)
+    })
+  }
+
+  function getSecFolderParts(sec: (typeof hierarchy.sections)[0], sIdx: number): string[] {
+    const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+    if (hasTabs && sec.tab) {
+      const tIdx = tabIndexMap.get(sec.tab) || 1
+      const tabFolder = `${String(tIdx).padStart(2, '0')}-${sec.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      return [tabFolder, secFolder]
+    }
+    return [secFolder]
+  }
+
   function collectItems(items: NavItem[], parentParts: string[]) {
-    for (const item of items) {
+    items.forEach((item, iIdx) => {
       const slug = item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const prefix = String(iIdx + 1).padStart(2, '0')
       const hasChildren = Boolean(item.items && item.items.length > 0)
       if (hasChildren) {
-        const folderParts = [...parentParts, slug]
+        const folderParts = [...parentParts, `${prefix}-${slug}`]
         addPath([...folderParts, 'index.md'], false, item.url, item.title)
         collectItems(item.items || [], folderParts)
       } else {
-        addPath([...parentParts, `${slug}.md`], false, item.url, item.title)
+        addPath([...parentParts, `${prefix}-${slug}.md`], false, item.url, item.title)
       }
-    }
+    })
   }
 
-  const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
-  if (hasTabs && hierarchy.tabs) {
-    for (const tab of hierarchy.tabs) {
-      const tabSlug = tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-      const tabSections = hierarchy.sections.filter((s) => s.tab === tab)
-      for (const sec of tabSections) {
-        collectItems(sec.items, [tabSlug, sec.slug])
-      }
-    }
-  } else {
-    for (const sec of hierarchy.sections) {
-      collectItems(sec.items, [sec.slug])
-    }
-  }
+  hierarchy.sections.forEach((sec, sIdx) => {
+    const secParts = getSecFolderParts(sec, sIdx)
+    // Also include section INDEX.md in the tree representation
+    addPath([...secParts, 'INDEX.md'], false, undefined, `${sec.title} Index`)
+    collectItems(sec.items, secParts)
+  })
 
   return root.children
 }
@@ -78,34 +89,43 @@ export function buildHierarchyTree(hierarchy: NavHierarchy): TreeNode[] {
 export function extractHierarchyPaths(_productName: string, hierarchy: NavHierarchy): string[] {
   const paths: string[] = []
   const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
+  const tabIndexMap = new Map<string, number>()
+  if (hasTabs && hierarchy.tabs) {
+    hierarchy.tabs.forEach((t, idx) => {
+      tabIndexMap.set(t, idx + 1)
+    })
+  }
+
+  function getSecFolder(sec: (typeof hierarchy.sections)[0], sIdx: number): string {
+    let folder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+    if (hasTabs && sec.tab) {
+      const tIdx = tabIndexMap.get(sec.tab) || 1
+      const tabFolder = `${String(tIdx).padStart(2, '0')}-${sec.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      folder = `${tabFolder}/${folder}`
+    }
+    return folder
+  }
 
   function collectItems(items: NavItem[], parentPath: string) {
-    items.forEach((item) => {
+    items.forEach((item, iIdx) => {
       const slug = item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const prefix = String(iIdx + 1).padStart(2, '0')
       const hasChildren = Boolean(item.items && item.items.length > 0)
       if (hasChildren) {
-        const folder = `${parentPath}/${slug}`
+        const folder = `${parentPath}/${prefix}-${slug}`
         paths.push(`${folder}/index.md`)
         collectItems(item.items || [], folder)
       } else {
-        paths.push(`${parentPath}/${slug}.md`)
+        paths.push(`${parentPath}/${prefix}-${slug}.md`)
       }
     })
   }
 
-  if (hasTabs && hierarchy.tabs) {
-    hierarchy.tabs.forEach((tab) => {
-      const tabSlug = tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-      const tabSections = hierarchy.sections.filter((s) => s.tab === tab)
-      tabSections.forEach((sec) => {
-        collectItems(sec.items, `${tabSlug}/${sec.slug}`)
-      })
-    })
-  } else {
-    hierarchy.sections.forEach((sec) => {
-      collectItems(sec.items, sec.slug)
-    })
-  }
+  hierarchy.sections.forEach((sec, sIdx) => {
+    const secFolder = getSecFolder(sec, sIdx)
+    paths.push(`${secFolder}/INDEX.md`)
+    collectItems(sec.items, secFolder)
+  })
 
   return [...new Set(paths)]
 }
@@ -119,6 +139,12 @@ export function generateAsciiTree(productName: string, hierarchy: NavHierarchy):
   lines.push(`${rootName}/docs/`)
 
   const hasTabs = Boolean(hierarchy.tabs && hierarchy.tabs.length > 1)
+  const tabIndexMap = new Map<string, number>()
+  if (hasTabs && hierarchy.tabs) {
+    hierarchy.tabs.forEach((t, idx) => {
+      tabIndexMap.set(t, idx + 1)
+    })
+  }
 
   function renderItems(items: NavItem[], prefix: string) {
     items.forEach((item, idx) => {
@@ -127,12 +153,13 @@ export function generateAsciiTree(productName: string, hierarchy: NavHierarchy):
       const nextPrefix = prefix + (isLast ? '    ' : '│   ')
       const hasChildren = Boolean(item.items && item.items.length > 0)
       const slug = item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const fileIdx = String(idx + 1).padStart(2, '0')
       if (hasChildren) {
-        lines.push(`${prefix}${branch}${slug}/`)
+        lines.push(`${prefix}${branch}${fileIdx}-${slug}/`)
         lines.push(`${nextPrefix}├── index.md`)
         renderItems(item.items || [], nextPrefix)
       } else {
-        lines.push(`${prefix}${branch}${slug}.md`)
+        lines.push(`${prefix}${branch}${fileIdx}-${slug}.md`)
       }
     })
   }
@@ -142,14 +169,15 @@ export function generateAsciiTree(productName: string, hierarchy: NavHierarchy):
       const isLastTab = tIdx === (hierarchy.tabs?.length ?? 0) - 1
       const tabBranch = isLastTab ? '└── ' : '├── '
       const tabPrefix = isLastTab ? '    ' : '│   '
-      const tabSlug = tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      const tabSlug = `${String(tIdx + 1).padStart(2, '0')}-${tab.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
       lines.push(`${tabBranch}${tabSlug}/`)
       const tabSections = hierarchy.sections.filter((s) => s.tab === tab)
       tabSections.forEach((sec, sIdx) => {
         const isLastSec = sIdx === tabSections.length - 1
         const secBranch = isLastSec ? '└── ' : '├── '
         const secPrefix = tabPrefix + (isLastSec ? '    ' : '│   ')
-        lines.push(`${tabPrefix}${secBranch}${sec.slug}/`)
+        const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+        lines.push(`${tabPrefix}${secBranch}${secFolder}/`)
         renderItems(sec.items, secPrefix)
       })
     })
@@ -158,7 +186,8 @@ export function generateAsciiTree(productName: string, hierarchy: NavHierarchy):
       const isLastSec = sIdx === hierarchy.sections.length - 1
       const secBranch = isLastSec ? '└── ' : '├── '
       const secPrefix = isLastSec ? '    ' : '│   '
-      lines.push(`${secBranch}${sec.slug}/`)
+      const secFolder = `${String(sIdx + 1).padStart(2, '0')}-${sec.slug}`
+      lines.push(`${secBranch}${secFolder}/`)
       renderItems(sec.items, secPrefix)
     })
   }
