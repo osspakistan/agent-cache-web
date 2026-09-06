@@ -75,24 +75,45 @@ async function probeDomainReachability(
       const text = await probeRes.text()
       const lower = text.toLowerCase()
 
-      const isParked =
+      let landerProvider = ''
+      if (
         finalUrl.includes('godaddy') ||
-        finalUrl.includes('sedo') ||
-        finalUrl.includes('dan.com') ||
+        lower.includes('godaddy') ||
+        lower.includes('window.location.href="/lander"')
+      ) {
+        landerProvider = 'GoDaddy'
+      } else if (finalUrl.includes('sedo') || lower.includes('sedo')) {
+        landerProvider = 'Sedo'
+      } else if (finalUrl.includes('dan.com') || lower.includes('dan.com')) {
+        landerProvider = 'Dan.com'
+      } else if (finalUrl.includes('afternic') || lower.includes('afternic')) {
+        landerProvider = 'Afternic'
+      } else if (finalUrl.includes('hugedomains') || lower.includes('hugedomains')) {
+        landerProvider = 'HugeDomains'
+      } else if (finalUrl.includes('namecheap') || lower.includes('namecheap')) {
+        landerProvider = 'Namecheap'
+      } else if (finalUrl.includes('porkbun') || lower.includes('porkbun')) {
+        landerProvider = 'Porkbun'
+      }
+
+      const isParked =
+        Boolean(landerProvider) ||
         finalUrl.includes('parking') ||
-        finalUrl.includes('afternic') ||
-        lower.includes('window.location.href="/lander"') ||
         lower.includes("window.location.href='/lander'") ||
         lower.includes('domain is for sale') ||
         lower.includes('buy this domain') ||
         lower.includes('parked domain') ||
         lower.includes('domain has expired') ||
-        lower.includes('is available for purchase')
+        lower.includes('is available for purchase') ||
+        lower.includes('inquire about this domain')
 
       if (isParked) {
+        const lotName = landerProvider
+          ? `${landerProvider} parking lot`
+          : "domain squatter's for-sale lot"
         return {
           ok: false,
-          message: `"${host}" is just sitting on a domain squatter's for-sale lot. Give me actual docs, not GoDaddy landers.`,
+          message: `"${host}" is just sitting on a ${lotName}. Give me actual docs, not parking landers.`,
         }
       }
 
