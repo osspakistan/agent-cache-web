@@ -29,6 +29,7 @@ export interface JobRecord {
   title: string | null
   description: string | null
   logo_url: string | null
+  github_url: string | null
   r2_prefix: string
   zip_size_bytes: number
   created_at: number

@@ -8,6 +8,7 @@ export interface ResolveResult {
   title: string
   description: string
   logoUrl: string | null
+  githubUrl?: string | null
   resolvedVia?: 'direct' | 'tavily'
 }
 
@@ -25,6 +26,24 @@ const COMMON_DOCS_SUBDOMAINS = [
   'reference',
   'manual',
 ]
+
+function extractGitHubRepo(html?: string | null): string | null {
+  if (!html) return null
+  const matches = html.matchAll(
+    /href=["'](https?:\/\/(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)(?:\/[^\s"'>]*)?)["']/gi,
+  )
+  for (const m of matches) {
+    const owner = m[2]
+    const repo = m[3].replace(/\.git$/, '')
+    if (
+      !['features', 'sponsors', 'about', 'pricing', 'site', 'topics'].includes(owner) &&
+      !['sponsors', 'branding'].includes(repo)
+    ) {
+      return `https://github.com/${owner}/${repo}`
+    }
+  }
+  return null
+}
 
 const GENERIC_WORDS = new Set([
   'docs',
@@ -582,6 +601,13 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
   // 4. Resolve logo URL from ROOT website first
   const logoUrl = rootHead.favicon || docsHead.favicon || null
 
+  // 5. Unconditionally extract official GitHub repository from root website and docs HTML
+  const githubUrl =
+    extractGitHubRepo(rootHtml) ||
+    extractGitHubRepo(targetHtml) ||
+    extractGitHubRepo(finalDocsHtml) ||
+    null
+
   return {
     originUrl: target,
     docsUrl,
@@ -589,6 +615,7 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
     title,
     description,
     logoUrl,
+    githubUrl,
     resolvedVia,
   }
 }

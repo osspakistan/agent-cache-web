@@ -9,6 +9,7 @@ export interface PackageBundleOptions {
   title?: string
   description?: string
   docsUrl: string
+  githubUrl?: string | null
   hierarchy: NavHierarchy
   extractedFiles: Map<string, Uint8Array>
   companionLlmsFullUrl?: string
@@ -26,6 +27,7 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
     title,
     description,
     docsUrl,
+    githubUrl,
     hierarchy,
     extractedFiles,
     companionLlmsFullUrl,
@@ -182,11 +184,12 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
       : ''
 
   // Write meta.yaml and _map.json directly to R2
+  const repoLine = githubUrl ? `repository: "${githubUrl}"\n` : ''
   const metaYaml = `${`name: "${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"
 title: "${(title || `${productName} Docs`).replace(/"/g, '\\"')}"
 description: "${(description || '').replace(/"/g, '\\"')}"
 url: "${docsUrl}"
-created_at: "${new Date().toISOString()}"
+${repoLine}created_at: "${new Date().toISOString()}"
 version: "1.0.0"
 companion_llms_full: ${hasCompanionLlmsFull}
 ${yamlKeywords}${yamlTriggers}${yamlEcosystem}`.trim()}\n`

@@ -145,12 +145,22 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       })
     }
 
+    if (resolved.githubUrl) {
+      await emit({
+        type: 'log',
+        level: 'info',
+        message: `Discovered official GitHub repository: ${resolved.githubUrl}`,
+        timestamp: Date.now(),
+      })
+    }
+
     await updateJob(job.id, {
       resolved_url: resolved.docsUrl,
       product_name: resolved.productName,
       title: resolved.title,
       description: resolved.description,
       logo_url: resolved.logoUrl,
+      github_url: resolved.githubUrl,
       status: 'probing',
     })
 
@@ -276,6 +286,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       title: resolved.title,
       description: resolved.description,
       docsUrl: resolved.docsUrl,
+      githubUrl: resolved.githubUrl,
       hierarchy,
       extractedFiles,
       companionLlmsFullUrl: decision.llmsFullUrl,
