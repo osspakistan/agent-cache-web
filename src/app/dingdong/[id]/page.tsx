@@ -15,7 +15,7 @@ export const GET = async (c: AppContext) => {
         <div class="wrap" style="padding: 96px 20px; text-align: center;">
           <h1>Cache not found.</h1>
           <p class="lede">
-            We couldn't find a job record for{' '}
+            I couldn't find a record for{' '}
             <span class="mono" style="color: var(--accent-ink);">
               {id}
             </span>

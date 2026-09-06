@@ -5,6 +5,21 @@ import type { NavHierarchy, NavItem, NavSection, StreamEvent } from '../../lib/u
 const NON_DOCS_FILTER =
   /blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|acp\b|agents?\b|marketplace|store|assets?|_next|_astro|_nuxt|cdn-cgi|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
 
+const COMMON_DOCS_SUBDOMAINS = [
+  'docs',
+  'doc',
+  'developer',
+  'developers',
+  'api',
+  'apis',
+  'help',
+  'guide',
+  'guides',
+  'learn',
+  'reference',
+  'manual',
+]
+
 interface DiscoveredPage {
   title: string
   url: string
@@ -631,14 +646,15 @@ export async function extractSiteTopology(
         return hubTree
       }
 
-      // 1c. Generic Live DOM Sidebar Extraction
+      // 1c. Generic Live DOM Sidebar Extraction (only target docs/sidebar navigation)
       const navEl =
         doc.querySelector('nav[data-left-nav]') ||
         doc.querySelector('aside nav') ||
-        doc.querySelector('nav[aria-label*="sidebar"]') ||
-        doc.querySelector('nav[aria-label*="Documentation"]') ||
-        doc.querySelector('aside') ||
-        doc.querySelector('nav')
+        doc.querySelector('nav[aria-label*="sidebar" i]') ||
+        doc.querySelector('nav[aria-label*="Documentation" i]') ||
+        doc.querySelector('.docs-sidebar') ||
+        doc.querySelector('#docs-sidebar') ||
+        doc.querySelector('aside')
 
       if (navEl) {
         const headings = navEl.querySelectorAll(
@@ -767,6 +783,21 @@ export async function extractSiteTopology(
         while (m !== null) {
           const loc = m[1].trim()
           if (isWithinScope(loc)) {
+            // If the target wasn't already an explicit docs path or subdomain,
+            // only accept sitemap routes that actually look like documentation
+            if (
+              !isSubpathDocs &&
+              !COMMON_DOCS_SUBDOMAINS.some((sub) => url.hostname.startsWith(`${sub}.`))
+            ) {
+              const p = new URL(loc).pathname.toLowerCase()
+              const isDocRoute =
+                /docs|doc\b|documentation|api|guide|manual|reference|tutorial/i.test(p)
+              if (!isDocRoute) {
+                m = locRegex.exec(xml)
+                continue
+              }
+            }
+
             const norm = normalizeUrl(loc)
             if (!discoveredMap.has(norm)) {
               discoveredMap.set(norm, { title: '', url: loc })
@@ -779,7 +810,13 @@ export async function extractSiteTopology(
   }
 
   // 4. Tier 4: Katana Crawler Fallback (if fewer than 4 pages found)
-  if (discoveredMap.size < 4) {
+  // Only crawl if URL explicitly targets docs or a doc subdomain to avoid crawling arbitrary SaaS landing pages
+  const isDocTarget =
+    isSubpathDocs ||
+    /docs|documentation|api-reference|api\b|manual|guide/i.test(url.pathname) ||
+    COMMON_DOCS_SUBDOMAINS.some((sub) => url.hostname.startsWith(`${sub}.`))
+
+  if (discoveredMap.size < 4 && isDocTarget) {
     await options?.onProgress?.({
       type: 'log',
       level: 'info',
@@ -846,13 +883,22 @@ export async function extractSiteTopology(
     })
   }
 
-  // If still empty, add docsUrl as single root page
+  // If still empty, only add docsUrl as single root page if the URL explicitly targets docs
+  // (e.g. /docs, /api, docs.foo.com, or single file docs like readme.md / doc.html)
+  // Otherwise, allow discoveredMap to remain empty so index.ts throws ErrorFactory.zeroPages!
   if (discoveredMap.size === 0) {
-    discoveredMap.set(normalizeUrl(docsUrl), {
-      title: 'Documentation Overview',
-      url: docsUrl,
-      sectionName: 'Overview',
-    })
+    const isExplicitDocTarget =
+      /docs|documentation|api-reference|api\b|manual|guide/i.test(url.pathname) ||
+      COMMON_DOCS_SUBDOMAINS.some((sub) => url.hostname.startsWith(`${sub}.`)) ||
+      /\.(md|mdx|html|txt)$/i.test(url.pathname)
+
+    if (isExplicitDocTarget) {
+      discoveredMap.set(normalizeUrl(docsUrl), {
+        title: 'Documentation Overview',
+        url: docsUrl,
+        sectionName: 'Overview',
+      })
+    }
   }
 
   // 5. Smart Grouping by URL segments into ordered sections

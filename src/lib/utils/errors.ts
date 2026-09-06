@@ -64,7 +64,7 @@ export const ErrorFactory = {
       code: 'INVALID_URL',
       statusCode: 400,
       machine: `Invalid URL submitted: "${url}". Reason: ${reason ?? 'Failed URL parse'}`,
-      human: `That doesn't look like a real URL. Even our eager crawler needs something like "https://example.com/docs" to sink its teeth into.`,
+      human: `That doesn't look like a valid link. Give me a full URL like https://example.com/docs to start.`,
     })
   },
 
@@ -73,7 +73,7 @@ export const ErrorFactory = {
       code: 'BOT_BLOCKED',
       statusCode: 403,
       machine: `HTTP ${status} Forbidden/WAF block on ${url}. RayID: ${rayId ?? 'none'}`,
-      human: `Cloudflare's bouncer took one look at our crawler and slammed the velvet rope. Try feeding us their direct docs subdomain instead of their marketing homepage.`,
+      human: `Their site blocked my automated request. If you gave me the homepage, try pasting their direct docs URL or docs subdomain instead.`,
       details: { url, status, rayId },
     })
   },
@@ -83,7 +83,7 @@ export const ErrorFactory = {
       code: 'ZERO_PAGES',
       statusCode: 422,
       machine: `Discovery failed: 0 documentation routes discovered across llms.txt, sitemaps, and navigation probing for ${url}`,
-      human: `We checked the sitemap, peeked at llms.txt, and sniffed every link—this site is guarding its docs like state secrets. Double check if this URL actually hosts developer docs.`,
+      human: `I looked through the links, sitemaps, and navigation, but I couldn't find any documentation pages here. Double check if this site has developer docs.`,
       details: { url },
     })
   },
@@ -93,7 +93,7 @@ export const ErrorFactory = {
       code: 'DNS_FAILURE',
       statusCode: 502,
       machine: `DNS resolution failed for ${domain}: ENOTFOUND or unreachable host`,
-      human: `That domain seems as dead as dial-up internet. Check the spelling before our crawler hurts itself trying to find it.`,
+      human: `I couldn't reach that address. Check the spelling or see if the site is offline right now.`,
       details: { domain },
       cause,
     })
@@ -104,7 +104,7 @@ export const ErrorFactory = {
       code: 'TIMEOUT',
       statusCode: 504,
       machine: `Request timed out after ${durationMs}ms while fetching ${url}`,
-      human: `Their documentation server took forever to answer. It might be having an afternoon nap or running on a potato. Give it another spin in a moment.`,
+      human: `Their server took too long to answer. It might be running slow or down right now. Try again in a minute.`,
       details: { url, durationMs },
     })
   },
@@ -114,7 +114,7 @@ export const ErrorFactory = {
       code: 'RATE_LIMITED',
       statusCode: 429,
       machine: `HTTP 429 Rate Limited by remote origin: ${url}. Retry-After: ${retryAfter ?? 'unknown'}`,
-      human: `Their server told us to slow our roll. We backed off politely, but they're still catching their breath. Give it a minute and hit retry.`,
+      human: `Their server asked me to slow down. Wait a minute and try again.`,
       details: { url, retryAfter },
     })
   },
@@ -124,8 +124,18 @@ export const ErrorFactory = {
       code: 'NOT_FOUND',
       statusCode: 404,
       machine: `Job record not found: ${id}`,
-      human: `We searched high and low, but this documentation cache doesn't exist. Maybe it vanished into the digital void, or the link has a typo?`,
+      human: `I couldn't find this documentation bundle. The link might have a typo, or it expired.`,
       details: { id },
+    })
+  },
+
+  siteGone(url: string, status = 410): AppError {
+    return new AppError({
+      code: 'FETCH_FAILED',
+      statusCode: status,
+      machine: `Target origin returned HTTP ${status} (Gone / Unreachable): ${url}`,
+      human: `That website looks inactive or gone. Check if the address is right or if the project moved.`,
+      details: { url, status },
     })
   },
 
@@ -137,7 +147,7 @@ export const ErrorFactory = {
       code: 'FETCH_FAILED',
       statusCode: 502,
       machine: `Connection closed abruptly by remote server (${url}): ${cleanReason || 'ECONNRESET'}`,
-      human: `The remote documentation server abruptly closed the connection. It may be blocking automated requests or temporarily overloaded. Try feeding us a direct documentation subdomain instead.`,
+      human: `Their server suddenly closed the connection while I was reading it. Try pasting their direct docs link instead.`,
       details: { url, rawReason },
     })
   },
@@ -152,7 +162,11 @@ export const ErrorFactory = {
     if (/timeout|timed out|AbortError/i.test(rawMsg)) {
       return ErrorFactory.timeout(url ?? 'target', 10000)
     }
-    if (/ENOTFOUND|getaddrinfo/i.test(rawMsg)) {
+    if (
+      /ENOTFOUND|getaddrinfo|ConnectionRefused|FailedToOpenSocket|Unable to connect|Was there a typo in the url/i.test(
+        rawMsg,
+      )
+    ) {
       return ErrorFactory.dnsFailure(url ?? 'target', err)
     }
     if (/403|Cloudflare|Forbidden/i.test(rawMsg)) {
@@ -173,8 +187,7 @@ export const ErrorFactory = {
       statusCode: 500,
       machine: cleanMsg,
       human:
-        humanMessage ??
-        `Our backend machinery threw a gear trying to process that. The log has been preserved for the nerds to inspect.`,
+        humanMessage ?? `I ran into an unexpected problem processing this. Try again in a minute.`,
       cause,
     })
   },

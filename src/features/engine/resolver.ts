@@ -1,4 +1,5 @@
 import { JSDOM } from 'jsdom'
+import { ErrorFactory } from '../../lib/utils/errors'
 
 export interface ResolveResult {
   originUrl: string
@@ -224,8 +225,32 @@ function extractHeadFromHtml(html: string, baseUrl: string): ExtractedHead {
   }
 }
 
+export function getApexDomain(inputUrl: string): string {
+  try {
+    const parsed = new URL(inputUrl)
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    const parts = hostname.split('.')
+    if (parts.length > 2) {
+      if (COMMON_DOCS_SUBDOMAINS.includes(parts[0])) {
+        return parts.slice(1).join('.')
+      }
+      const secondTld = parts[parts.length - 2]
+      const commonSecondTlds = ['co', 'com', 'org', 'net', 'edu', 'gov']
+      if (commonSecondTlds.includes(secondTld) && parts.length > 3) {
+        return parts.slice(-3).join('.')
+      }
+      return parts.slice(-2).join('.')
+    }
+    return hostname
+  } catch {
+    return inputUrl
+  }
+}
+
 export async function resolveViaTavily(siteUrl: string): Promise<string | null> {
   const prompt = `Find the official developer or API documentation for ${siteUrl}. Return only the documentation URL.`
+  const targetApex = getApexDomain(siteUrl)
+
   try {
     const res = await fetch('https://api.tavily.com/search', {
       method: 'POST',
@@ -248,6 +273,34 @@ export async function resolveViaTavily(siteUrl: string): Promise<string | null> 
       results?: Array<{ url: string }>
     }
     const data = (await res.json()) as TavilyResponse
+
+    // Helper to verify if candidate belongs to target domain or trusted hosted docs
+    const isAffiliatedDomain = (candUrl: string): boolean => {
+      try {
+        const u = new URL(candUrl)
+        const h = u.hostname.toLowerCase()
+        if (targetApex && (h === targetApex || h.endsWith(`.${targetApex}`))) {
+          return true
+        }
+        // Also allow recognized doc platforms if path contains the target brand
+        const brand = targetApex.split('.')[0]
+        if (brand && brand.length >= 3) {
+          if (
+            (h.endsWith('gitbook.io') ||
+              h.endsWith('readme.io') ||
+              h.endsWith('mintlify.app') ||
+              h.endsWith('github.io')) &&
+            (h.includes(brand) || u.pathname.includes(brand))
+          ) {
+            return true
+          }
+        }
+        return false
+      } catch {
+        return false
+      }
+    }
+
     const rawAnswerMatches =
       (data.answer || '').match(
         /(https?:\/\/[^\s)\],]+|[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s)\],]*)?)/gi,
@@ -255,7 +308,9 @@ export async function resolveViaTavily(siteUrl: string): Promise<string | null> 
     for (let u of rawAnswerMatches) {
       u = u.replace(/[.,);]+$/, '')
       if (!/^https?:\/\//i.test(u)) u = `https://${u}`
-      if (/docs|developer|guide|api/i.test(u)) return u
+      if (/docs|developer|guide|api/i.test(u) && isAffiliatedDomain(u)) {
+        return u
+      }
     }
 
     const resultUrls = (data.results || [])
@@ -267,7 +322,11 @@ export async function resolveViaTavily(siteUrl: string): Promise<string | null> 
       )
       .map((r) => r.url.replace(/[.,);]+$/, ''))
 
-    if (resultUrls.length > 0) return resultUrls[0]
+    for (const cand of resultUrls) {
+      if (isAffiliatedDomain(cand)) {
+        return cand
+      }
+    }
   } catch {
     return null
   }
@@ -288,6 +347,10 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
   let resolvedVia: 'direct' | 'tavily' = 'direct'
   let targetHtml = ''
   let rootHtml = ''
+
+  const isAlreadyDocs =
+    /docs|documentation|api-reference|developers|guide/i.test(parsed.pathname) ||
+    COMMON_DOCS_SUBDOMAINS.some((sub) => hostname.startsWith(`${sub}.`))
 
   try {
     const [targetRes, rootRes] = await Promise.allSettled([
@@ -311,24 +374,65 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
         : Promise.resolve(null),
     ])
 
-    if (targetRes.status === 'fulfilled' && targetRes.value?.ok) {
-      targetHtml = await targetRes.value.text()
-      if (targetRes.value.url && targetRes.value.url !== target) {
-        docsUrl = targetRes.value.url
+    if (targetRes.status === 'fulfilled') {
+      if (targetRes.value.ok) {
+        targetHtml = await targetRes.value.text()
+        if (targetRes.value.url && targetRes.value.url !== target) {
+          docsUrl = targetRes.value.url
+        }
+
+        // Detect parked / for-sale expired domains
+        const lowerHtml = targetHtml.toLowerCase()
+        if (
+          lowerHtml.includes('domain is for sale') ||
+          lowerHtml.includes('buy this domain') ||
+          lowerHtml.includes('parked domain') ||
+          lowerHtml.includes('domain has expired') ||
+          (lowerHtml.includes('sale-banner') && lowerHtml.includes('find the best information'))
+        ) {
+          throw ErrorFactory.siteGone(target, 410)
+        }
+      } else if (targetRes.value.status === 410) {
+        throw ErrorFactory.siteGone(target, 410)
+      } else if (targetRes.value.status === 403) {
+        // Only throw if target explicitly was a docs URL; if root, let fallback attempt docs subdomain
+        if (isAlreadyDocs) {
+          throw ErrorFactory.botBlocked(target, 403)
+        }
+      }
+    } else {
+      // Direct network rejection - inspect reason
+      const reason = targetRes.reason
+      const msg = reason instanceof Error ? reason.message : String(reason)
+      if (
+        /ENOTFOUND|getaddrinfo|EAI_AGAIN|unreachable|ConnectionRefused|FailedToOpenSocket|Unable to connect/i.test(
+          msg,
+        )
+      ) {
+        throw reason
       }
     }
+
     if (rootRes.status === 'fulfilled' && rootRes.value && rootRes.value.ok) {
       rootHtml = await rootRes.value.text()
     }
   } catch (err) {
-    console.warn(`[Resolver] Initial probe failed on ${target}:`, err)
+    if (err instanceof Error && err.name === 'AppError') {
+      throw err
+    }
+    const msg = err instanceof Error ? err.message : String(err)
+    if (
+      /ENOTFOUND|getaddrinfo|EAI_AGAIN|unreachable|ConnectionRefused|FailedToOpenSocket|Unable to connect/i.test(
+        msg,
+      )
+    ) {
+      // Re-throw DNS / network failures immediately so caller surfaces DNS_FAILURE
+      throw err
+    }
+    console.warn(`[Resolver] Initial probe warning on ${target}:`, err)
   }
 
   // If target wasn't docs, search for outbound documentation link in targetHtml
-  const isAlreadyDocs =
-    /docs|documentation|api-reference|developers|guide/i.test(parsed.pathname) ||
-    COMMON_DOCS_SUBDOMAINS.some((sub) => hostname.startsWith(`${sub}.`))
-
   if (!isAlreadyDocs && targetHtml) {
     try {
       const dom = new JSDOM(targetHtml)

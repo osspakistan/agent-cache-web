@@ -23,8 +23,8 @@ export default function ErrorPage(props: { message: string }) {
       <h1 style="margin: 12px 0 16px;">Something broke.</h1>
       <p class="lede" style="margin-bottom: 24px;">
         {isSocketErr
-          ? 'The upstream remote server dropped the connection unexpectedly. Try again in a minute.'
-          : 'Our fault, not yours. We ran into an unexpected snag while handling this request.'}
+          ? 'The remote server suddenly dropped the connection. Try again in a minute.'
+          : 'My fault, not yours. I ran into an unexpected snag handling this request.'}
       </p>
 
       {isDev && cleanMessage && (
