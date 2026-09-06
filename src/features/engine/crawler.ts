@@ -273,7 +273,7 @@ export async function crawlAndExtractPages(
                 if (!markdown) {
                   // Strip noise elements
                   const elementsToRemove = doc.querySelectorAll(
-                    'script, style, nav, header, footer, aside, noscript, svg',
+                    'script, style, nav, header, footer, aside, noscript, svg, .wy-breadcrumbs, [aria-label*="breadcrumbs" i], .headerlink, a.headerlink',
                   )
                   for (const el of elementsToRemove) {
                     el.remove()
@@ -281,8 +281,16 @@ export async function crawlAndExtractPages(
 
                   const mainContent =
                     doc.querySelector('main, article, [role="main"], .content') || doc.body
-                  const purified = turndown.turndown(mainContent ? mainContent.innerHTML : text)
-                  if (purified.trim().length > 0) {
+                  let purified = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+
+                  // Clean residual Sphinx permalinks, doctypes, and breadcrumb artifact links
+                  purified = purified
+                    .replace(/^<!DOCTYPE[^>]*>\s*/i, '')
+                    .replace(/\[\]\([^)]+\)/g, '')
+                    .replace(/\[¶\]\([^)]+\)/g, '')
+                    .trim()
+
+                  if (purified.length > 0) {
                     markdown = purified
                     break
                   }

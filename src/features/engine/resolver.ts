@@ -210,6 +210,7 @@ function extractHeadFromHtml(html: string, baseUrl: string): ExtractedHead {
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim()
     }
 
