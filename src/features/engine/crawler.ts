@@ -141,31 +141,6 @@ export async function crawlAndExtractPages(
         }
       }
 
-      // 2. If github strategy or known doc site, try direct raw GitHub endpoints
-      if (!markdown && _strategy === 'github-raw-markdown') {
-        try {
-          const pathSegments = new URL(task.url).pathname.replace(/^\//, '')
-          const rawCandidates = [
-            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}/index.mdx`,
-            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}.mdx`,
-            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}.md`,
-          ]
-          for (const rawUrl of rawCandidates) {
-            const res = await fetch(rawUrl, {
-              headers: { 'User-Agent': 'agent-cache/1.0' },
-              signal: AbortSignal.timeout(4000),
-            })
-            if (res.ok) {
-              const text = await res.text()
-              if (text.trim().length > 20) {
-                markdown = text
-                break
-              }
-            }
-          }
-        } catch {}
-      }
-
       // 3. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
       if (!markdown) {
         try {

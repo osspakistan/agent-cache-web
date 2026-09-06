@@ -377,8 +377,13 @@ function extractMdBookHierarchy(
   )
   if (!chapterOl) return null
 
+  const bookTitle =
+    doc.querySelector('.menu-title')?.textContent?.trim() ||
+    doc.querySelector('h1')?.textContent?.trim() ||
+    'Documentation'
+
   const sections: NavSection[] = []
-  let currentSectionTitle = 'Getting Started'
+  let currentSectionTitle = bookTitle
   let currentItems: NavItem[] = []
   let sIdx = 1
 
@@ -392,7 +397,7 @@ function extractMdBookHierarchy(
           items: currentItems,
         })
       }
-      currentSectionTitle = child.textContent?.trim() || 'Overview'
+      currentSectionTitle = child.textContent?.trim() || bookTitle
       currentItems = []
     } else {
       const links = Array.from(child.querySelectorAll('a[href]'))
@@ -426,7 +431,8 @@ function extractMdBookHierarchy(
     })
   }
 
-  if (sections.length >= 2) {
+  const totalItemCount = sections.reduce((acc, s) => acc + s.items.length, 0)
+  if (sections.length >= 1 && totalItemCount >= 2) {
     return {
       title: new URL(baseDocsUrl).hostname,
       sections,
@@ -686,39 +692,24 @@ function extractSphinxHierarchy(
       } catch {}
     }
 
-    if (topItems.length >= 2) {
-      // Group items into logical sections based on chapter volume or title prefixes
-      // If <= 10 items, 1-2 sections; if > 10 items, split into logical chapters (e.g. Getting Started & User Guide)
-      if (topItems.length <= 8) {
-        sections.push({
-          title: 'Documentation',
-          slug: 'documentation',
-          order: sIdx++,
-          items: topItems,
-        })
-      } else {
-        // Split into "Getting Started" (first 4) and "Guide & Reference" (remaining)
-        const gettingStartedItems = topItems.slice(0, 4)
-        const guideItems = topItems.slice(4)
+    if (topItems.length > 0) {
+      const pageHeading =
+        doc
+          .querySelector('.rst-content h1, main h1, [role="main"] h1, h1')
+          ?.textContent?.replace(/[¶#]$/, '')
+          .trim() || 'Documentation'
 
-        sections.push({
-          title: 'Getting Started',
-          slug: 'getting-started',
-          order: sIdx++,
-          items: gettingStartedItems,
-        })
-
-        sections.push({
-          title: 'User Guide & Reference',
-          slug: 'user-guide-reference',
-          order: sIdx++,
-          items: guideItems,
-        })
-      }
+      sections.push({
+        title: pageHeading,
+        slug: pageHeading.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        order: sIdx++,
+        items: topItems,
+      })
     }
   }
 
-  if (sections.length >= 2) {
+  const totalItemCount = sections.reduce((acc, s) => acc + s.items.length, 0)
+  if (sections.length >= 1 && totalItemCount >= 2) {
     return {
       title: new URL(baseDocsUrl).hostname,
       sections,
@@ -797,7 +788,7 @@ export async function extractSiteTopology(
 
       // 1b. Check for mdBook chapter sidebar (Rust, Zed, Tokio, Tauri, etc.)
       const mdBookTree = extractMdBookHierarchy(doc, baseDocsUrl, isWithinScope)
-      if (mdBookTree && mdBookTree.sections.length >= 2) {
+      if (mdBookTree && mdBookTree.sections.length >= 1) {
         return mdBookTree
       }
 
@@ -815,7 +806,7 @@ export async function extractSiteTopology(
 
       // 1d. Check for Sphinx / ReadTheDocs navigation
       const sphinxTree = extractSphinxHierarchy(doc, baseDocsUrl, isWithinScope)
-      if (sphinxTree && sphinxTree.sections.length >= 2) {
+      if (sphinxTree && sphinxTree.sections.length >= 1) {
         return sphinxTree
       }
 
@@ -1139,45 +1130,22 @@ export async function extractSiteTopology(
     let itemTitle = page.title
 
     if (!page.sectionName) {
-      if (pageUrl.pathname.startsWith('/api-reference') || pageUrl.pathname.startsWith('/api/')) {
-        secName =
-          segments.length > 1
-            ? segments[0].replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-            : 'API Reference'
-      } else if (pageUrl.pathname.startsWith('/guides') || pageUrl.pathname.startsWith('/guide')) {
-        secName = 'Guides'
-      } else if (segments.length <= 1) {
-        secName = 'Getting Started'
-      } else {
+      if (segments.length > 1) {
         secName = segments[0].replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      } else {
+        secName = 'Documentation'
       }
     }
 
     if (!itemTitle) {
-      const lastSeg = segments[segments.length - 1] || 'Overview'
-      itemTitle = lastSeg.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      const lastSeg = segments[segments.length - 1] || 'Documentation'
+      itemTitle = lastSeg
+        .replace(/\.[a-z0-9]+$/i, '')
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase())
     }
 
-    // Normalize section names to avoid subtle case/variation duplicates
-    const lowerSec = secName.toLowerCase().trim()
-    if (
-      lowerSec === 'getting started' ||
-      lowerSec === 'get-started' ||
-      lowerSec === 'get started'
-    ) {
-      secName = 'Get started'
-    } else if (lowerSec === 'api reference' || lowerSec === 'api-reference') {
-      secName = 'API reference'
-    } else if (
-      lowerSec === 'sdks and tools' ||
-      lowerSec === 'sdks & tools' ||
-      lowerSec === 'sdks'
-    ) {
-      secName = 'SDKs and tools'
-    } else {
-      // Clean leading/trailing punctuation and title case cleanly
-      secName = secName.trim()
-    }
+    secName = secName.trim()
 
     let groupList = groupMap.get(secName)
     if (!groupList) {
@@ -1203,35 +1171,20 @@ export async function extractSiteTopology(
     }
   }
 
-  // Sort sections logically: Overview / Getting Started first, Guides second, Reference third
-  const sectionRank = (title: string): number => {
-    const lower = title.toLowerCase()
-    if (lower.includes('start') || lower.includes('intro') || lower.includes('overview')) return 1
-    if (lower.includes('guide') || lower.includes('tutorial') || lower.includes('concept')) return 2
-    if (lower.includes('core') || lower.includes('feature')) return 3
-    if (lower.includes('api') || lower.includes('reference') || lower.includes('sdk')) return 4
-    if (lower.includes('config') || lower.includes('deploy') || lower.includes('advanced')) return 5
-    return 6
-  }
-
-  const sortedSecNames = Array.from(groupMap.keys()).sort((a, b) => {
-    const rankDiff = sectionRank(a) - sectionRank(b)
-    if (rankDiff !== 0) return rankDiff
-    return a.localeCompare(b)
-  })
-
-  const finalSections: NavSection[] = sortedSecNames.map((secName, sIdx) => {
-    const items = groupMap.get(secName) || []
-    return {
-      title: secName,
-      slug: secName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      order: sIdx + 1,
-      items: items.map((it, iIdx) => ({
-        ...it,
-        order: iIdx + 1,
-      })),
-    }
-  })
+  // Preserve natural discovery order from the site
+  const finalSections: NavSection[] = Array.from(groupMap.entries()).map(
+    ([secName, items], sIdx) => {
+      return {
+        title: secName,
+        slug: secName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        order: sIdx + 1,
+        items: items.map((it, iIdx) => ({
+          ...it,
+          order: iIdx + 1,
+        })),
+      }
+    },
+  )
 
   return {
     title: url.hostname,
