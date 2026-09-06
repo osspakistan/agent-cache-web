@@ -242,29 +242,32 @@ export async function crawlAndExtractPages(
               try {
                 const doc = dom.window.document
 
-                // 4a. Check if the page has an "Edit on GitHub" / source link
+                // 4a. Check if the page has an "Edit on GitHub" / source link for raw markdown
                 const ghSourceLink = doc.querySelector(
                   'a[href*="github.com"][href*="/edit/"], a[href*="github.com"][href*="/blob/"]',
                 )
                 if (ghSourceLink) {
                   const href = ghSourceLink.getAttribute('href') || ''
-                  const rawGhUrl = href
-                    .replace('https://github.com/', 'https://raw.githubusercontent.com/')
-                    .replace('/edit/', '/')
-                    .replace('/blob/', '/')
-                  try {
-                    const rawRes = await fetch(rawGhUrl, {
-                      headers: { 'User-Agent': 'agent-cache/1.0' },
-                      signal: AbortSignal.timeout(6000),
-                    })
-                    if (rawRes.ok) {
-                      const rawMd = await rawRes.text()
-                      if (rawMd.trim().length > 20) {
-                        markdown = rawMd
-                        break
+                  // Only fetch if the source link points to markdown (.md / .mdx), not ReStructuredText (.rst)
+                  if (/\.(md|mdx)$/i.test(href.split(/[?#]/)[0])) {
+                    const rawGhUrl = href
+                      .replace('https://github.com/', 'https://raw.githubusercontent.com/')
+                      .replace('/edit/', '/')
+                      .replace('/blob/', '/')
+                    try {
+                      const rawRes = await fetch(rawGhUrl, {
+                        headers: { 'User-Agent': 'agent-cache/1.0' },
+                        signal: AbortSignal.timeout(6000),
+                      })
+                      if (rawRes.ok) {
+                        const rawMd = await rawRes.text()
+                        if (rawMd.trim().length > 20) {
+                          markdown = rawMd
+                          break
+                        }
                       }
-                    }
-                  } catch {}
+                    } catch {}
+                  }
                 }
 
                 if (!markdown) {

@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom'
 import type { NavHierarchy, NavItem, NavSection, StreamEvent } from '../../lib/utils/types'
 
 const NON_DOCS_FILTER =
-  /blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|acp\b|agents?\b|marketplace|store|assets?|_next|_astro|_nuxt|cdn-cgi|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
+  /\b(?:blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|acp|agents?|marketplace|store|assets?)\b|_next|_astro|_nuxt|cdn-cgi|_static\/js\/|\$\{|%7B|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
 
 const COMMON_DOCS_SUBDOMAINS = [
   'docs',
@@ -582,6 +582,151 @@ function extractHubSections(
   return null
 }
 
+function extractSphinxHierarchy(
+  doc: Document,
+  baseDocsUrl: string,
+  isWithinScope: (url: string) => boolean,
+): NavHierarchy | null {
+  // Sphinx uses .wy-menu-vertical (RTD theme), .sphinxsidebar, or .toctree-wrapper
+  const sphinxNav =
+    doc.querySelector('.wy-menu-vertical') ||
+    doc.querySelector('.sphinxsidebar') ||
+    doc.querySelector('nav[aria-label*="Navigation menu" i]') ||
+    doc.querySelector('.toctree-wrapper')
+
+  if (!sphinxNav) return null
+
+  const sections: NavSection[] = []
+  let sIdx = 1
+
+  // Check if there are explicit captions (e.g. <p class="caption"> or <span class="caption-text">)
+  const captionEls = Array.from(
+    doc.querySelectorAll(
+      '.wy-menu-vertical p.caption, .sphinxsidebar p.caption, .toctree-wrapper p.caption',
+    ),
+  )
+
+  if (captionEls.length >= 2) {
+    for (const capEl of captionEls) {
+      const capTitle = capEl.textContent?.trim().replace(/[:\s]+$/, '') || 'General'
+      const nextUl = capEl.nextElementSibling
+      const links = nextUl ? Array.from(nextUl.querySelectorAll('a[href]')) : []
+      const items: NavItem[] = []
+      let iIdx = 1
+
+      for (const a of links) {
+        const itemTitle = a.textContent?.trim()
+        const href = a.getAttribute('href')
+        if (
+          !href ||
+          !itemTitle ||
+          href.startsWith('#') ||
+          href.startsWith('mailto:') ||
+          href.startsWith('javascript:')
+        )
+          continue
+        // Remove Sphinx link anchor glyphs
+        const cleanTitle = itemTitle.replace(/[¶#]$/, '').trim()
+        try {
+          const full = new URL(href, baseDocsUrl).href
+          if (isWithinScope(full) && !items.some((it) => it.url === full)) {
+            items.push({ title: cleanTitle, url: full, order: iIdx++ })
+          }
+        } catch {}
+      }
+
+      if (items.length > 0) {
+        sections.push({
+          title: capTitle,
+          slug: capTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          order: sIdx++,
+          items,
+        })
+      }
+    }
+  }
+
+  // If no multiple captions, extract top-level chapters from toctree-l1 elements
+  if (sections.length < 2) {
+    const toctreeLis = Array.from(
+      doc.querySelectorAll(
+        '.wy-menu-vertical li.toctree-l1, .sphinxsidebar li.toctree-l1, .toctree-wrapper > ul > li.toctree-l1',
+      ),
+    )
+
+    const seenUrls = new Set<string>()
+    const topItems: NavItem[] = []
+    let iIdx = 1
+
+    for (const li of toctreeLis) {
+      const a = li.querySelector(':scope > a') || li.querySelector('a')
+      if (!a) continue
+      const rawTitle = a.textContent?.trim() || ''
+      const href = a.getAttribute('href') || ''
+      if (
+        !href ||
+        !rawTitle ||
+        href.startsWith('#') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('javascript:')
+      )
+        continue
+
+      const cleanTitle = rawTitle.replace(/[¶#]$/, '').trim()
+      try {
+        const full = new URL(href, baseDocsUrl).href
+        if (isWithinScope(full) && !seenUrls.has(full)) {
+          seenUrls.add(full)
+          topItems.push({
+            title: cleanTitle,
+            url: full,
+            order: iIdx++,
+          })
+        }
+      } catch {}
+    }
+
+    if (topItems.length >= 2) {
+      // Group items into logical sections based on chapter volume or title prefixes
+      // If <= 10 items, 1-2 sections; if > 10 items, split into logical chapters (e.g. Getting Started & User Guide)
+      if (topItems.length <= 8) {
+        sections.push({
+          title: 'Documentation',
+          slug: 'documentation',
+          order: sIdx++,
+          items: topItems,
+        })
+      } else {
+        // Split into "Getting Started" (first 4) and "Guide & Reference" (remaining)
+        const gettingStartedItems = topItems.slice(0, 4)
+        const guideItems = topItems.slice(4)
+
+        sections.push({
+          title: 'Getting Started',
+          slug: 'getting-started',
+          order: sIdx++,
+          items: gettingStartedItems,
+        })
+
+        sections.push({
+          title: 'User Guide & Reference',
+          slug: 'user-guide-reference',
+          order: sIdx++,
+          items: guideItems,
+        })
+      }
+    }
+  }
+
+  if (sections.length >= 2) {
+    return {
+      title: new URL(baseDocsUrl).hostname,
+      sections,
+    }
+  }
+  return null
+}
+
 export async function extractSiteTopology(
   docsUrl: string,
   options?: TopologyOptions,
@@ -666,6 +811,12 @@ export async function extractSiteTopology(
       const hubTree = extractHubSections(doc, baseDocsUrl, isWithinScope)
       if (hubTree && hubTree.sections.length >= 2) {
         return hubTree
+      }
+
+      // 1d. Check for Sphinx / ReadTheDocs navigation
+      const sphinxTree = extractSphinxHierarchy(doc, baseDocsUrl, isWithinScope)
+      if (sphinxTree && sphinxTree.sections.length >= 2) {
+        return sphinxTree
       }
 
       // 1c. Generic Live DOM Sidebar Extraction (only target docs/sidebar navigation)
