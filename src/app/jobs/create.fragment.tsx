@@ -8,7 +8,7 @@ import type { AppContext } from '../../lib/utils/types'
 export const POST = async (c: AppContext) => {
   const log = c.get('log')
   const form = await c.req.parseBody()
-  const rawUrl = String(form.docs ?? '').trim()
+  let rawUrl = String(form.docs ?? '').trim()
 
   if (!rawUrl) {
     return c.html(
@@ -17,6 +17,11 @@ export const POST = async (c: AppContext) => {
       </p>,
       400,
     )
+  }
+
+  // Prepend https:// if user pasted bare domain or path (e.g. paddle.com or stripe.com/docs)
+  if (!/^https?:\/\//i.test(rawUrl)) {
+    rawUrl = `https://${rawUrl}`
   }
 
   log.set({ url: rawUrl })

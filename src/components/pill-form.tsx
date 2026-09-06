@@ -15,8 +15,12 @@ export function PillForm(props: { id?: string; placeholder?: string }) {
       hx-swap="outerHTML"
     >
       <input
-        type="url"
+        type="text"
         name="docs"
+        inputmode="url"
+        autocomplete="url"
+        autocapitalize="none"
+        spellcheck={false}
         required
         placeholder={props.placeholder ?? 'paste a docs url, e.g. docs.example.com'}
         aria-label="documentation URL"
