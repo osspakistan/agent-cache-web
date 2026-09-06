@@ -38,7 +38,7 @@ export function PillForm(props: {
       </form>
       {props.errorMessage && (
         <p class="exp-note" role="alert" style="color: #dc2626; margin-top: 8px;">
-          <b>invalid url</b> · {props.errorMessage}
+          <b>nice try</b> · {props.errorMessage}
         </p>
       )}
     </div>

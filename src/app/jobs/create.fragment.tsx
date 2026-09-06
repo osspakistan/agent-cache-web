@@ -53,7 +53,7 @@ async function probeDomainReachability(
         if (code === 'ENOTFOUND' || code === 'NODATA') {
           return {
             ok: false,
-            message: `Could not find DNS records for "${host}". Check the spelling or make sure the site is online.`,
+            message: `"${host}" doesn't exist on this planet. Did your cat walk across the keyboard?`,
           }
         }
       }
@@ -92,14 +92,14 @@ async function probeDomainReachability(
       if (isParked) {
         return {
           ok: false,
-          message: `"${host}" appears to be an inactive or parked domain.`,
+          message: `"${host}" is just sitting on a domain squatter's for-sale lot. Give me actual docs, not GoDaddy landers.`,
         }
       }
 
       if (probeRes.status === 410) {
         return {
           ok: false,
-          message: `"${host}" returned HTTP 410 Gone. The site is no longer active.`,
+          message: `"${host}" is dead and gone (HTTP 410). Not even an AI can resurrect docs from the afterlife.`,
         }
       }
     } catch (httpErr: unknown) {
@@ -107,13 +107,13 @@ async function probeDomainReachability(
       if (/ENOTFOUND|getaddrinfo|EAI_AGAIN/i.test(msg)) {
         return {
           ok: false,
-          message: `Could not find DNS records for "${host}". Check the spelling or make sure the site is online.`,
+          message: `"${host}" doesn't exist on this planet. Check your spelling or buy the domain first.`,
         }
       }
       if (/ECONNREFUSED|ConnectionRefused/i.test(msg)) {
         return {
           ok: false,
-          message: `Connection refused by "${host}". The server is not accepting web traffic.`,
+          message: `"${host}" slammed the door in my face (connection refused). Server is totally offline.`,
         }
       }
     }
@@ -134,7 +134,7 @@ export const POST = async (c: AppContext) => {
 
   if (!rawInput) {
     return c.html(
-      <PillForm errorMessage="Paste a docs URL or domain first (e.g. paddle.com or docs.stripe.com)." />,
+      <PillForm errorMessage="You literally submitted nothing. Paste an actual docs URL." />,
       400,
     )
   }
@@ -146,7 +146,7 @@ export const POST = async (c: AppContext) => {
     return c.html(
       <PillForm
         defaultValue={rawInput}
-        errorMessage={`"${rawInput}" doesn't look like a valid domain or URL. Try something like paddle.com or docs.hono.dev.`}
+        errorMessage={`"${rawInput}" is not a website. Try typing a real domain like paddle.com or stripe.com.`}
       />,
       400,
     )
@@ -158,7 +158,9 @@ export const POST = async (c: AppContext) => {
     return c.html(
       <PillForm
         defaultValue={rawInput}
-        errorMessage={reachability.message || `Could not connect to "${rawInput}".`}
+        errorMessage={
+          reachability.message || `Couldn't reach "${rawInput}". It's either dead or imaginary.`
+        }
       />,
       400,
     )
