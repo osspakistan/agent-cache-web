@@ -61,23 +61,39 @@ export async function getFromR2(key: string): Promise<Uint8Array | null> {
   const client = getR2Client()
   const bucket = getBucketName()
 
-  try {
-    const res = await client.send(
-      new GetObjectCommand({
-        Bucket: bucket,
-        Key: key,
-      }),
-      { abortSignal: AbortSignal.timeout(10000) },
-    )
+  let attempts = 0
+  const maxAttempts = 3
 
-    if (!res.Body) return null
-    return await res.Body.transformToByteArray()
-  } catch (err: unknown) {
-    if ((err as { name?: string }).name === 'NoSuchKey') {
+  while (attempts < maxAttempts) {
+    attempts++
+    try {
+      const res = await client.send(
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+        { abortSignal: AbortSignal.timeout(12000) },
+      )
+
+      if (!res.Body) return null
+      return await res.Body.transformToByteArray()
+    } catch (err: unknown) {
+      const name = (err as { name?: string })?.name
+      const msg = (err as Error)?.message || String(err)
+      if (name === 'NoSuchKey' || name === 'NotFound') {
+        return null
+      }
+      // Retry transient socket drops / ECONNRESET / timeout
+      const isTransient =
+        /socket connection was closed|ECONNRESET|timeout|AbortError|ENOTFOUND/i.test(msg)
+      if (isTransient && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, attempts * 250))
+        continue
+      }
       return null
     }
-    return null
   }
+  return null
 }
 
 export async function appendEventToR2(jobId: string, event: StreamEvent): Promise<void> {

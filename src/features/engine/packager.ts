@@ -1,6 +1,7 @@
 import { zipSync } from 'fflate'
 import { uploadToR2 } from '../../lib/clients'
 import type { NavHierarchy } from '../../lib/utils/types'
+import { generateDocMetadata } from './meta'
 
 export interface PackageBundleOptions {
   jobId: string
@@ -120,7 +121,7 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
   masterIndex += `> Auto-generated agent-ready mirror of [${docsUrl}](${docsUrl})\n\n`
 
   if (hasCompanionLlmsFull) {
-    masterIndex += `> 💡 **Companion File**: [llms-full.txt](llms-full.txt) is included in the root archive as a vendor single-file dump.\n\n`
+    masterIndex += `> **Companion File**: [llms-full.txt](llms-full.txt) is included in the root archive as a vendor single-file dump.\n\n`
   }
 
   masterIndex += `## Table of Contents\n\n`
@@ -155,15 +156,41 @@ export async function packageJobBundle(opts: PackageBundleOptions): Promise<Pack
   await uploadToR2(`${r2FinalPrefix}/INDEX.md`, masterBytes, 'text/markdown; charset=utf-8')
   extractedFiles.set('INDEX.md', masterBytes)
 
-  // 4. Write meta.yaml and _map.json directly to R2
-  const metaYaml = `name: "${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"
+  // 4. Generate Strategy B metadata (keywords, intent triggers, ecosystem)
+  const meta = await generateDocMetadata({
+    productName,
+    url: docsUrl,
+    title,
+    description,
+    hierarchy,
+  })
+
+  // Format YAML arrays cleanly
+  const yamlKeywords =
+    meta.keywords.length > 0
+      ? `keywords:\n${meta.keywords.map((k) => `  - "${k.replace(/"/g, '\\"')}"`).join('\n')}\n`
+      : ''
+
+  const yamlTriggers =
+    meta.intent_triggers.length > 0
+      ? `intent_triggers:\n${meta.intent_triggers.map((t) => `  - "${t.replace(/"/g, '\\"')}"`).join('\n')}\n`
+      : ''
+
+  const yamlEcosystem =
+    meta.ecosystem.length > 0
+      ? `ecosystem:\n${meta.ecosystem.map((e) => `  - "${e.replace(/"/g, '\\"')}"`).join('\n')}\n`
+      : ''
+
+  // Write meta.yaml and _map.json directly to R2
+  const metaYaml = `${`name: "${productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"
 title: "${(title || `${productName} Docs`).replace(/"/g, '\\"')}"
 description: "${(description || '').replace(/"/g, '\\"')}"
 url: "${docsUrl}"
 created_at: "${new Date().toISOString()}"
 version: "1.0.0"
 companion_llms_full: ${hasCompanionLlmsFull}
-`
+${yamlKeywords}${yamlTriggers}${yamlEcosystem}`.trim()}\n`
+
   const metaBytes = Buffer.from(metaYaml, 'utf8')
   await uploadToR2(`${r2FinalPrefix}/meta.yaml`, metaBytes, 'text/yaml; charset=utf-8')
   extractedFiles.set('meta.yaml', metaBytes)

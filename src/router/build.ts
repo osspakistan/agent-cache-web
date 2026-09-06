@@ -4,6 +4,9 @@ import { statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import type { EvlogVariables } from 'evlog/hono'
 import type { Hono, MiddlewareHandler } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import { ErrorFactory } from '../lib/utils/errors'
+import { Logger } from '../lib/utils/logger'
 import type { AppContext, JSXNode } from '../lib/utils/types'
 import {
   type ErrorComponent,
@@ -18,7 +21,7 @@ import {
 const ROUTER_METHODS = ['GET', 'POST'] as const
 
 /** render a JSX node through c.html — JSX trees are string-branded by hono */
-function htmlResponse(c: AppContext, node: JSXNode, status?: 200 | 404 | 500): Response {
+function htmlResponse(c: AppContext, node: JSXNode, status?: ContentfulStatusCode): Response {
   return c.html(node as unknown as string, status)
 }
 
@@ -114,22 +117,32 @@ export async function buildApp(
   })
 
   // errors — htmx swaps get the bare component; navigations get root layout.
-  // evlog: log via the request-scoped logger when present, else standalone console
+  // evlog: structured grouping via Logger.error isolating machine from human error
   app.onError((err, c) => {
-    const log = c.get('log')
-    if (log) {
-      log.set({ path: c.req.path })
-      log.error(err)
-    } else {
-      console.error(`[error] ${c.req.method} ${c.req.path}:`, err)
-    }
+    const reqLog = c.get('log')
+    const appErr = ErrorFactory.fromUnknown(err, c.req.url)
+
+    Logger.error({
+      group: 'http_error',
+      topic: `${c.req.method} ${c.req.path}`,
+      error: appErr,
+      reqLog,
+      meta: {
+        method: c.req.method,
+        path: c.req.path,
+        statusCode: appErr.statusCode,
+      },
+    })
+
+    const status = (appErr.statusCode || 500) as ContentfulStatusCode
+
     if (ErrorComp) {
-      const bare = ErrorComp({ message: String(err?.message ?? err) })
-      if (c.req.header('HX-Request')) return htmlResponse(c, bare, 500)
+      const bare = ErrorComp({ message: appErr.human })
+      if (c.req.header('HX-Request')) return htmlResponse(c, bare, status)
       const html = rootLayout ? renderWithLayouts([rootLayout], bare) : bare
-      return htmlResponse(c, html, 500)
+      return htmlResponse(c, html, status)
     }
-    return c.text('internal error', 500)
+    return c.text(appErr.human, status)
   })
 
   return app

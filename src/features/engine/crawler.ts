@@ -141,7 +141,32 @@ export async function crawlAndExtractPages(
         }
       }
 
-      // 2. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
+      // 2. If github strategy or known doc site, try direct raw GitHub endpoints
+      if (!markdown && _strategy === 'github-raw-markdown') {
+        try {
+          const pathSegments = new URL(task.url).pathname.replace(/^\//, '')
+          const rawCandidates = [
+            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}/index.mdx`,
+            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}.mdx`,
+            `https://raw.githubusercontent.com/npm/documentation/main/content/${pathSegments}.md`,
+          ]
+          for (const rawUrl of rawCandidates) {
+            const res = await fetch(rawUrl, {
+              headers: { 'User-Agent': 'agent-cache/1.0' },
+              signal: AbortSignal.timeout(4000),
+            })
+            if (res.ok) {
+              const text = await res.text()
+              if (text.trim().length > 20) {
+                markdown = text
+                break
+              }
+            }
+          }
+        } catch {}
+      }
+
+      // 3. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
       if (!markdown) {
         try {
           const res = await fetch(task.url, {
@@ -202,17 +227,43 @@ export async function crawlAndExtractPages(
             try {
               const doc = dom.window.document
 
-              // Strip noise elements
-              const elementsToRemove = doc.querySelectorAll(
-                'script, style, nav, header, footer, aside, noscript, svg',
+              // 4a. Check if the page has an "Edit on GitHub" / source link (e.g. npm docs, Docusaurus, VitePress, etc.)
+              const ghSourceLink = doc.querySelector(
+                'a[href*="github.com"][href*="/edit/"], a[href*="github.com"][href*="/blob/"]',
               )
-              elementsToRemove.forEach((el) => {
-                el.remove()
-              })
+              if (ghSourceLink) {
+                const href = ghSourceLink.getAttribute('href') || ''
+                const rawGhUrl = href
+                  .replace('https://github.com/', 'https://raw.githubusercontent.com/')
+                  .replace('/edit/', '/')
+                  .replace('/blob/', '/')
+                try {
+                  const rawRes = await fetch(rawGhUrl, {
+                    headers: { 'User-Agent': 'agent-cache/1.0' },
+                    signal: AbortSignal.timeout(6000),
+                  })
+                  if (rawRes.ok) {
+                    const rawMd = await rawRes.text()
+                    if (rawMd.trim().length > 20) {
+                      markdown = rawMd
+                    }
+                  }
+                } catch {}
+              }
 
-              const mainContent =
-                doc.querySelector('main, article, [role="main"], .content') || doc.body
-              markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+              if (!markdown) {
+                // Strip noise elements
+                const elementsToRemove = doc.querySelectorAll(
+                  'script, style, nav, header, footer, aside, noscript, svg',
+                )
+                elementsToRemove.forEach((el) => {
+                  el.remove()
+                })
+
+                const mainContent =
+                  doc.querySelector('main, article, [role="main"], .content') || doc.body
+                markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+              }
             } finally {
               dom.window.close()
             }

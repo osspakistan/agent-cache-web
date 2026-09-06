@@ -128,8 +128,36 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
     }
   })()
 
+  // 2c. Probe for open-source GitHub documentation repository in docs HTML
+  let gitRepo: { owner: string; repo: string; branch: string; docsPath: string } | undefined
+  const ghProbeTask = (async () => {
+    try {
+      const res = await fetch(docsUrl, {
+        headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+        signal: AbortSignal.timeout(5000),
+      })
+      if (res.ok) {
+        const text = await res.text()
+        const match = text.match(
+          /href=["'](https?:\/\/(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)(?:\/[^\s"'>]*)?)["']/,
+        )
+        if (match) {
+          const owner = match[2]
+          const repo = match[3].replace(/\.git$/, '')
+          // Exclude social/generic/asset links
+          if (
+            !['features', 'sponsors', 'about', 'pricing', 'site'].includes(owner) &&
+            !['sponsors', 'branding'].includes(repo)
+          ) {
+            gitRepo = { owner, repo, branch: 'main', docsPath: '' }
+          }
+        }
+      }
+    } catch {}
+  })()
+
   // Run probes concurrently
-  await Promise.all([...probeTasks, mdProbeTask])
+  await Promise.all([...probeTasks, mdProbeTask, ghProbeTask])
 
   if (isDirectMd) {
     return {
@@ -139,6 +167,18 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
       hasLlmsTxt,
       llmsTxtUrl,
       directMdSampleUrl,
+      gitRepo,
+    }
+  }
+
+  if (gitRepo) {
+    return {
+      strategy: 'github-raw-markdown',
+      hasLlmsFull,
+      llmsFullUrl,
+      hasLlmsTxt,
+      llmsTxtUrl,
+      gitRepo,
     }
   }
 

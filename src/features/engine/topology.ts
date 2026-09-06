@@ -398,6 +398,95 @@ function extractMdBookHierarchy(
   return null
 }
 
+function extractPrimerHierarchy(
+  doc: Document,
+  baseDocsUrl: string,
+  isWithinScope: (url: string) => boolean,
+): NavHierarchy | null {
+  const nav = doc.querySelector(
+    'nav[aria-label="Site"], nav[aria-label*="navigation" i], .sidebar-module--Box--4180a',
+  )
+  if (!nav) return null
+
+  const mainUl = nav.querySelector('ul')
+  if (!mainUl) return null
+
+  const topGroups = Array.from(mainUl.children).filter(
+    (c) => c.tagName === 'LI' && (c.className.includes('Group') || Boolean(c.querySelector('ul'))),
+  )
+  if (topGroups.length < 2) return null
+
+  function parseLi(li: Element): NavItem | null {
+    const labelSpan =
+      li.querySelector(':scope > button [data-component="ActionList.Item.Label"]') ||
+      li.querySelector(':scope > a [data-component="ActionList.Item.Label"]') ||
+      li.querySelector(':scope > div > a [data-component="ActionList.Item.Label"]') ||
+      li.querySelector(':scope > a') ||
+      li.querySelector(':scope > button')
+
+    const title = (labelSpan?.textContent || '').trim().replace(/\s+/g, ' ')
+    const directAnchor = li.querySelector(':scope > a, :scope > div > a')
+    const href = directAnchor?.getAttribute('href')
+    let url: string | undefined
+
+    if (href && !href.startsWith('#') && !href.includes('github.com')) {
+      try {
+        const full = new URL(href, baseDocsUrl).href
+        if (isWithinScope(full)) url = full
+      } catch {}
+    }
+
+    const subUl = li.querySelector(':scope > ul, :scope > div > ul, :scope > [id] > ul')
+    if (subUl) {
+      const childLis = Array.from(subUl.children).filter(
+        (c) => c.tagName === 'LI' && !c.className.includes('Divider'),
+      )
+      const children = childLis.map(parseLi).filter((it): it is NavItem => Boolean(it))
+      return {
+        title: title || (children[0]?.title ?? 'Section'),
+        url: url || children[0]?.url || baseDocsUrl,
+        items: children,
+      }
+    }
+
+    if (url && title) {
+      return { title, url }
+    }
+    return null
+  }
+
+  const sections: NavSection[] = []
+  let sIdx = 1
+
+  for (const grp of topGroups) {
+    const grpList = grp.querySelector('ul')
+    if (!grpList) continue
+
+    const groupItems = Array.from(grpList.children)
+      .filter((c) => c.tagName === 'LI')
+      .map(parseLi)
+      .filter((it): it is NavItem => Boolean(it))
+
+    for (const item of groupItems) {
+      const itemsList = item.items && item.items.length > 0 ? item.items : [item]
+      sections.push({
+        title: item.title,
+        slug: item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        order: sIdx++,
+        items: itemsList,
+      })
+    }
+  }
+
+  if (sections.length >= 2) {
+    return {
+      title: new URL(baseDocsUrl).hostname,
+      sections,
+    }
+  }
+  return null
+}
+
 function extractHubSections(
   doc: Document,
   baseDocsUrl: string,
@@ -528,6 +617,12 @@ export async function extractSiteTopology(
       const mdBookTree = extractMdBookHierarchy(doc, baseDocsUrl, isWithinScope)
       if (mdBookTree && mdBookTree.sections.length >= 2) {
         return mdBookTree
+      }
+
+      // 1c. Check for GitHub Primer / ActionList navigation (docs.npmjs.com, GitHub Docs, etc.)
+      const primerTree = extractPrimerHierarchy(doc, baseDocsUrl, isWithinScope)
+      if (primerTree && primerTree.sections.length >= 2) {
+        return primerTree
       }
 
       // 1c. Check for documentation hub page (FFmpeg, legacy categorised index pages)
@@ -688,7 +783,7 @@ export async function extractSiteTopology(
     await options?.onProgress?.({
       type: 'log',
       level: 'info',
-      message: `🕷️ Fast crawler discovering pages on ${origin}...`,
+      message: `Fast crawler discovering pages on ${origin}...`,
       timestamp: Date.now(),
     })
 

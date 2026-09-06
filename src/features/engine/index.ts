@@ -117,7 +117,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
     await emit({
       type: 'log',
       level: 'info',
-      message: `🚀 Running extraction job [${job.id}] for: ${job.input_url}`,
+      message: `Running extraction job [${job.id}] for: ${job.input_url}`,
       timestamp: Date.now(),
     })
 
@@ -133,7 +133,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       await emit({
         type: 'log',
         level: 'info',
-        message: `🧠 Target domain protected or ambiguous. Resolved canonical docs via Tavily: ${resolved.docsUrl}`,
+        message: `Target domain protected or ambiguous. Resolved canonical docs via Tavily: ${resolved.docsUrl}`,
         timestamp: Date.now(),
       })
     } else {
@@ -167,7 +167,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       await emit({
         type: 'log',
         level: 'info',
-        message: `🎁 Discovered vendor llms-full.txt (${decision.llmsFullUrl}) — bundling as companion bonus`,
+        message: `Discovered vendor llms-full.txt (${decision.llmsFullUrl}) — bundling as companion file`,
         timestamp: Date.now(),
       })
     }
@@ -176,7 +176,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       await emit({
         type: 'log',
         level: 'info',
-        message: `🗺️ Discovered vendor llms.txt (${decision.llmsTxtUrl}) — mapping link topology`,
+        message: `Discovered vendor llms.txt (${decision.llmsTxtUrl}) — mapping link topology`,
         timestamp: Date.now(),
       })
     }
