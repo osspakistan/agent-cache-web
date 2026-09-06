@@ -36,6 +36,94 @@ function isValidDocsUrl(input: string): boolean {
   }
 }
 
+import dns from 'node:dns/promises'
+
+async function probeDomainReachability(
+  targetUrl: string,
+): Promise<{ ok: boolean; message?: string }> {
+  try {
+    const host = new URL(targetUrl).hostname.toLowerCase()
+
+    // 1. DNS Resolution Probe (< 40ms)
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      try {
+        await dns.lookup(host)
+      } catch (dnsErr: unknown) {
+        const code = (dnsErr as { code?: string }).code
+        if (code === 'ENOTFOUND' || code === 'NODATA') {
+          return {
+            ok: false,
+            message: `Could not find DNS records for "${host}". Check the spelling or make sure the site is online.`,
+          }
+        }
+      }
+    }
+
+    // 2. Fast HTTP probe to check connection and detect dead or parked domains (< 3.5s)
+    try {
+      const probeRes = await fetch(targetUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: AbortSignal.timeout(3500),
+        redirect: 'follow',
+      })
+
+      const finalUrl = (probeRes.url || '').toLowerCase()
+      const text = await probeRes.text()
+      const lower = text.toLowerCase()
+
+      const isParked =
+        finalUrl.includes('godaddy') ||
+        finalUrl.includes('sedo') ||
+        finalUrl.includes('dan.com') ||
+        finalUrl.includes('parking') ||
+        finalUrl.includes('afternic') ||
+        lower.includes('window.location.href="/lander"') ||
+        lower.includes("window.location.href='/lander'") ||
+        lower.includes('domain is for sale') ||
+        lower.includes('buy this domain') ||
+        lower.includes('parked domain') ||
+        lower.includes('domain has expired') ||
+        lower.includes('is available for purchase')
+
+      if (isParked) {
+        return {
+          ok: false,
+          message: `"${host}" appears to be an inactive or parked domain.`,
+        }
+      }
+
+      if (probeRes.status === 410) {
+        return {
+          ok: false,
+          message: `"${host}" returned HTTP 410 Gone. The site is no longer active.`,
+        }
+      }
+    } catch (httpErr: unknown) {
+      const msg = httpErr instanceof Error ? httpErr.message : String(httpErr)
+      if (/ENOTFOUND|getaddrinfo|EAI_AGAIN/i.test(msg)) {
+        return {
+          ok: false,
+          message: `Could not find DNS records for "${host}". Check the spelling or make sure the site is online.`,
+        }
+      }
+      if (/ECONNREFUSED|ConnectionRefused/i.test(msg)) {
+        return {
+          ok: false,
+          message: `Connection refused by "${host}". The server is not accepting web traffic.`,
+        }
+      }
+    }
+
+    return { ok: true }
+  } catch {
+    return { ok: true }
+  }
+}
+
 /**
  * POST /jobs/create — creates the job record in Turso DB + disk, then redirects to /dingdong/ac-{id}
  */
@@ -59,6 +147,18 @@ export const POST = async (c: AppContext) => {
       <PillForm
         defaultValue={rawInput}
         errorMessage={`"${rawInput}" doesn't look like a valid domain or URL. Try something like paddle.com or docs.hono.dev.`}
+      />,
+      400,
+    )
+  }
+
+  // Probe domain reachability (DNS + HTTP parking check) before burning DB or LLM resources
+  const reachability = await probeDomainReachability(normalizedUrl)
+  if (!reachability.ok) {
+    return c.html(
+      <PillForm
+        defaultValue={rawInput}
+        errorMessage={reachability.message || `Could not connect to "${rawInput}".`}
       />,
       400,
     )
