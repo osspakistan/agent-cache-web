@@ -209,66 +209,91 @@ export async function crawlAndExtractPages(
 
       // 4. Fallback: HTML fetch with Turndown purification
       if (!markdown) {
-        const res = await fetch(task.url, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0 Safari/537.36',
-          },
-          signal: AbortSignal.timeout(10000),
-        })
-        if (res.ok) {
-          const contentType = res.headers.get('content-type') || ''
-          const text = await res.text()
-
-          if (contentType.includes('markdown') || contentType.includes('text/plain')) {
-            markdown = text
-          } else {
-            const dom = new JSDOM(text)
-            try {
-              const doc = dom.window.document
-
-              // 4a. Check if the page has an "Edit on GitHub" / source link (e.g. npm docs, Docusaurus, VitePress, etc.)
-              const ghSourceLink = doc.querySelector(
-                'a[href*="github.com"][href*="/edit/"], a[href*="github.com"][href*="/blob/"]',
-              )
-              if (ghSourceLink) {
-                const href = ghSourceLink.getAttribute('href') || ''
-                const rawGhUrl = href
-                  .replace('https://github.com/', 'https://raw.githubusercontent.com/')
-                  .replace('/edit/', '/')
-                  .replace('/blob/', '/')
-                try {
-                  const rawRes = await fetch(rawGhUrl, {
-                    headers: { 'User-Agent': 'agent-cache/1.0' },
-                    signal: AbortSignal.timeout(6000),
-                  })
-                  if (rawRes.ok) {
-                    const rawMd = await rawRes.text()
-                    if (rawMd.trim().length > 20) {
-                      markdown = rawMd
-                    }
-                  }
-                } catch {}
-              }
-
-              if (!markdown) {
-                // Strip noise elements
-                const elementsToRemove = doc.querySelectorAll(
-                  'script, style, nav, header, footer, aside, noscript, svg',
-                )
-                elementsToRemove.forEach((el) => {
-                  el.remove()
-                })
-
-                const mainContent =
-                  doc.querySelector('main, article, [role="main"], .content') || doc.body
-                markdown = turndown.turndown(mainContent ? mainContent.innerHTML : text)
-              }
-            } finally {
-              dom.window.close()
-            }
+        // Prepare URL candidates: primary task.url, and if task.url is missing a /docs prefix, try candidate with /docs
+        const urlCandidates = [task.url]
+        try {
+          const parsed = new URL(task.url)
+          if (!parsed.pathname.startsWith('/docs/') && parsed.pathname !== '/docs') {
+            const docsCandidate = new URL(`/docs${parsed.pathname}${parsed.search}`, parsed.origin)
+              .href
+            urlCandidates.push(docsCandidate)
           }
+        } catch {}
+
+        for (const candidateUrl of urlCandidates) {
+          try {
+            const res = await fetch(candidateUrl, {
+              headers: {
+                'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0 Safari/537.36',
+              },
+              signal: AbortSignal.timeout(10000),
+            })
+            if (res.ok) {
+              const contentType = res.headers.get('content-type') || ''
+              const text = await res.text()
+
+              if (contentType.includes('markdown') || contentType.includes('text/plain')) {
+                markdown = text
+                break
+              }
+
+              const dom = new JSDOM(text)
+              try {
+                const doc = dom.window.document
+
+                // 4a. Check if the page has an "Edit on GitHub" / source link
+                const ghSourceLink = doc.querySelector(
+                  'a[href*="github.com"][href*="/edit/"], a[href*="github.com"][href*="/blob/"]',
+                )
+                if (ghSourceLink) {
+                  const href = ghSourceLink.getAttribute('href') || ''
+                  const rawGhUrl = href
+                    .replace('https://github.com/', 'https://raw.githubusercontent.com/')
+                    .replace('/edit/', '/')
+                    .replace('/blob/', '/')
+                  try {
+                    const rawRes = await fetch(rawGhUrl, {
+                      headers: { 'User-Agent': 'agent-cache/1.0' },
+                      signal: AbortSignal.timeout(6000),
+                    })
+                    if (rawRes.ok) {
+                      const rawMd = await rawRes.text()
+                      if (rawMd.trim().length > 20) {
+                        markdown = rawMd
+                        break
+                      }
+                    }
+                  } catch {}
+                }
+
+                if (!markdown) {
+                  // Strip noise elements
+                  const elementsToRemove = doc.querySelectorAll(
+                    'script, style, nav, header, footer, aside, noscript, svg',
+                  )
+                  for (const el of elementsToRemove) {
+                    el.remove()
+                  }
+
+                  const mainContent =
+                    doc.querySelector('main, article, [role="main"], .content') || doc.body
+                  const purified = turndown.turndown(mainContent ? mainContent.innerHTML : text)
+                  if (purified.trim().length > 0) {
+                    markdown = purified
+                    break
+                  }
+                }
+              } finally {
+                dom.window.close()
+              }
+            }
+          } catch {}
         }
+      }
+
+      if (!markdown || markdown.trim().length === 0) {
+        markdown = `> Failed to extract content from ${task.url}\n\n*Page was unreachable or returned empty content during crawl.*`
       }
     } catch (err) {
       console.warn(`[Crawler] Failed page ${task.url}:`, err)

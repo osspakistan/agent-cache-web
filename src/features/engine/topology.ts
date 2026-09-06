@@ -130,7 +130,24 @@ async function extractMintlifyHierarchy(
             (typeof p === 'object' ? p.title : undefined) ||
             (href.split('/').pop() || 'Untitled').replace(/[-_]+/g, ' ')
           if (href) {
-            const fullUrl = new URL(href, docsUrl).href
+            let fullUrl: string
+            try {
+              if (href.startsWith('http://') || href.startsWith('https://')) {
+                fullUrl = href
+              } else {
+                // If docsUrl has a subpath prefix (e.g. /docs or /docs/), preserve it
+                const docsObj = new URL(docsUrl)
+                const basePath = docsObj.pathname.replace(/\/$/, '')
+                let cleanHref = href.startsWith('/') ? href.slice(1) : href
+                if (basePath && !cleanHref.startsWith(basePath.replace(/^\//, ''))) {
+                  cleanHref = `${basePath.replace(/^\//, '')}/${cleanHref}`
+                }
+                fullUrl = new URL(cleanHref, docsObj.origin).href
+              }
+            } catch {
+              fullUrl = new URL(href, docsUrl).href
+            }
+
             if (!items.some((it) => it.url === fullUrl)) {
               items.push({
                 title,
@@ -158,12 +175,17 @@ async function extractMintlifyHierarchy(
 
   await processNav(initialNav)
 
-  // Probe remaining tabs (e.g. "API Reference" on docs.context.dev)
+  // Probe remaining tabs (e.g. "API Reference" on docs.context.dev or scoped docs)
+  const basePath = url.pathname.replace(/\/$/, '')
   for (const tab of initialNav.tabs || []) {
     if (tab.tab && !processedTabs.has(tab.tab)) {
       const tabName = tab.tab
       const tabSlug = tabName.toLowerCase().replace(/\s+/g, '-')
       const candidateUrls = [`${origin}/${tabSlug}`, `${origin}/api-reference`, `${origin}/docs`]
+      if (basePath && basePath !== '') {
+        candidateUrls.unshift(`${origin}${basePath}/${tabSlug}`)
+        candidateUrls.push(`${origin}${basePath}/api-reference`)
+      }
       for (const cand of candidateUrls) {
         try {
           const res = await fetch(cand, { headers: { 'User-Agent': 'agent-cache/1.0' } })
