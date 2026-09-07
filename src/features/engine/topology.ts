@@ -1222,7 +1222,7 @@ export async function extractSiteTopology(
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: `Detected ${name} site — using ${name} extractor`,
+          message: `Detected ${name} site — using extractor ${name}`,
           timestamp: Date.now(),
         })
       })
@@ -1233,6 +1233,12 @@ export async function extractSiteTopology(
       // 1b. Check for Stripe multi-nested hydration navigation tree
       const stripeTree = extractStripeHierarchy(docsUrl, html)
       if (stripeTree && stripeTree.sections.length >= 2) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor stripe',
+          timestamp: Date.now(),
+        })
         return stripeTree
       }
 
@@ -1242,30 +1248,60 @@ export async function extractSiteTopology(
       // 1c. Check for mdBook chapter sidebar (Rust, Zed, Tokio, Tauri, etc.)
       const mdBookTree = extractMdBookHierarchy(doc, baseDocsUrl, isWithinScope)
       if (mdBookTree && mdBookTree.sections.length >= 1) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor mdbook',
+          timestamp: Date.now(),
+        })
         return mdBookTree
       }
 
       // 1d. Check for GitHub Primer / ActionList navigation (docs.npmjs.com, GitHub Docs, etc.)
       const primerTree = extractPrimerHierarchy(doc, baseDocsUrl, isWithinScope)
       if (primerTree && primerTree.sections.length >= 2) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor primer',
+          timestamp: Date.now(),
+        })
         return primerTree
       }
 
       // 1e. Check for modern structured sidebar groups (Cursor, Tailwind, Next, Radix, shadcn)
       const groupedTree = await extractGroupedSidebarHierarchy(doc, baseDocsUrl, isWithinScope)
       if (groupedTree && groupedTree.sections.length >= 2) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor grouped-sidebar',
+          timestamp: Date.now(),
+        })
         return groupedTree
       }
 
       // 1f. Check for documentation hub page (FFmpeg, legacy categorised index pages)
       const hubTree = await extractHubSections(doc, baseDocsUrl, isWithinScope)
       if (hubTree && hubTree.sections.length >= 2) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor doc-hub',
+          timestamp: Date.now(),
+        })
         return hubTree
       }
 
       // 1g. Check for Sphinx / ReadTheDocs navigation
       const sphinxTree = extractSphinxHierarchy(doc, baseDocsUrl, isWithinScope)
       if (sphinxTree && sphinxTree.sections.length >= 1) {
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: 'using extractor sphinx',
+          timestamp: Date.now(),
+        })
         return sphinxTree
       }
 
@@ -1338,6 +1374,12 @@ export async function extractSiteTopology(
   let domItemCount = 0
   for (const s of sections) domItemCount += s.items.length
   if (sections.length >= 2 && domItemCount >= 4) {
+    void options?.onProgress?.({
+      type: 'log',
+      level: 'info',
+      message: 'using extractor dom-sidebar',
+      timestamp: Date.now(),
+    })
     return {
       title: url.hostname,
       sections,
