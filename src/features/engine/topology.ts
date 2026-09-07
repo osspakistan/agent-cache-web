@@ -1196,11 +1196,19 @@ export async function extractSiteTopology(
     return u.replace(/\/$/, '').replace(/\.(html|mdx?)$/i, '')
   }
 
-  function isWithinScope(candidateUrl: string): boolean {
-    if (!candidateUrl.startsWith(origin)) return false
+  // Apex hostname equivalence: strip leading "www." for cross-origin matching
+  // e.g. user enters inngest.com → origin is https://inngest.com
+  //      but llms.txt links are https://www.inngest.com/... → must still match
+  const normalizedOriginHost = url.hostname.toLowerCase().replace(/^www\./, '')
 
+  function isWithinScope(candidateUrl: string): boolean {
     try {
       const candUrl = new URL(candidateUrl)
+      const candHost = candUrl.hostname.toLowerCase().replace(/^www\./, '')
+
+      // Allow apex ↔ www equivalence (e.g. inngest.com === www.inngest.com)
+      if (candHost !== normalizedOriginHost) return false
+
       if (NON_DOCS_FILTER.test(candUrl.pathname)) return false
 
       if (isSubpathDocs) {

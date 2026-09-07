@@ -641,6 +641,11 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
       })
       if (dRes.ok) {
         finalDocsHtml = await dRes.text()
+        // Follow any redirect: update docsUrl so extractSiteTopology uses the correct origin
+        // e.g. inngest.com/docs/ → www.inngest.com/docs/ (301) → origin must be www.inngest.com
+        if (dRes.url && dRes.url !== docsUrl) {
+          docsUrl = dRes.url
+        }
       }
     } catch {}
   }
