@@ -599,8 +599,22 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
   } catch {}
 
   // Ensure trailing slash for directory documentation paths (e.g. /docs -> /docs/)
+  // and strip ephemeral tracking parameters (e.g. ?ref=nav, ?utm_source=...)
   try {
     const parsedDocs = new URL(docsUrl)
+    const trackingParams = [
+      'ref',
+      'ref_src',
+      'source',
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'utm_term',
+      'utm_content',
+    ]
+    for (const p of trackingParams) {
+      parsedDocs.searchParams.delete(p)
+    }
     if (
       !parsedDocs.pathname.endsWith('/') &&
       !/\.[a-z0-9]+$/i.test(parsedDocs.pathname) &&
@@ -608,8 +622,9 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
         parsedDocs.pathname.includes('/documentation') ||
         parsedDocs.pathname.includes('/guide'))
     ) {
-      docsUrl = `${docsUrl}/`
+      parsedDocs.pathname = `${parsedDocs.pathname}/`
     }
+    docsUrl = parsedDocs.href
   } catch {}
 
   // If docsUrl resolved to a different endpoint, fetch its HTML for accurate page title/metadata

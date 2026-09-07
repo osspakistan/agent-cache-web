@@ -14,6 +14,7 @@ import type { NavHierarchy } from '../../../lib/utils/types'
 import { docusExtractor } from './docus'
 import { docusaurusExtractor } from './docusaurus'
 import { fumadocsExtractor } from './fumadocs'
+import { llmsTxtExtractor } from './llms-txt'
 import { mintlifyExtractor } from './mintlify'
 import type { DocExtractor, ScopeCheck } from './types'
 
@@ -22,6 +23,7 @@ import type { DocExtractor, ScopeCheck } from './types'
 const EXTRACTORS: DocExtractor[] = [
   mintlifyExtractor, // Mintlify scopedNav RSC
   fumadocsExtractor, // Fumadocs pageTree RSC
+  llmsTxtExtractor, // Structured hierarchical llms.txt extractor
   docusExtractor, // Docus / Nuxt Content llms.txt structured extractor
   docusaurusExtractor, // Docusaurus sidebar DOM & pillar extractor
 ]

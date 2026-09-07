@@ -130,8 +130,11 @@ export async function crawlAndExtractPages(
 
     let markdown = ''
     try {
-      // 1. Direct fetch if URL ends in .md or .mdx
-      if (task.url.endsWith('.md') || task.url.endsWith('.mdx')) {
+      if (!task.url) {
+        // Topic/Folder grouping without a dedicated URL (e.g. from structured llms.txt)
+        markdown = `This section contains documentation topics for **${task.itemTitle}**.`
+      } else if (task.url.endsWith('.md') || task.url.endsWith('.mdx')) {
+        // 1. Direct fetch if URL ends in .md or .mdx
         const res = await fetch(task.url, {
           headers: { 'User-Agent': 'agent-cache/1.0' },
           signal: AbortSignal.timeout(8000),
@@ -141,8 +144,8 @@ export async function crawlAndExtractPages(
         }
       }
 
-      // 3. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
-      if (!markdown) {
+      // 2. Try content-negotiated fetch (works for Hono, Cloudflare, Next.js docs)
+      if (!markdown && task.url) {
         try {
           const res = await fetch(task.url, {
             headers: {
@@ -162,7 +165,7 @@ export async function crawlAndExtractPages(
       }
 
       // 3. Try .md URL suffix (works for Mintlify, GitBook, Zed docs)
-      if (!markdown) {
+      if (!markdown && task.url) {
         try {
           const mdUrl = `${task.url.replace(/\/$/, '')}.md`
           const res = await fetch(mdUrl, {
@@ -183,7 +186,7 @@ export async function crawlAndExtractPages(
       }
 
       // 4. Fallback: HTML fetch with Turndown purification
-      if (!markdown) {
+      if (!markdown && task.url) {
         // Prepare URL candidates: primary task.url, and if task.url is missing a /docs prefix, try candidate with /docs
         const urlCandidates = [task.url]
         try {
@@ -279,17 +282,17 @@ export async function crawlAndExtractPages(
       }
 
       if (!markdown || markdown.trim().length === 0) {
-        markdown = `> Failed to extract content from ${task.url}\n\n*Page was unreachable or returned empty content during crawl.*`
+        markdown = `> Failed to extract content from ${task.url || task.itemTitle}\n\n*Page was unreachable or returned empty content during crawl.*`
       }
     } catch (err) {
-      console.warn(`[Crawler] Failed page ${task.url}:`, err)
-      markdown = `> Failed to extract content from ${task.url}\n\n*Error encountered during crawl.*`
+      console.warn(`[Crawler] Failed page ${task.url || task.itemTitle}:`, err)
+      markdown = `> Failed to extract content from ${task.url || task.itemTitle}\n\n*Error encountered during crawl.*`
     }
 
     // Prepend metadata frontmatter
     const frontmatter = `---
 title: "${task.itemTitle.replace(/"/g, '\\"')}"
-url: "${task.url}"
+url: "${task.url || ''}"
 section: "${task.secTitle.replace(/"/g, '\\"')}"
 ---
 

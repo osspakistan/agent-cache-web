@@ -829,12 +829,27 @@ async function extractHubSections(
     }
 
     if (items.length >= 2) {
-      sections.push({
-        title,
-        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        order: sIdx++,
-        items,
-      })
+      // Avoid adding duplicate sections with identical link sets (e.g. repetitive card grids)
+      const linkSignature = items
+        .map((it) => it.url)
+        .sort()
+        .join('|')
+      if (
+        !sections.some(
+          (s) =>
+            s.items
+              .map((it) => it.url)
+              .sort()
+              .join('|') === linkSignature,
+        )
+      ) {
+        sections.push({
+          title,
+          slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          order: sIdx++,
+          items,
+        })
+      }
     }
   }
 
@@ -1189,7 +1204,16 @@ export async function extractSiteTopology(
       if (NON_DOCS_FILTER.test(candUrl.pathname)) return false
 
       if (isSubpathDocs) {
-        const candPath = candUrl.pathname
+        let candPath = candUrl.pathname
+        // Support documentation markdown/raw route aliases (e.g. Inngest /docs-markdown/..., Nuxt /raw/...)
+        if (candPath.startsWith(`${docsScopePrefix}-markdown/`)) {
+          candPath = candPath.replace(`${docsScopePrefix}-markdown/`, `${docsScopePrefix}/`)
+        } else if (candPath === `${docsScopePrefix}-markdown`) {
+          candPath = docsScopePrefix
+        } else if (candPath.startsWith('/raw/')) {
+          candPath = candPath.replace('/raw/', `${docsScopePrefix}/`)
+        }
+
         if (!candPath.startsWith(`${docsScopePrefix}/`) && candPath !== docsScopePrefix) {
           return false
         }
