@@ -65,6 +65,55 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
             text.trim().length > 10 &&
             (cType.includes('text') || cType.includes('markdown') || !cType)
           ) {
+            // Detect meta-index: ALL links in the file point to .txt files (no real doc pages).
+            // e.g. better-auth.com/llms.txt links only to /docs/llms.txt, /docs/1.6/llms.txt.
+            // In that case, prefer the first same-origin docs llms.txt link found within it.
+            const allLinks = [...text.matchAll(/\]\((https?:\/\/[^)]+|\/[^)]+)\)/g)].map((m) =>
+              m[1].trim(),
+            )
+            const docLinks = allLinks.filter((l) => !l.endsWith('.txt'))
+            const isMetaIndex = allLinks.length > 0 && docLinks.length === 0
+
+            if (isMetaIndex) {
+              // Find the first same-origin .txt link that looks like a full docs index
+              const docsIndexLink = allLinks.find((l) => {
+                try {
+                  const resolved = new URL(l, candidate)
+                  return (
+                    resolved.origin === origin &&
+                    resolved.pathname !== '/llms.txt' &&
+                    resolved.pathname.endsWith('.txt')
+                  )
+                } catch {
+                  return false
+                }
+              })
+              if (docsIndexLink) {
+                try {
+                  const realUrl = new URL(docsIndexLink, candidate).href
+                  // Verify it returns content
+                  const realRes = await fetch(realUrl, {
+                    headers: { 'User-Agent': 'agent-cache-probe/1.0' },
+                    signal: AbortSignal.timeout(4000),
+                  })
+                  if (realRes.ok) {
+                    const realText = await realRes.text()
+                    if (realText.trim().length > 100) {
+                      hasLlmsTxt = true
+                      llmsTxtUrl = realUrl
+                      break
+                    }
+                  }
+                } catch {}
+              }
+              // Fallback: still mark as found even if we couldn't resolve the sub-index
+              if (!hasLlmsTxt) {
+                hasLlmsTxt = true
+                llmsTxtUrl = candidate
+              }
+              break
+            }
+
             hasLlmsTxt = true
             llmsTxtUrl = candidate
             break

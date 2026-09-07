@@ -44,15 +44,19 @@ export async function initDb(): Promise<void> {
       description TEXT,
       logo_url TEXT,
       github_url TEXT,
+      doc_platform TEXT,
       r2_prefix TEXT NOT NULL,
       zip_size_bytes INTEGER DEFAULT 0,
       created_at INTEGER NOT NULL,
       completed_at INTEGER
     );
   `)
-  // Auto-migrate existing databases that may lack github_url column
+  // Auto-migrate existing databases that may lack github_url or doc_platform columns
   try {
     await db.execute(`ALTER TABLE jobs ADD COLUMN github_url TEXT;`)
+  } catch {}
+  try {
+    await db.execute(`ALTER TABLE jobs ADD COLUMN doc_platform TEXT;`)
   } catch {}
 }
 

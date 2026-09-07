@@ -205,9 +205,13 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       timestamp: Date.now(),
     })
 
+    let docPlatform: string | undefined
     const hierarchy = await extractSiteTopology(resolved.docsUrl, {
       llmsTxtUrl: decision.llmsTxtUrl,
       onProgress: emit,
+      onDetectedPlatform: (platform) => {
+        docPlatform = platform
+      },
     })
     await uploadToR2(
       `jobs/${job.id}/.dingdong/03-nav-tree.json`,
@@ -253,6 +257,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       status: 'crawling',
       strategy: decision.strategy,
       page_count: totalItems,
+      doc_platform: docPlatform,
     })
 
     await emit({
