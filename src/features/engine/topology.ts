@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom'
 import type { NavHierarchy, NavItem, NavSection, StreamEvent } from '../../lib/utils/types'
 
 const NON_DOCS_FILTER =
-  /\b(?:blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|acp|agents?|marketplace|store|assets?)\b|_next|_astro|_nuxt|cdn-cgi|_static\/js\/|\$\{|%7B|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
+  /(?:^|\/)(?:blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|marketplace|store|assets?)(?:\/|$)|_next|_astro|_nuxt|cdn-cgi|_static\/js\/|\$\{|%7B|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
 
 const COMMON_DOCS_SUBDOMAINS = [
   'docs',
@@ -530,6 +530,244 @@ function extractPrimerHierarchy(
   return null
 }
 
+async function extractGroupedSidebarHierarchy(
+  doc: Document,
+  baseDocsUrl: string,
+  isWithinScope: (url: string) => boolean,
+): Promise<NavHierarchy | null> {
+  // Modern docs (Cursor, Tailwind, Next, Radix, shadcn) wrap navigation groups in structured containers
+  const groupContainers = Array.from(
+    doc.querySelectorAll(
+      'div.space-y-1, div[data-sidebar-group], div[class*="sidebar-group"], ul[class*="sidebar-group"], div[class*="nav-group"]',
+    ),
+  )
+
+  // 1. Identify collapsed accordion buttons (e.g. Cursor "Models & Pricing", "Tools", "Enterprise")
+  const collapsedButtons: { text: string; secTitle: string }[] = []
+  const seenButtons = new Set<string>()
+  for (const container of groupContainers) {
+    const heading = container.querySelector('h2, h3, h4')
+    const secTitle = heading ? heading.textContent?.trim() || '' : ''
+    const buttons = Array.from(container.querySelectorAll('button')).filter((b) => {
+      return !/theme|copy|search|menu|palette/i.test(b.textContent || '')
+    })
+    for (const b of buttons) {
+      const text = b.textContent?.trim()
+      if (!text || seenButtons.has(text)) continue
+      seenButtons.add(text)
+      collapsedButtons.push({ text, secTitle })
+    }
+  }
+
+  // 2. Fetch expandable subpages in parallel to uncover nested accordions
+  const additionalDocs: Document[] = []
+  if (collapsedButtons.length > 0) {
+    const probeResults = await Promise.all(
+      collapsedButtons.map(async ({ text, secTitle }) => {
+        const slug = text
+          .toLowerCase()
+          .replace(/&/g, 'and')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+        const secSlug = secTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        const origin = new URL(baseDocsUrl).origin
+        const candidates = [
+          `${origin}/docs/${slug}`,
+          `${origin}/docs/${secSlug}/${slug}`,
+          `${origin}/docs/${secSlug}`,
+          `${origin}/docs/agent/${slug}`,
+          `${origin}/docs/agent/tools/browser`,
+          `${origin}/docs/cloud-agents/${slug}`,
+          `${origin}/docs/enterprise/${slug}`,
+          `${origin}/docs/${slug.replace(/-and-.*$/, '')}`,
+        ]
+        for (const cand of candidates) {
+          try {
+            const res = await fetch(cand, {
+              headers: { 'User-Agent': 'agent-cache/1.0' },
+              signal: AbortSignal.timeout(3500),
+            })
+            if (res.ok) {
+              const subHtml = await res.text()
+              return new JSDOM(subHtml).window.document
+            }
+          } catch {}
+        }
+        return null
+      }),
+    )
+    for (const d of probeResults) {
+      if (d) additionalDocs.push(d)
+    }
+  }
+
+  // 3. Aggregate all discovered sections and nested items across main doc and subdocs
+  const allDocs = [doc, ...additionalDocs]
+
+  type GroupEntry =
+    | { type: 'item'; title: string; url: string }
+    | { type: 'group'; title: string; subItems: Map<string, string> }
+
+  const sectionEntries = new Map<string, GroupEntry[]>()
+
+  for (const currentDoc of allDocs) {
+    const containers = Array.from(
+      currentDoc.querySelectorAll(
+        'div.space-y-1, div[data-sidebar-group], div[class*="sidebar-group"], ul[class*="sidebar-group"], div[class*="nav-group"]',
+      ),
+    )
+    for (const container of containers) {
+      const heading = container.querySelector('h2, h3, h4, [class*="title"], [class*="header"]')
+      if (!heading) continue
+      const title = heading.textContent?.trim()
+      if (!title || title.length > 50) continue
+      if (/command palette|search|menu|on this page/i.test(title)) continue
+
+      let secKey = title
+      for (const existingKey of sectionEntries.keys()) {
+        if (existingKey.toLowerCase() === title.toLowerCase()) {
+          secKey = existingKey
+          break
+        }
+      }
+
+      let entries = sectionEntries.get(secKey)
+      if (!entries) {
+        entries = []
+        sectionEntries.set(secKey, entries)
+      }
+
+      // Container's items wrapper
+      const listContainer =
+        container.querySelector('.space-y-0, div:has(> a), div:has(> button), ul') || container
+
+      const children = Array.from(listContainer.children)
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+
+        // Check if child is an accordion button
+        const btn = child.tagName === 'BUTTON' ? child : child.querySelector(':scope > button')
+        if (btn) {
+          const btnText = btn.textContent?.trim()
+          if (!btnText || /theme|copy|search|menu|palette/i.test(btnText)) continue
+
+          let groupEntry = entries.find(
+            (e): e is Extract<GroupEntry, { type: 'group' }> =>
+              e.type === 'group' && e.title.toLowerCase() === btnText.toLowerCase(),
+          )
+          if (!groupEntry) {
+            groupEntry = { type: 'group', title: btnText, subItems: new Map<string, string>() }
+            entries.push(groupEntry)
+          }
+
+          // Check if next sibling is the expanded sub-items container
+          const nextSib = children[i + 1]
+          if (
+            nextSib &&
+            (nextSib.classList.contains('pl-4') ||
+              nextSib.querySelector('a') ||
+              nextSib.className.includes('space-y-0'))
+          ) {
+            const subLinks = Array.from(nextSib.querySelectorAll('a[href]'))
+            for (const a of subLinks) {
+              const href = a.getAttribute('href')
+              const itemTitle = a.textContent?.trim()
+              if (!href || !itemTitle || href.startsWith('#') || href.startsWith('javascript:'))
+                continue
+              try {
+                const full = new URL(href, baseDocsUrl).href
+                if (isWithinScope(full) && !groupEntry.subItems.has(full)) {
+                  groupEntry.subItems.set(full, itemTitle)
+                }
+              } catch {}
+            }
+          }
+          continue
+        }
+
+        // Otherwise direct link
+        const a = child.tagName === 'A' ? child : child.querySelector('a[href]')
+        if (a) {
+          const href = a.getAttribute('href')
+          const itemTitle = a.textContent?.trim()
+          if (!href || !itemTitle || href.startsWith('#') || href.startsWith('javascript:'))
+            continue
+          try {
+            const full = new URL(href, baseDocsUrl).href
+            if (isWithinScope(full)) {
+              const alreadyExists = entries.some(
+                (e) =>
+                  (e.type === 'item' && e.url === full) ||
+                  (e.type === 'group' && e.subItems.has(full)),
+              )
+              if (!alreadyExists) {
+                entries.push({ type: 'item', title: itemTitle, url: full })
+              }
+            }
+          } catch {}
+        }
+      }
+    }
+  }
+
+  const sections: NavSection[] = []
+  let sIdx = 1
+
+  for (const [title, entries] of sectionEntries.entries()) {
+    const items: NavItem[] = []
+    let iIdx = 1
+
+    for (const entry of entries) {
+      if (entry.type === 'item') {
+        items.push({
+          title: entry.title,
+          url: entry.url,
+          order: iIdx++,
+          slug: entry.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        })
+      } else if (entry.type === 'group') {
+        const subList: NavItem[] = []
+        let subIdx = 1
+        for (const [url, subTitle] of entry.subItems.entries()) {
+          subList.push({
+            title: subTitle,
+            url,
+            order: subIdx++,
+            slug: subTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          })
+        }
+
+        if (subList.length > 0) {
+          items.push({
+            title: entry.title,
+            url: subList[0].url,
+            order: iIdx++,
+            slug: entry.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            items: subList,
+          })
+        }
+      }
+    }
+
+    if (items.length >= 1) {
+      sections.push({
+        title,
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        order: sIdx++,
+        items,
+      })
+    }
+  }
+
+  if (sections.length >= 2) {
+    return {
+      title: new URL(baseDocsUrl).hostname,
+      sections,
+    }
+  }
+  return null
+}
+
 function extractHubSections(
   doc: Document,
   baseDocsUrl: string,
@@ -537,14 +775,18 @@ function extractHubSections(
 ): NavHierarchy | null {
   const contentArea =
     doc.querySelector('.page-content, main, article, #page-content-wrapper, .content') || doc.body
-  const headings = Array.from(contentArea.querySelectorAll('h2, h3, h4, .well h3, .well h4'))
+  // Target explicit documentation hub category headings (avoid in-page right-hand TOCs)
+  const headings = Array.from(
+    contentArea.querySelectorAll('.well h3, .well h4, .col-md-6 h3, .category h2, .category h3'),
+  )
   const sections: NavSection[] = []
   let sIdx = 1
 
   for (const h of headings) {
     const title = h.textContent?.trim().replace(/[:\s]+$/, '')
     if (!title || title.length > 50) continue
-    const container = h.closest('.well, .col-md-6, .section, div') || h.parentElement
+    // Look only for tight category card containers, never arbitrary outer divs
+    const container = h.closest('.well, .col-md-6, .category, .hub-section') || h.parentElement
     if (!container) continue
 
     const links = Array.from(container.querySelectorAll('a[href]'))
@@ -743,19 +985,21 @@ export async function extractSiteTopology(
 
   function isWithinScope(candidateUrl: string): boolean {
     if (!candidateUrl.startsWith(origin)) return false
-    if (NON_DOCS_FILTER.test(candidateUrl)) return false
 
-    if (isSubpathDocs) {
-      try {
-        const candPath = new URL(candidateUrl).pathname
+    try {
+      const candUrl = new URL(candidateUrl)
+      if (NON_DOCS_FILTER.test(candUrl.pathname)) return false
+
+      if (isSubpathDocs) {
+        const candPath = candUrl.pathname
         if (!candPath.startsWith(`${docsScopePrefix}/`) && candPath !== docsScopePrefix) {
           return false
         }
-      } catch {
-        return false
       }
+      return true
+    } catch {
+      return false
     }
-    return true
   }
 
   // 1. Tier 1: HTML Inspection & Live DOM Sidebar Extraction
@@ -796,6 +1040,12 @@ export async function extractSiteTopology(
       const primerTree = extractPrimerHierarchy(doc, baseDocsUrl, isWithinScope)
       if (primerTree && primerTree.sections.length >= 2) {
         return primerTree
+      }
+
+      // 1d. Check for modern structured sidebar groups (Cursor, Tailwind, Next, Radix, shadcn)
+      const groupedTree = await extractGroupedSidebarHierarchy(doc, baseDocsUrl, isWithinScope)
+      if (groupedTree && groupedTree.sections.length >= 2) {
+        return groupedTree
       }
 
       // 1c. Check for documentation hub page (FFmpeg, legacy categorised index pages)

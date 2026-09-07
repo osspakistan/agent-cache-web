@@ -159,9 +159,10 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
   // Run probes concurrently
   await Promise.all([...probeTasks, mdProbeTask, ghProbeTask])
 
-  if (isDirectMd) {
+  // 1. Priority 1: GitHub markdown repository
+  if (gitRepo) {
     return {
-      strategy: 'direct-raw-md',
+      strategy: 'github-raw-markdown',
       hasLlmsFull,
       llmsFullUrl,
       hasLlmsTxt,
@@ -171,13 +172,15 @@ export async function probeAcquisitionLadder(docsUrl: string): Promise<LadderDec
     }
   }
 
-  if (gitRepo) {
+  // 2. Priority 2: Direct raw markdown endpoint / content-negotiation
+  if (isDirectMd) {
     return {
-      strategy: 'github-raw-markdown',
+      strategy: 'direct-raw-md',
       hasLlmsFull,
       llmsFullUrl,
       hasLlmsTxt,
       llmsTxtUrl,
+      directMdSampleUrl,
       gitRepo,
     }
   }

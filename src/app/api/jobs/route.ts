@@ -1,5 +1,6 @@
 import { startJobEngine } from '../../../features/engine'
 import { createNewJob, listCompletedJobs } from '../../../features/jobs'
+import { detectParkedDomain } from '../../../lib/utils/parking'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
@@ -32,8 +33,21 @@ export const POST = async (c: AppContext) => {
     )
   }
 
+  const normalizedUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`
+  const parkingCheck = await detectParkedDomain(normalizedUrl)
+  if (parkingCheck.isParked) {
+    return c.json(
+      {
+        ok: false,
+        error: parkingCheck.message || 'Target domain is parked or inactive.',
+        code: 'PARKED_DOMAIN',
+      },
+      400,
+    )
+  }
+
   try {
-    const job = await createNewJob(targetUrl)
+    const job = await createNewJob(normalizedUrl)
 
     // Launch engine in background
     startJobEngine(job).catch((err) =>

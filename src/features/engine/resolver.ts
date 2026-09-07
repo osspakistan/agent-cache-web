@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom'
 import { ErrorFactory } from '../../lib/utils/errors'
+import { detectParkedDomain } from '../../lib/utils/parking'
 
 export interface ResolveResult {
   originUrl: string
@@ -401,20 +402,19 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
           docsUrl = targetRes.value.url
         }
 
-        // Detect parked / for-sale expired domains
-        const lowerHtml = targetHtml.toLowerCase()
-        if (
-          lowerHtml.includes('domain is for sale') ||
-          lowerHtml.includes('buy this domain') ||
-          lowerHtml.includes('parked domain') ||
-          lowerHtml.includes('domain has expired') ||
-          (lowerHtml.includes('sale-banner') && lowerHtml.includes('find the best information'))
-        ) {
+        // Fast detect parked / for-sale expired domains
+        const parkingCheck = await detectParkedDomain(target)
+        if (parkingCheck.isParked) {
           throw ErrorFactory.siteGone(target, 410)
         }
       } else if (targetRes.value.status === 410) {
         throw ErrorFactory.siteGone(target, 410)
       } else if (targetRes.value.status === 403) {
+        // Also check if 403 was caused by a parking lander (like Sedo Cloudflare challenge)
+        const parkingCheck = await detectParkedDomain(target)
+        if (parkingCheck.isParked) {
+          throw ErrorFactory.siteGone(target, 410)
+        }
         // Only throw if target explicitly was a docs URL; if root, let fallback attempt docs subdomain
         if (isAlreadyDocs) {
           throw ErrorFactory.botBlocked(target, 403)
