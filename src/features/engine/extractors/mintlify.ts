@@ -37,8 +37,16 @@ interface MintlifyTab {
   href?: string
 }
 
+interface MintlifyDropdown {
+  dropdown?: string
+  groups?: MintlifyGroup[]
+  pages?: (MintlifyPage | string)[]
+  href?: string
+}
+
 interface MintlifyNav {
   tabs?: MintlifyTab[]
+  dropdowns?: MintlifyDropdown[]
 }
 
 // ---------------------------------------------------------------------------
@@ -215,14 +223,37 @@ export const mintlifyExtractor: DocExtractor = {
       const urlObj = new URL(docsUrl)
       const origin = urlObj.origin
       const initialNav = parseScopedNavFromHtml(html)
-      if (!initialNav?.tabs) return null
+      if (!initialNav) return null
+
+      // Normalize tabs or dropdowns into a unified tab list
+      const rawTabs: MintlifyTab[] = [
+        ...(initialNav.tabs || []),
+        ...(initialNav.dropdowns?.map((d) => ({
+          tab: d.dropdown,
+          groups: d.groups,
+          pages: d.pages,
+          href: d.href,
+        })) || []),
+      ]
+
+      if (rawTabs.length === 0) return null
 
       const sections: NavSection[] = []
       const processedTabs = new Set<string>()
       let sIdx = 1
 
       function processHydratedTabs(nav: MintlifyNav) {
-        for (const tab of nav.tabs || []) {
+        const currentTabs: MintlifyTab[] = [
+          ...(nav.tabs || []),
+          ...(nav.dropdowns?.map((d) => ({
+            tab: d.dropdown,
+            groups: d.groups,
+            pages: d.pages,
+            href: d.href,
+          })) || []),
+        ]
+
+        for (const tab of currentTabs) {
           if (!tab.tab || processedTabs.has(tab.tab)) continue
           if (!tab.groups || tab.groups.length === 0) continue
 
@@ -249,7 +280,7 @@ export const mintlifyExtractor: DocExtractor = {
 
       // 2. Probe unhydrated tabs
       const basePath = urlObj.pathname.replace(/\/$/, '')
-      for (const tab of initialNav.tabs || []) {
+      for (const tab of rawTabs) {
         if (tab.tab && !processedTabs.has(tab.tab)) {
           const candidateUrls: string[] = []
           const firstPage = tab.pages?.[0]
@@ -287,7 +318,7 @@ export const mintlifyExtractor: DocExtractor = {
       }
 
       // 3. Final pass: single-page or non-grouped tabs (e.g. Changelog)
-      for (const tab of initialNav.tabs || []) {
+      for (const tab of rawTabs) {
         if (tab.tab && !processedTabs.has(tab.tab)) {
           if (tab.pages && tab.pages.length > 0) {
             processedTabs.add(tab.tab)
