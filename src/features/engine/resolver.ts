@@ -454,16 +454,24 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
 
   // If target wasn't docs, search for outbound documentation link in targetHtml
   if (!isAlreadyDocs && targetHtml) {
+    const candidates: { url: string; score: number }[] = []
+
+    // 1. DOM-based link extraction with crash resilience
     try {
       const dom = new JSDOM(targetHtml)
       const doc = dom.window.document
       const links = Array.from(doc.querySelectorAll('a[href]'))
-      const candidates: { url: string; score: number }[] = []
 
       for (const link of links) {
         const href = link.getAttribute('href') || ''
         const text = (link.textContent || '').trim().toLowerCase()
-        if (!href || href.startsWith('#') || href.startsWith('javascript:')) continue
+        if (
+          !href ||
+          href.startsWith('#') ||
+          href.startsWith('javascript:') ||
+          href.startsWith('mailto:')
+        )
+          continue
 
         let fullUrl: string
         try {
@@ -483,29 +491,80 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
         }
 
         // Exact link anchor text
-        if (text === 'documentation' || text === 'docs') score += 80
+        if (text === 'documentation' || text === 'docs') score += 90
         else if (text === 'api reference' || text === 'developers' || text === 'developer docs')
           score += 60
         else if (text.includes('doc') || text.includes('developer')) score += 40
 
-        // Path matches
+        // Path matches (exact /docs or /documentation takes top priority over deep guides)
         if (linkPath === '/docs' || linkPath === '/documentation' || linkPath === '/api-reference')
-          score += 50
+          score += 95
         else if (linkPath.startsWith('/docs/') || linkPath.startsWith('/documentation/'))
           score += 30
-        else if (linkPath === '/guides' || linkPath === '/guide') score += 15
-        else if (linkPath.startsWith('/guides/') || linkPath.startsWith('/guide/')) score += 5 // specific article/blog
+        else if (linkPath === '/guides' || linkPath === '/guide') score += 20
+        else if (linkPath.startsWith('/guides/') || linkPath.startsWith('/guide/')) score += 10
 
         if (score > 0) {
           candidates.push({ url: fullUrl, score })
         }
       }
-
-      if (candidates.length > 0) {
-        candidates.sort((a, b) => b.score - a.score)
-        docsUrl = candidates[0].url
-      }
     } catch {}
+
+    // 2. Resilient Regex-based Link Scanner (immune to JSDOM CSS/DOM parser crashes)
+    if (candidates.length === 0) {
+      try {
+        const linkRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
+        const linkMatches = targetHtml.matchAll(linkRegex)
+        for (const match of linkMatches) {
+          const href = match[1].trim()
+          const text = match[2]
+            .replace(/<[^>]+>/g, '')
+            .trim()
+            .toLowerCase()
+          if (
+            !href ||
+            href.startsWith('#') ||
+            href.startsWith('javascript:') ||
+            href.startsWith('mailto:')
+          )
+            continue
+
+          let fullUrl: string
+          try {
+            fullUrl = new URL(href, target).href
+          } catch {
+            continue
+          }
+
+          let score = 0
+          const parsedLink = new URL(fullUrl)
+          const linkHost = parsedLink.hostname.toLowerCase()
+          const linkPath = parsedLink.pathname.toLowerCase().replace(/\/$/, '')
+
+          if (COMMON_DOCS_SUBDOMAINS.some((sub) => linkHost.startsWith(`${sub}.`))) score += 100
+          if (
+            linkPath === '/docs' ||
+            linkPath === '/documentation' ||
+            linkPath === '/api-reference'
+          )
+            score += 95
+          if (text === 'documentation' || text === 'docs') score += 90
+          else if (text === 'api reference' || text === 'developers' || text === 'developer docs')
+            score += 60
+          else if (text.includes('doc') || text.includes('developer')) score += 40
+          if (linkPath.startsWith('/docs/') || linkPath.startsWith('/documentation/')) score += 30
+
+          if (score > 0) {
+            candidates.push({ url: fullUrl, score })
+          }
+        }
+      } catch {}
+    }
+
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => b.score - a.score)
+      docsUrl = candidates[0].url
+    }
   }
 
   // Fallback to Tavily if direct probe failed, or didn't find docs path
@@ -517,6 +576,27 @@ export async function resolveTargetDocs(rawInput: string): Promise<ResolveResult
       resolvedVia = 'tavily'
     }
   }
+
+  // Canonical Parent Root Elevation:
+  // If resolution returned a deep leaf page (e.g. /docs/reference/api/introduction),
+  // check if the parent documentation hub (e.g. /docs or /documentation) exists and returns 200 OK.
+  try {
+    const pUrl = new URL(docsUrl)
+    const m = pUrl.pathname.match(/^(\/(?:docs|documentation|guides?|manual|api))\b/i)
+    if (m && pUrl.pathname !== m[1] && pUrl.pathname !== `${m[1]}/`) {
+      const candidateRoot = `${pUrl.origin}${m[1]}/`
+      try {
+        const rootCheck = await fetch(candidateRoot, {
+          method: 'HEAD',
+          headers: { 'User-Agent': 'agent-cache/1.0' },
+          signal: AbortSignal.timeout(4000),
+        })
+        if (rootCheck.ok && rootCheck.status < 400) {
+          docsUrl = candidateRoot
+        }
+      } catch {}
+    }
+  } catch {}
 
   // Ensure trailing slash for directory documentation paths (e.g. /docs -> /docs/)
   try {

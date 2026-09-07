@@ -325,7 +325,7 @@ export function DocumentationTreeSection({
             dangerouslySetInnerHTML={{
               __html: `
                 #${id}, #${id} ul { list-style: none; margin: 0; padding: 0; }
-                #${id} .tree-children { padding-left: 18px; border-left: 1px solid var(--rule); margin-left: 8px; }
+                #${id} .tree-children { padding-left: 12px; border-left: 1px solid var(--rule); margin-left: 8px; }
                 #${id} .tree-dir-btn {
                   display: flex; align-items: center; gap: 6px;
                   width: 100%; padding: 3px 12px;
@@ -342,7 +342,7 @@ export function DocumentationTreeSection({
                 }
                 #${id} .tree-node-name { color: var(--ink); font-weight: 500; }
                 #${id} .tree-file-item {
-                  padding: 2px 12px 2px 30px;
+                  padding: 2px 12px;
                   font-family: var(--mono, ui-monospace, monospace); font-size: 12px;
                 }
                 #${id} .tree-file-name { color: var(--ink-soft); transition: color 0.15s ease; }

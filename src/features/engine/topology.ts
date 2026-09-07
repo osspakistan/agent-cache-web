@@ -768,49 +768,246 @@ async function extractGroupedSidebarHierarchy(
   return null
 }
 
-function extractHubSections(
+function getTopicScope(urlStr: string): string {
+  try {
+    const u = new URL(urlStr)
+    let p = u.pathname.replace(/\/$/, '')
+    if (p.endsWith('/overview') || p.endsWith('/introduction') || p.endsWith('/index')) {
+      p = p.substring(0, p.lastIndexOf('/'))
+    }
+    return `${p}/`
+  } catch {
+    return urlStr
+  }
+}
+
+async function probeChildSidebar(
+  cardUrl: string,
+  isWithinScope: (url: string) => boolean,
+): Promise<NavItem[] | null> {
+  try {
+    const res = await fetch(cardUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AgentCache/1.0)' },
+      signal: AbortSignal.timeout(6000),
+    })
+    if (!res.ok) return null
+    const html = await res.text()
+    const dom = new JSDOM(html)
+    const doc = dom.window.document
+
+    const topicScope = getTopicScope(cardUrl)
+
+    const nav = doc.querySelector(
+      'nav[aria-labelledby*="nav"], nav[class*="border-r"], nav[aria-label*="sidebar" i], aside nav, .docs-sidebar',
+    )
+    if (!nav) return null
+
+    const cardNorm = new URL(cardUrl).pathname.replace(/\/$/, '')
+    const seenUrls = new Set<string>()
+
+    // 1. Check if sidebar has structured group headers
+    const headerEls = Array.from(
+      nav.querySelectorAll(
+        'span.font-mono, [class*="uppercase"], [class*="group-header"], [class*="tracking-wider"], h3, h4',
+      ),
+    )
+
+    const firstHeader = headerEls[0]
+    const rootItems: NavItem[] = []
+    const allNavLinks = Array.from(nav.querySelectorAll('a[href]'))
+
+    if (firstHeader) {
+      for (const a of allNavLinks) {
+        if (firstHeader.compareDocumentPosition(a) & 2) {
+          const href = a.getAttribute('href') || ''
+          if (
+            !href ||
+            href.startsWith('#') ||
+            href.startsWith('javascript:') ||
+            href.startsWith('mailto:')
+          )
+            continue
+          try {
+            const full = new URL(href, cardUrl)
+            if (!full.pathname.startsWith(topicScope)) continue
+            if (!isWithinScope(full.href)) continue
+            const norm = full.pathname.replace(/\/$/, '')
+            if (norm === cardNorm || seenUrls.has(full.href)) continue
+            seenUrls.add(full.href)
+            const titleEl = a.querySelector('div, span, p, h3, h4, strong') || a
+            const title = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+            if (title && title.length <= 100) {
+              rootItems.push({ title, url: full.href, order: rootItems.length + 1 })
+            }
+          } catch {}
+        }
+      }
+    }
+
+    const groups: NavItem[] = []
+
+    for (const h of headerEls) {
+      const groupTitle = h.textContent?.trim()
+      if (!groupTitle || groupTitle.length > 50 || /main menu/i.test(groupTitle)) continue
+
+      const container = h.closest('div, section, ul')
+      if (!container) continue
+
+      const links = Array.from(container.querySelectorAll('a[href]'))
+      const items: NavItem[] = []
+
+      for (const a of links) {
+        const href = a.getAttribute('href') || ''
+        if (
+          !href ||
+          href.startsWith('#') ||
+          href.startsWith('javascript:') ||
+          href.startsWith('mailto:')
+        )
+          continue
+
+        try {
+          const full = new URL(href, cardUrl)
+          if (!full.pathname.startsWith(topicScope)) continue
+          if (!isWithinScope(full.href)) continue
+
+          const norm = full.pathname.replace(/\/$/, '')
+          if (norm === cardNorm || seenUrls.has(full.href)) continue
+          seenUrls.add(full.href)
+
+          const titleEl = a.querySelector('div, span, p, h3, h4, strong') || a
+          const title = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+          if (title && title.length <= 100) {
+            items.push({ title, url: full.href, order: items.length + 1 })
+          }
+        } catch {}
+      }
+
+      if (items.length > 0) {
+        groups.push({
+          title: groupTitle,
+          url: items[0].url,
+          order: groups.length + 1,
+          items,
+        })
+      }
+    }
+
+    if (groups.length >= 2 || rootItems.length > 0) {
+      return [...rootItems, ...groups]
+    }
+
+    // 2. Fallback to flat list of topic links if no groups found
+    const allLinks = Array.from(nav.querySelectorAll('a[href]'))
+    const flatItems: NavItem[] = []
+    for (const a of allLinks) {
+      const href = a.getAttribute('href') || ''
+      if (
+        !href ||
+        href.startsWith('#') ||
+        href.startsWith('javascript:') ||
+        href.startsWith('mailto:')
+      )
+        continue
+
+      try {
+        const full = new URL(href, cardUrl)
+        if (!full.pathname.startsWith(topicScope)) continue
+        if (!isWithinScope(full.href)) continue
+
+        const norm = full.pathname.replace(/\/$/, '')
+        if (norm === cardNorm || seenUrls.has(full.href)) continue
+        seenUrls.add(full.href)
+
+        const titleEl = a.querySelector('h3, h4, p, span, strong') || a
+        const title = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+        if (title && title.length <= 100) {
+          flatItems.push({
+            title,
+            url: full.href,
+            order: flatItems.length + 1,
+          })
+        }
+      } catch {}
+    }
+
+    return flatItems.length >= 2 ? flatItems : null
+  } catch {
+    return null
+  }
+}
+
+async function extractHubSections(
   doc: Document,
   baseDocsUrl: string,
   isWithinScope: (url: string) => boolean,
-): NavHierarchy | null {
+): Promise<NavHierarchy | null> {
   const contentArea =
     doc.querySelector('.page-content, main, article, #page-content-wrapper, .content') || doc.body
   // Target explicit documentation hub category headings (avoid in-page right-hand TOCs)
   const headings = Array.from(
-    contentArea.querySelectorAll('.well h3, .well h4, .col-md-6 h3, .category h2, .category h3'),
+    contentArea.querySelectorAll(
+      '.well h3, .well h4, .col-md-6 h3, .category h2, .category h3, h2',
+    ),
   )
   const sections: NavSection[] = []
   let sIdx = 1
 
   for (const h of headings) {
     const title = h.textContent?.trim().replace(/[:\s]+$/, '')
-    if (!title || title.length > 50) continue
-    // Look only for tight category card containers, never arbitrary outer divs
-    const container = h.closest('.well, .col-md-6, .category, .hub-section') || h.parentElement
+    if (!title || title.length > 60) continue
+
+    // Find parent container (card grid, bordered category section, or well)
+    const container =
+      h.closest(
+        '.well, .col-md-6, .category, .hub-section, div[class*="border"], div[class*="grid"], section',
+      ) || h.parentElement
     if (!container) continue
 
     const links = Array.from(container.querySelectorAll('a[href]'))
     const items: NavItem[] = []
+    let iIdx = 1
+
     for (const a of links) {
       const href = a.getAttribute('href')
-      const itemTitle = a.textContent?.trim()
       if (
         !href ||
-        !itemTitle ||
         href.startsWith('#') ||
         href.startsWith('mailto:') ||
         href.startsWith('javascript:')
       )
         continue
+
+      // Card title extraction: prefer heading, bold title, or clean text container
+      const titleEl =
+        a.querySelector(
+          'h3, h4, p.text-base, p.font-medium, strong, span.text-base, [class*="title"]',
+        ) || a
+      const descEl = a.querySelector(
+        'p.text-sm, span.text-sm, span[class*="text-foreground-light"], span[class*="description"]',
+      )
+
+      let cleanTitle = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+      const desc = descEl?.textContent?.trim() || ''
+
+      if (desc && cleanTitle.includes(desc)) {
+        cleanTitle = cleanTitle.replace(desc, '').trim()
+      }
+      if (/explore more|more on/i.test(cleanTitle) && cleanTitle.length > 30) {
+        const short = cleanTitle.split(/about|\/guides/i)[0].trim()
+        cleanTitle = short || cleanTitle
+      }
+
+      if (!cleanTitle || cleanTitle.length > 80) continue
+
       try {
         const full = new URL(href, baseDocsUrl).href
-        if (isWithinScope(full)) {
-          if (!items.some((it) => it.url === full)) {
-            items.push({ title: itemTitle, url: full, order: items.length + 1 })
-          }
+        if (isWithinScope(full) && !items.some((it) => it.url === full)) {
+          items.push({ title: cleanTitle, url: full, order: iIdx++ })
         }
       } catch {}
     }
+
     if (items.length >= 2) {
       sections.push({
         title,
@@ -822,6 +1019,187 @@ function extractHubSections(
   }
 
   if (sections.length >= 2) {
+    async function probeSectionModule(
+      section: NavSection,
+      baseDocsUrl: string,
+      isWithinScope: (url: string) => boolean,
+    ): Promise<NavSection | null> {
+      if (section.items.length < 2) return null
+
+      // Find longest common path prefix across all items in this section
+      const pathLists = section.items.map((it) => {
+        try {
+          return new URL(it.url).pathname.split('/').filter(Boolean)
+        } catch {
+          return []
+        }
+      })
+      if (pathLists.length === 0 || pathLists[0].length === 0) return null
+
+      const commonSegments: string[] = []
+      for (let i = 0; i < pathLists[0].length; i++) {
+        const seg = pathLists[0][i]
+        if (pathLists.every((p) => p[i] === seg)) {
+          commonSegments.push(seg)
+        } else {
+          break
+        }
+      }
+
+      let commonPath = `/${commonSegments.join('/')}`
+      if (commonPath.endsWith('/quickstarts')) {
+        commonPath = commonPath.replace(/\/quickstarts$/, '')
+      }
+
+      if (commonPath.split('/').filter(Boolean).length < 2) return null
+
+      try {
+        const parentUrl = new URL(commonPath, baseDocsUrl).href
+        const res = await fetch(parentUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AgentCache/1.0)' },
+          signal: AbortSignal.timeout(6000),
+        })
+        if (!res.ok) return null
+        const html = await res.text()
+        const dom = new JSDOM(html)
+        const doc = dom.window.document
+
+        const nav = doc.querySelector(
+          'nav[aria-labelledby*="nav"], nav[class*="border-r"], nav[aria-label*="sidebar" i], aside nav, .docs-sidebar',
+        )
+        if (!nav) return null
+
+        const headerEls = Array.from(
+          nav.querySelectorAll(
+            'span.font-mono, [class*="uppercase"], [class*="group-header"], [class*="tracking-wider"], h3, h4',
+          ),
+        )
+        if (headerEls.length < 2) return null
+
+        const seenUrls = new Set<string>()
+        const firstHeader = headerEls[0]
+        const rootItems: NavItem[] = []
+        const allNavLinks = Array.from(nav.querySelectorAll('a[href]'))
+
+        if (firstHeader) {
+          for (const a of allNavLinks) {
+            if (firstHeader.compareDocumentPosition(a) & 2) {
+              const href = a.getAttribute('href') || ''
+              if (
+                !href ||
+                href.startsWith('#') ||
+                href.startsWith('javascript:') ||
+                href.startsWith('mailto:')
+              )
+                continue
+              try {
+                const full = new URL(href, parentUrl)
+                if (!isWithinScope(full.href)) continue
+                if (seenUrls.has(full.href)) continue
+                seenUrls.add(full.href)
+                const titleEl = a.querySelector('div, span, p, h3, h4, strong') || a
+                const title = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+                if (title && title.length <= 100) {
+                  rootItems.push({ title, url: full.href, order: rootItems.length + 1 })
+                }
+              } catch {}
+            }
+          }
+        }
+
+        const groups: NavItem[] = []
+
+        for (const h of headerEls) {
+          const groupTitle = h.textContent?.trim()
+          if (!groupTitle || groupTitle.length > 50 || /main menu/i.test(groupTitle)) continue
+
+          const container = h.closest('div, section, ul')
+          if (!container) continue
+
+          const links = Array.from(container.querySelectorAll('a[href]'))
+          const items: NavItem[] = []
+
+          for (const a of links) {
+            const href = a.getAttribute('href') || ''
+            if (
+              !href ||
+              href.startsWith('#') ||
+              href.startsWith('javascript:') ||
+              href.startsWith('mailto:')
+            )
+              continue
+
+            try {
+              const full = new URL(href, parentUrl)
+              if (!isWithinScope(full.href)) continue
+              if (seenUrls.has(full.href)) continue
+              seenUrls.add(full.href)
+
+              const titleEl = a.querySelector('div, span, p, h3, h4, strong') || a
+              const title = titleEl.textContent?.trim() || a.textContent?.trim() || ''
+              if (title && title.length <= 100) {
+                items.push({ title, url: full.href, order: items.length + 1 })
+              }
+            } catch {}
+          }
+
+          if (items.length > 0) {
+            groups.push({
+              title: groupTitle,
+              url: items[0].url,
+              order: groups.length + 1,
+              items,
+            })
+          }
+        }
+
+        if (groups.length >= 2 || rootItems.length > 0) {
+          const moduleTitle = doc.querySelector('h1')?.textContent?.trim() || section.title
+          const combinedItems = [...rootItems, ...groups]
+          return {
+            title: moduleTitle,
+            slug: moduleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            order: section.order,
+            items: combinedItems,
+          }
+        }
+      } catch {}
+
+      return null
+    }
+
+    // 1. Check if any section belongs to a common parent documentation module (e.g. Getting Started)
+    for (let sIdx = 0; sIdx < sections.length; sIdx++) {
+      const sec = sections[sIdx]
+      const parentModule = await probeSectionModule(sec, baseDocsUrl, isWithinScope)
+      if (parentModule) {
+        sections[sIdx] = parentModule
+      }
+    }
+
+    // 2. Probe cards across sections to expand child topic sidebars
+    const allCards: NavItem[] = []
+    for (const s of sections) {
+      for (const it of s.items) {
+        if (!it.items || it.items.length === 0) {
+          allCards.push(it)
+        }
+      }
+    }
+
+    const concurrency = 8
+    for (let i = 0; i < allCards.length; i += concurrency) {
+      const batch = allCards.slice(i, i + concurrency)
+      await Promise.all(
+        batch.map(async (it) => {
+          const sub = await probeChildSidebar(it.url, isWithinScope)
+          if (sub && sub.length >= 2) {
+            it.items = sub.map((c, idx) => ({ ...c, order: idx + 1 }))
+          }
+        }),
+      )
+    }
+
     return {
       title: new URL(baseDocsUrl).hostname,
       sections,
@@ -1049,7 +1427,7 @@ export async function extractSiteTopology(
       }
 
       // 1c. Check for documentation hub page (FFmpeg, legacy categorised index pages)
-      const hubTree = extractHubSections(doc, baseDocsUrl, isWithinScope)
+      const hubTree = await extractHubSections(doc, baseDocsUrl, isWithinScope)
       if (hubTree && hubTree.sections.length >= 2) {
         return hubTree
       }
@@ -1066,6 +1444,7 @@ export async function extractSiteTopology(
         doc.querySelector('aside nav') ||
         doc.querySelector('nav[aria-label*="sidebar" i]') ||
         doc.querySelector('nav[aria-label*="Documentation" i]') ||
+        doc.querySelector('nav.border-r, nav[class*="border-r"]') ||
         doc.querySelector('.docs-sidebar') ||
         doc.querySelector('#docs-sidebar') ||
         doc.querySelector('aside')

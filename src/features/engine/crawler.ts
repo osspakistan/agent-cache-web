@@ -293,10 +293,10 @@ url: "${task.url}"
 section: "${task.secTitle.replace(/"/g, '\\"')}"
 ---
 
-# ${task.itemTitle}
-
 `
-    const fullContent = frontmatter + markdown
+    const hasH1 = /^\s*#\s+/m.test(markdown)
+    const titleHeading = hasH1 ? '' : `# ${task.itemTitle}\n\n`
+    const fullContent = frontmatter + titleHeading + markdown
     const fileBytes = Buffer.from(fullContent, 'utf8')
 
     // 1. Upload directly to R2 with error isolation
