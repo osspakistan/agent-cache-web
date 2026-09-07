@@ -35,9 +35,10 @@ export interface TopologyOptions {
 
 interface MintlifyPage {
   title?: string
+  sidebarTitle?: string
   href?: string
   group?: string
-  pages?: MintlifyPage[]
+  pages?: (MintlifyPage | string)[]
 }
 
 interface MintlifyGroup {
@@ -48,6 +49,8 @@ interface MintlifyGroup {
 interface MintlifyTab {
   tab?: string
   groups?: MintlifyGroup[]
+  pages?: (MintlifyPage | string)[]
+  href?: string
 }
 
 interface MintlifyNav {
@@ -56,6 +59,56 @@ interface MintlifyNav {
 
 // Helper to extract Mintlify embedded navigation tree (handles multi-tab sites like docs.context.dev)
 function parseScopedNavFromHtml(html: string): MintlifyNav | null {
+  // 1. Try Next.js App Router streaming RSC chunks (self.__next_f)
+  const nextFPushes = [
+    ...html.matchAll(/self\.__next_f\.push\(\[1,\s*("(?:[^"\\]|\\.)*")\s*\]\)/g),
+  ].map((m) => {
+    try {
+      return JSON.parse(m[1])
+    } catch {
+      return ''
+    }
+  })
+  const combined = nextFPushes.length > 0 ? nextFPushes.join('') : html
+
+  const searchKey = '{"scopedNav":'
+  const startIdx = combined.indexOf(searchKey)
+  if (startIdx !== -1) {
+    let depth = 0
+    let inString = false
+    let end = -1
+    for (let i = startIdx; i < combined.length; i++) {
+      const ch = combined[i]
+      const prev = combined[i - 1]
+      if (ch === '"' && prev === '\\') {
+        let b = i - 1
+        let count = 0
+        while (b >= 0 && combined[b] === '\\') {
+          count++
+          b--
+        }
+        if (count % 2 === 1) inString = !inString
+      }
+      if (!inString) {
+        if (ch === '{') depth++
+        else if (ch === '}') {
+          depth--
+          if (depth === 0) {
+            end = i + 1
+            break
+          }
+        }
+      }
+    }
+    if (end !== -1) {
+      try {
+        const rawSnippet = combined.slice(startIdx, end)
+        return JSON.parse(rawSnippet)?.scopedNav as MintlifyNav
+      } catch {}
+    }
+  }
+
+  // 2. Fallback for raw escaped snippet in HTML string
   const key = '{\\"scopedNav\\":'
   const idx = html.indexOf(key)
   if (idx === -1) return null
@@ -108,58 +161,75 @@ async function extractMintlifyHierarchy(
   const processedTabs = new Set<string>()
   let sIdx = 1
 
-  async function processNav(nav: MintlifyNav) {
+  function resolveMintlifyUrl(href: string): string {
+    try {
+      if (href.startsWith('http://') || href.startsWith('https://')) {
+        return href
+      }
+      const docsObj = new URL(docsUrl)
+      if (href.startsWith('/')) {
+        const pathSegments = docsObj.pathname.split('/').filter(Boolean)
+        const commonDocPrefixes = ['docs', 'doc', 'documentation', 'guide', 'guides', 'api']
+        const hasDocSubpath =
+          pathSegments.length > 0 && commonDocPrefixes.includes(pathSegments[0].toLowerCase())
+        if (hasDocSubpath && !href.startsWith(`/${pathSegments[0]}`)) {
+          return new URL(`/${pathSegments[0]}${href}`, docsObj.origin).href
+        }
+        return new URL(href, docsObj.origin).href
+      }
+      return new URL(href, docsUrl).href
+    } catch {
+      return new URL(href, docsUrl).href
+    }
+  }
+
+  function processMintlifyPages(pages: (MintlifyPage | string)[]): NavItem[] {
+    const items: NavItem[] = []
+    let idx = 1
+    for (const p of pages || []) {
+      if (!p) continue
+      if (typeof p === 'object' && p.group && Array.isArray(p.pages) && p.pages.length > 0) {
+        const subItems = processMintlifyPages(p.pages)
+        if (subItems.length > 0) {
+          items.push({
+            title: p.group,
+            url: subItems[0].url,
+            slug: p.group.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            order: idx++,
+            items: subItems,
+          })
+        }
+      } else {
+        const href = typeof p === 'string' ? p : p.href || ''
+        if (!href) continue
+        const fullUrl = resolveMintlifyUrl(href)
+        const title =
+          (typeof p === 'object' ? p.title || p.sidebarTitle : undefined) ||
+          (href.split('/').pop() || 'Untitled').replace(/[-_]+/g, ' ')
+        const slug =
+          (typeof p === 'object' && p.href ? p.href.split('/').filter(Boolean).pop() : undefined) ||
+          title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        items.push({
+          title,
+          url: fullUrl,
+          slug,
+          order: idx++,
+        })
+      }
+    }
+    return items
+  }
+
+  function processHydratedTabs(nav: MintlifyNav) {
     for (const tab of nav.tabs || []) {
       if (!tab.tab || processedTabs.has(tab.tab)) continue
       if (!tab.groups || tab.groups.length === 0) continue
+
       processedTabs.add(tab.tab)
 
       for (const grp of tab.groups) {
         const grpTitle = grp.group || tab.tab || 'General'
-        const items: NavItem[] = []
-        let iIdx = 1
-
-        const addPage = (p: MintlifyPage | string | undefined) => {
-          if (!p) return
-          if (typeof p === 'object' && p.group && p.pages) {
-            for (const sub of p.pages) addPage(sub)
-            return
-          }
-          const href = typeof p === 'string' ? p : p.href || ''
-          const title =
-            (typeof p === 'object' ? p.title : undefined) ||
-            (href.split('/').pop() || 'Untitled').replace(/[-_]+/g, ' ')
-          if (href) {
-            let fullUrl: string
-            try {
-              if (href.startsWith('http://') || href.startsWith('https://')) {
-                fullUrl = href
-              } else {
-                // If docsUrl has a subpath prefix (e.g. /docs or /docs/), preserve it
-                const docsObj = new URL(docsUrl)
-                const basePath = docsObj.pathname.replace(/\/$/, '')
-                let cleanHref = href.startsWith('/') ? href.slice(1) : href
-                if (basePath && !cleanHref.startsWith(basePath.replace(/^\//, ''))) {
-                  cleanHref = `${basePath.replace(/^\//, '')}/${cleanHref}`
-                }
-                fullUrl = new URL(cleanHref, docsObj.origin).href
-              }
-            } catch {
-              fullUrl = new URL(href, docsUrl).href
-            }
-
-            if (!items.some((it) => it.url === fullUrl)) {
-              items.push({
-                title,
-                url: fullUrl,
-                order: iIdx++,
-              })
-            }
-          }
-        }
-
-        for (const p of grp.pages || []) addPage(p)
-
+        const items = processMintlifyPages(grp.pages || [])
         if (items.length > 0) {
           sections.push({
             title: grpTitle,
@@ -173,31 +243,63 @@ async function extractMintlifyHierarchy(
     }
   }
 
-  await processNav(initialNav)
+  // 1. Process initially hydrated tabs (e.g. "Documentation")
+  processHydratedTabs(initialNav)
 
-  // Probe remaining tabs (e.g. "API Reference" on docs.context.dev or scoped docs)
+  // 2. Probe unhydrated tabs (e.g. API Reference, Recipes, Integrations on docs.context.dev)
   const basePath = url.pathname.replace(/\/$/, '')
   for (const tab of initialNav.tabs || []) {
     if (tab.tab && !processedTabs.has(tab.tab)) {
-      const tabName = tab.tab
-      const tabSlug = tabName.toLowerCase().replace(/\s+/g, '-')
-      const candidateUrls = [`${origin}/${tabSlug}`, `${origin}/api-reference`, `${origin}/docs`]
+      const candidateUrls: string[] = []
+      const firstPage = tab.pages?.[0]
+      const firstHref = typeof firstPage === 'string' ? firstPage : firstPage?.href
+      if (firstHref) {
+        candidateUrls.push(resolveMintlifyUrl(firstHref))
+      }
+      if (tab.href) {
+        candidateUrls.push(resolveMintlifyUrl(tab.href))
+      }
+      const tabSlug = tab.tab.toLowerCase().replace(/\s+/g, '-')
+      candidateUrls.push(`${origin}/${tabSlug}`)
+      candidateUrls.push(`${origin}/api-reference`)
       if (basePath && basePath !== '') {
         candidateUrls.unshift(`${origin}${basePath}/${tabSlug}`)
         candidateUrls.push(`${origin}${basePath}/api-reference`)
       }
+
       for (const cand of candidateUrls) {
         try {
-          const res = await fetch(cand, { headers: { 'User-Agent': 'agent-cache/1.0' } })
+          const res = await fetch(cand, {
+            headers: { 'User-Agent': 'agent-cache/1.0' },
+          })
           if (res.ok) {
             const candHtml = await res.text()
             const candNav = parseScopedNavFromHtml(candHtml)
             if (candNav) {
-              await processNav(candNav)
-              if (processedTabs.has(tabName)) break
+              processHydratedTabs(candNav)
+              if (processedTabs.has(tab.tab)) break
             }
           }
         } catch {}
+      }
+    }
+  }
+
+  // 3. Final pass: single-page or non-grouped tabs (e.g. Changelog)
+  for (const tab of initialNav.tabs || []) {
+    if (tab.tab && !processedTabs.has(tab.tab)) {
+      if (tab.pages && tab.pages.length > 0) {
+        processedTabs.add(tab.tab)
+        const items = processMintlifyPages(tab.pages)
+        if (items.length > 0) {
+          sections.push({
+            title: tab.tab,
+            slug: tab.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            tab: tab.tab,
+            order: sIdx++,
+            items,
+          })
+        }
       }
     }
   }
