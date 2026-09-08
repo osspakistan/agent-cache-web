@@ -26,6 +26,14 @@ const Layout: LayoutComponent = ({ children }) => {
           <meta name="twitter:card" content="summary_large_image" />
           {meta.image && <meta name="twitter:image" content={meta.image} />}
           {meta.canonical && <link rel="canonical" href={meta.canonical} />}
+          {meta.jsonLd && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(meta.jsonLd),
+              }}
+            />
+          )}
 
           {/* Theme color — affects browser chrome (Safari tab bar, mobile status bar) */}
           <meta name="theme-color" content="#fffcf4" media="(prefers-color-scheme: light)" />

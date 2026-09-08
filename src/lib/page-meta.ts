@@ -6,6 +6,7 @@ export interface PageMeta {
   description: string
   image?: string
   canonical?: string
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[]
 }
 
 let current: PageMeta | null = null

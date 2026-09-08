@@ -12,6 +12,13 @@ export const GET = async (_c: AppContext) => {
     description:
       'Download full doc sites pre-converted for coding agents. Drop them in your repo and stop watching your agent hallucinate outdated APIs.',
     image: '/og?title=Packaged+docs&subtitle=Full+doc+sites+for+coding+agents',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Packaged docs',
+      description: 'Full doc sites pre-converted for coding agents.',
+      url: 'https://agentcache.run/docs',
+    },
   })
   await initDb()
   const allJobs = await listCompletedJobs(100)

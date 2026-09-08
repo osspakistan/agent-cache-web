@@ -18,6 +18,17 @@ export const GET = (c: Context) => {
     description:
       'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
     image: '/og?title=Agent+Cache&subtitle=Give+your+agents+the+docs',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Agent Cache',
+      applicationCategory: 'DeveloperApplication',
+      description:
+        'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
+      url: 'https://agentcache.run',
+      operatingSystem: 'Linux, macOS, Windows',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
   })
   const captured = c.req.query('captured')
   return (
