@@ -453,7 +453,7 @@ export const GET = async (c: AppContext) => {
                 </button>
               </div>
               <p style="font-size: 12.5px; color: var(--ink-body); margin: 0 0 18px;">
-                Tell me what's wrong — missing pages, wrong content, broken links.
+                Tell me what's wrong. Missing pages, wrong content, broken links.
               </p>
 
               <div style="display: grid; gap: 12px;">
@@ -517,7 +517,7 @@ export const GET = async (c: AppContext) => {
                     id="fb-details"
                     name="details"
                     rows={3}
-                    placeholder="Describe what's missing or wrong…"
+                    placeholder="What did you expect to find?"
                     required
                     style="
                       font-size: 13px;
@@ -540,7 +540,16 @@ export const GET = async (c: AppContext) => {
               </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border);">
+            <div
+              id="fb-success"
+              style="display: none; padding: 12px 24px; font-size: 13px; color: #16a34a; border-top: 1px solid var(--border);"
+            >
+              Got it. I will look into this and get back to you soon.
+            </div>
+            <div
+              id="fb-actions"
+              style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border);"
+            >
               <button
                 type="button"
                 id="fb-cancel"

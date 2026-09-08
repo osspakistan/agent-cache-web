@@ -52,10 +52,18 @@ export function Integration() {
           drop-in folder
         </label>
         <label class="tab" for="i2">
-          CLI
+          CLI{' '}
+          <span class="mono" style="font-size: 10px; opacity: 0.6;">
+            {' '}
+            not yet available
+          </span>
         </label>
         <label class="tab" for="i3">
-          MCP
+          MCP{' '}
+          <span class="mono" style="font-size: 10px; opacity: 0.6;">
+            {' '}
+            not yet available
+          </span>
         </label>
       </div>
 
