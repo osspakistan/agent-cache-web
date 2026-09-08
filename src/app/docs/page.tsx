@@ -138,7 +138,7 @@ export const GET = async (_c: AppContext) => {
                         </span>
                       </div>
 
-                      <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35; visibility: hidden;">
+                      <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35;">
                         <a href={`/docs/${j.id}`} style="color: var(--ink); text-decoration: none;">
                           <span
                             style="position: absolute; inset: 0; z-index: 1;"
