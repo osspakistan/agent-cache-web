@@ -13,7 +13,7 @@ const PRE_1 = `<span class="cm">$ agent-cache add https://docs.example.com</span
 └── <span class="path">api/</span>               <span class="cm">responses.md  tools.md …</span>`
 
 const PRE_2 = `<span class="cm">$ agent-cache add https://example.com/docs</span>
-<span class="cm"># classic html site. we handle the mess so you don't.</span>
+<span class="cm"># classic html site. I handle the mess.</span>
 <span class="ok">✓ 212 pages found</span>
 <span class="ok">✓ 209 pages fetched</span>        <span class="cm">3 failed. listed, not fatal.</span>
 <span class="ok">✓ bundle written</span>           <span class="path">example-docs/</span> · <span class="num">41</span>s
@@ -27,13 +27,13 @@ const PRE_3 = `<span class="cm">$ agent-cache add https://hono.dev</span>
 <span class="ok">✓ 86 pages fetched</span>
 <span class="ok">✓ bundle written</span>           <span class="path">hono-docs/</span> · <span class="num">2.4</span>s
 
-<span class="cm"># we cached hono's docs for our own repo with this.</span>
-<span class="cm"># it's the same tool we use.</span>`
+<span class="cm"># I cached hono docs for my own repo with this.</span>
+<span class="cm"># same tool.</span>`
 
 export function Demo() {
   return (
     <section aria-labelledby="s1">
-      <h2 id="s1">One URL in. The whole docs site out.</h2>
+      <h2 id="s1">One URL in. The whole site out.</h2>
       <p class="sec-note">Simulated output. Pick a source, see what your agent gets.</p>
 
       <input type="radio" name="demo" id="t1" checked />

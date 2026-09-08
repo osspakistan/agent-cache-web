@@ -76,7 +76,7 @@ export function Integration() {
         <p class="panel-note">
           Works with every agent that reads files. Paste the line into{' '}
           <span class="path">AGENTS.md</span>, <span class="path">CLAUDE.md</span>, or{' '}
-          <span class="path">.cursor/rules/</span>. The choice for purists — zero install, zero
+          <span class="path">.cursor/rules/</span>. The choice for purists. Zero install, zero
           runtime, full control.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function Integration() {
         </div>
         <pre dangerouslySetInnerHTML={{ __html: PRE_CLI }} />
         <p class="panel-note">
-          Same pipeline as the web app, byte-compatible output. Ships when the backend does — the
+          Same pipeline as the web app, byte-compatible output. Ships when the backend does. The
           dot-folder you get is the same one.
         </p>
       </div>

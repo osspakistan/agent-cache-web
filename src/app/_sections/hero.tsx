@@ -9,8 +9,8 @@ export function Hero(props: { captured?: string }) {
         the docs.
       </h1>
       <p class="lede">
-        Paste a docs URL. Get the whole site back as clean markdown files your coding agent can
-        actually read. No cookie banners. No navigation junk. No missing pages.{' '}
+        Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners,
+        nav, cookie popups all stripped.{' '}
         <span class="dim">Drop the folder in your repo and point your agent at it.</span>
       </p>
       <p class="stack-note">

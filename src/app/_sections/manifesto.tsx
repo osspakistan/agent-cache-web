@@ -6,24 +6,20 @@ export function Manifesto() {
       <div class="wrap">
         <p class="thesis">Your agent is only as good as its docs.</p>
         <p>
-          Documentation sites are built for humans who click. Agents read raw text, and they drown
-          in banners, menus, and cookie popups before they ever reach the answer.
+          Docs sites are built for humans who click. Agents read text and hit banners, nav, and
+          cookie popups before they ever find the answer.
         </p>
         <p>
-          Agent Cache fetches the entire site, strips it down to content, and organizes it the way
-          agents read: plain markdown, in folders that match the site structure.{' '}
-          <span class="dim">No summaries. No lost pages.</span>
+          I fetch the whole site, handle the Mintlify and Docusaurus and Sphinx quirks, and lay it
+          out as plain markdown in folders that match the site.
         </p>
         <p>
-          We kept pasting docs into agents by hand.{' '}
-          <span class="dim">Copying pages, dodging popups, losing code examples on the way.</span>{' '}
-          Nobody should have to do that twice.
+          Pasting docs into agents by hand meant copying pages, dodging popups, and losing the code
+          block that mattered.
         </p>
         <p>
-          It's not perfect yet. But the bet is simple:{' '}
-          <span class="dim">
-            the clean version of the docs already exists. Someone just had to package it.
-          </span>
+          It is not perfect yet. The bet is simple. The clean version of the docs already exists. I
+          just package it.
         </p>
         <div class="markbig">
           <BrandMark size="hq" px={88} mode="dark" />

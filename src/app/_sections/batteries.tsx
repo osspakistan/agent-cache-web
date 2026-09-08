@@ -18,8 +18,8 @@ export function Batteries() {
         <div>
           <h3>The whole site, not a summary</h3>
           <p>
-            Summaries are how agents <b>miss the one paragraph that mattered</b>. Every page ships,
-            in full, organized the way the site organizes itself.
+            Every page ships in full. Not a summary. Summaries skip the paragraph your agent needed.
+            Code examples stay intact, links keep working offline.
           </p>
           <div class="rows">
             <div class="row">
@@ -52,10 +52,10 @@ export function Batteries() {
           </svg>
         </div>
         <div>
-          <h3>Same site, same bundle. Every time.</h3>
+          <h3>Same input, same output.</h3>
           <p>
-            Nothing to configure, nothing to babysit. <b>Point it at a URL and walk away.</b> The
-            bundle comes back organized, page after page, run after run.
+            I resolve the URL, pick the cheapest acquisition that works, and pack the bundle. Point
+            it at a URL and walk away.
           </p>
           <div class="rows">
             <div class="row">
@@ -86,8 +86,8 @@ export function Batteries() {
         <div>
           <h3>Your agent finds the right page fast</h3>
           <p>
-            Every bundle ships with <b>a map of every page</b>, so your agent reads the map first
-            and opens only what it needs. Instead of drowning in 400 files.
+            Every bundle has a <b>map of every page</b> so your agent opens only what it needs. Plus
+            where the docs came from, when I fetched them, and the GitHub repo if I found one.
           </p>
           <div class="rows">
             <div class="row">
@@ -114,10 +114,10 @@ export function Batteries() {
           </svg>
         </div>
         <div>
-          <h3>A folder in your repo. Yours.</h3>
+          <h3>A folder in your repo.</h3>
           <p>
-            The bundle is <b>plain files on your disk</b>. Gitignore it or commit it. Inspect it,
-            delete it. It works offline, and nothing phones home.
+            Plain files on your disk. Gitignore them or commit them. Works offline, nothing phones
+            home.
           </p>
           <div class="rows">
             <div class="row">
@@ -125,9 +125,6 @@ export function Batteries() {
             </div>
             <div class="row">
               <span class="ic">→</span>works offline after download
-            </div>
-            <div class="row">
-              <span class="ic">→</span>cli + .agentcache/ folder (soon)
             </div>
           </div>
         </div>
