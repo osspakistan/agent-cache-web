@@ -51,12 +51,14 @@ export async function initDb(): Promise<void> {
       completed_at INTEGER
     );
   `)
-  // Auto-migrate existing databases that may lack github_url or doc_platform columns
   try {
     await db.execute(`ALTER TABLE jobs ADD COLUMN github_url TEXT;`)
   } catch {}
   try {
     await db.execute(`ALTER TABLE jobs ADD COLUMN doc_platform TEXT;`)
+  } catch {}
+  try {
+    await db.execute(`ALTER TABLE jobs ADD COLUMN naked_domain TEXT;`)
   } catch {}
 }
 
@@ -125,6 +127,17 @@ export async function listCompletedJobs(limit = 50): Promise<JobRecord[]> {
     sql: `SELECT * FROM jobs WHERE status = 'complete' ORDER BY created_at DESC LIMIT ?`,
     args: [limit],
   })
+  return rs.rows as unknown as JobRecord[]
+}
 
+export async function listJobsByNakedDomain(naked: string, limit = 20): Promise<JobRecord[]> {
+  const db = getTursoClient()
+  const rs = await db.execute({
+    sql: `SELECT * FROM jobs WHERE naked_domain = ? AND status = 'complete' ORDER BY created_at DESC LIMIT ?`,
+    args: [naked, limit],
+  })
+  if (rs.rows.length === 0) {
+    return []
+  }
   return rs.rows as unknown as JobRecord[]
 }

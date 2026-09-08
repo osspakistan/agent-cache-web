@@ -1,5 +1,6 @@
 import { getPublicR2Url, updateJob, uploadToR2 } from '../../lib/clients'
 import { ErrorFactory } from '../../lib/utils/errors'
+import { nakedDomain } from '../../lib/utils/id'
 import type { JobRecord, StreamEvent } from '../../lib/utils/types'
 import { crawlAndExtractPages } from './crawler'
 import { probeAcquisitionLadder } from './ladder'
@@ -161,6 +162,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       description: resolved.description,
       logo_url: resolved.logoUrl,
       github_url: resolved.githubUrl,
+      naked_domain: nakedDomain(resolved.docsUrl),
       status: 'probing',
     })
 

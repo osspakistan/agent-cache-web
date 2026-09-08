@@ -57,6 +57,30 @@ export function generateJobId(inputUrl?: string): string {
 }
 
 export function isValidJobId(id: string): boolean {
-  // Matches {domain.ext}-{4chars} or legacy ac-[a-z0-9]{8}
   return /^[a-z0-9.-]+-[a-z0-9]{4,8}$/i.test(id)
+}
+
+/**
+ * Naked domain: strip www. and known prefixes, reduce to apex (last 2 labels).
+ * hono.dev → hono.dev, docs.hono.dev → hono.dev, www.stripe.com → stripe.com
+ * Shared group key so all variants for one product share one identifier.
+ */
+export function nakedDomain(inputUrl: string): string {
+  try {
+    let urlStr = inputUrl.trim()
+    if (!/^https?:\/\//i.test(urlStr)) urlStr = `https://${urlStr}`
+    const parsed = new URL(urlStr)
+    let host = parsed.hostname.toLowerCase().replace(/^www\./, '')
+    for (const prefix of COMMON_DOCS_PREFIXES) {
+      if (host.startsWith(prefix) && host.length > prefix.length) {
+        host = host.slice(prefix.length)
+        break
+      }
+    }
+    const parts = host.split('.')
+    if (parts.length >= 2) return parts.slice(-2).join('.')
+    return host
+  } catch {
+    return ''
+  }
 }

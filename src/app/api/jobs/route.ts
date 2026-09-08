@@ -1,6 +1,6 @@
 import { startJobEngine } from '../../../features/engine'
 import { createNewJob, listCompletedJobs } from '../../../features/jobs'
-import { detectParkedDomain } from '../../../lib/utils/parking'
+import { validateUrl } from '../../../lib/url-rules'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
@@ -34,13 +34,23 @@ export const POST = async (c: AppContext) => {
   }
 
   const normalizedUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`
-  const parkingCheck = await detectParkedDomain(normalizedUrl)
-  if (parkingCheck.isParked) {
+
+  // Run full URL validation rules engine
+  const validation = await validateUrl(normalizedUrl)
+  if (!validation.passed && validation.failedRule) {
+    const metadata = validation.failedRule.metadata as
+      | { code?: string; message?: string }
+      | undefined
     return c.json(
       {
         ok: false,
-        error: parkingCheck.message || 'Target domain is parked or inactive.',
-        code: 'PARKED_DOMAIN',
+        error: metadata?.message || 'URL validation failed.',
+        code: metadata?.code || 'VALIDATION_FAILED',
+        validation: {
+          state: validation.state,
+          failed_rule: validation.failedRule.rule.name,
+          duration_ms: validation.total_duration_ms,
+        },
       },
       400,
     )

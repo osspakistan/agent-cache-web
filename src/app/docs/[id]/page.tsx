@@ -2,7 +2,7 @@ import { DocumentationTreeSection } from '../../../components/doc-tree'
 import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
-import { getFromR2, getPublicR2Url } from '../../../lib/clients'
+import { getFromR2, getPublicR2Url, listJobsByNakedDomain } from '../../../lib/clients'
 import { formatBytes } from '../../../lib/utils'
 import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
@@ -123,10 +123,19 @@ export const GET = async (c: AppContext) => {
     } catch {}
   }
 
+  let variants: Awaited<ReturnType<typeof listJobsByNakedDomain>> = []
+  if (job.naked_domain) {
+    const all = await listJobsByNakedDomain(job.naked_domain, 50)
+    variants = all.filter((v) => v.id !== job.id)
+  }
+
   const directR2Download =
     getPublicR2Url(`jobs/${id}/${id}.zip`) ||
     getPublicR2Url(`jobs/${id}/bundle.zip`) ||
     `/docs/${id}/download`
+
+  const fmtDate = (ts: number) =>
+    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
   return (
     <>
@@ -344,6 +353,53 @@ export const GET = async (c: AppContext) => {
             </span>
           </div>
         </div>
+
+        {/* Variant Selector */}
+        {variants.length > 0 && (
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 16px;
+              margin-bottom: 24px;
+              background: var(--card);
+              border: 1px solid var(--border);
+              border-radius: var(--radius);
+            "
+          >
+            <span
+              class="mono"
+              style="font-size: 11.5px; color: var(--ink-soft); white-space: nowrap;"
+            >
+              {job.naked_domain} · {variants.length + 1} variants
+            </span>
+            <select
+              class="mono"
+              style="
+                flex: 1;
+                max-width: 280px;
+                font-size: 12.5px;
+                color: var(--ink);
+                background: var(--secondary);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 5px 10px;
+                cursor: pointer;
+              "
+              onchange="location.href='/docs/'+this.value"
+            >
+              <option value={job.id} selected>
+                {fmtDate(job.created_at)} · {job.page_count}p · {job.id} (current)
+              </option>
+              {variants.map((v) => (
+                <option value={v.id}>
+                  {fmtDate(v.created_at)} · {v.page_count}p · {v.id}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Interactive Multi-Nested Documentation Tree & ASCII Map */}
         {mapData ? (
