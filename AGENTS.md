@@ -97,6 +97,13 @@ Async patterns
 • Cloudflare R2 - `R2_ACCOUNT_ID`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` - ZIP storage
 • OpenRouter (optional) - `OPENROUTER_API_KEY` - LLM metadata extraction
 
+## SEO
+
+• Skill: `seo` CLI (npm i -g seo, seoskill.dev) — `seo report --url <url> --crawl` for crawl-only audits; `seo report --site <gcs-url>` when Search Console is connected.
+• Latest report: `.wtf/04.reports/seo/seo-report-2026-09-08.md` + `.html`/`.json`
+• GTM plan: `.wtf/06.gtm/seo/seo-strategy-2026-09-08.md` — auto-generated, update when you add GSC/GA or ship fixes. Re-run after every fix with same inputs to verify.
+• Command Code skill: `.wtf/skills/seo/SKILL.md` — commit this (like .commandcode/skills). Or symlink from there to the global seoskill install.
+
 ## Gotchas
 
 • `detectParkedDomain` is legacy — use `validateUrl` from `src/lib/url-rules/` instead

@@ -3,6 +3,7 @@ import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
 import { getFromR2, getPublicR2Url, listCompletedJobs } from '../../../lib/clients'
+import { setPageMeta } from '../../../lib/page-meta'
 import { formatBytes, nakedDomain } from '../../../lib/utils'
 import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
@@ -139,6 +140,16 @@ export const GET = async (c: AppContext) => {
 
   const fmtDate = (ts: number) =>
     new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+  const product =
+    job.product_name ||
+    (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
+  setPageMeta({
+    title: `${product} docs — Agent Cache`,
+    description:
+      job.description ||
+      `Documentation for ${product}, packaged as clean markdown for coding agents. ${job.page_count} pages.`,
+  })
 
   return (
     <>

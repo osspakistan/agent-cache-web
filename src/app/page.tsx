@@ -1,5 +1,6 @@
 import type { Context } from 'hono'
 import { Nav } from '../components/nav'
+import { setPageMeta } from '../lib/page-meta'
 import { Batteries } from './_sections/batteries'
 import { Demo } from './_sections/demo'
 import { GetStarted } from './_sections/get-started'
@@ -12,6 +13,11 @@ import { Manifesto } from './_sections/manifesto'
  * ?captured=<url> is the no-JS fallback feedback from POST /jobs/create (303 here).
  */
 export const GET = (c: Context) => {
+  setPageMeta({
+    title: 'Agent Cache — give your agents the docs',
+    description:
+      'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
+  })
   const captured = c.req.query('captured')
   return (
     <>

@@ -1,4 +1,5 @@
 import { raw } from 'hono/html'
+import { consumePageMeta } from '../lib/page-meta'
 import type { LayoutComponent } from '../router/scan'
 
 /**
@@ -6,6 +7,7 @@ import type { LayoutComponent } from '../router/scan'
  * Theme init runs inline before paint (shared 'ac-theme' key with the logo preview).
  */
 const Layout: LayoutComponent = ({ children }) => {
+  const meta = consumePageMeta()
   return (
     <>
       {raw('<!doctype html>')}
@@ -13,18 +15,12 @@ const Layout: LayoutComponent = ({ children }) => {
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Agent Cache — give your agents the docs</title>
-          <meta
-            name="description"
-            content="Paste a docs URL. Get the whole site back as clean markdown files your coding agent can actually read."
-          />
+          <title>{meta.title}</title>
+          <meta name="description" content={meta.description} />
 
           {/* OpenGraph / Twitter card — link previews */}
-          <meta property="og:title" content="Agent Cache — give your agents the docs" />
-          <meta
-            property="og:description"
-            content="Paste a docs URL. Get the whole site back as clean markdown files your coding agent can actually read."
-          />
+          <meta property="og:title" content={meta.title} />
+          <meta property="og:description" content={meta.description} />
           <meta property="og:type" content="website" />
 
           {/* Theme color — affects browser chrome (Safari tab bar, mobile status bar) */}

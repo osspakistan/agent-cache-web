@@ -2,6 +2,7 @@ import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
 import { readEventsFromR2 } from '../../../lib/clients'
+import { setPageMeta } from '../../../lib/page-meta'
 import type { AppContext } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
@@ -29,6 +30,14 @@ export const GET = async (c: AppContext) => {
       </>
     )
   }
+
+  const product =
+    job.product_name ||
+    (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
+  setPageMeta({
+    title: `${product} — extraction in progress`,
+    description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
+  })
 
   // Pre-load past events directly from R2 for instant replay
   const events = await readEventsFromR2(id)
