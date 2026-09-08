@@ -17,6 +17,8 @@ export const GET = (c: Context) => {
     title: 'Agent Cache — give your agents the docs',
     description:
       'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
+    image: '/logo-hq-light.svg',
+    canonical: 'https://agentcache.run/',
   })
   const captured = c.req.query('captured')
   return (

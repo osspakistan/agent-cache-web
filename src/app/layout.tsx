@@ -22,6 +22,10 @@ const Layout: LayoutComponent = ({ children }) => {
           <meta property="og:title" content={meta.title} />
           <meta property="og:description" content={meta.description} />
           <meta property="og:type" content="website" />
+          {meta.image && <meta property="og:image" content={meta.image} />}
+          <meta name="twitter:card" content="summary_large_image" />
+          {meta.image && <meta name="twitter:image" content={meta.image} />}
+          {meta.canonical && <link rel="canonical" href={meta.canonical} />}
 
           {/* Theme color — affects browser chrome (Safari tab bar, mobile status bar) */}
           <meta name="theme-color" content="#fffcf4" media="(prefers-color-scheme: light)" />

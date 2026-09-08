@@ -4,6 +4,8 @@
 export interface PageMeta {
   title: string
   description: string
+  image?: string
+  canonical?: string
 }
 
 let current: PageMeta | null = null

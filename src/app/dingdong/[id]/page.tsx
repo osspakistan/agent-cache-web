@@ -37,6 +37,8 @@ export const GET = async (c: AppContext) => {
   setPageMeta({
     title: `${product} — extraction in progress`,
     description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
+    image: '/logo-hq-light.svg',
+    canonical: `https://agentcache.run/dingdong/${job.id}`,
   })
 
   // Pre-load past events directly from R2 for instant replay

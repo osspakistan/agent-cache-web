@@ -1,11 +1,19 @@
 import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { initDb, listCompletedJobs } from '../../features/jobs'
+import { setPageMeta } from '../../lib/page-meta'
 import { formatBytes } from '../../lib/utils'
 import { nakedDomain } from '../../lib/utils/id'
 import type { AppContext, JobRecord } from '../../lib/utils/types'
 
 export const GET = async (_c: AppContext) => {
+  setPageMeta({
+    title: 'Agent Cache — packaged docs',
+    description:
+      'Download full doc sites pre-converted for coding agents. Drop them in your repo and stop watching your agent hallucinate outdated APIs.',
+    image: '/logo-hq-light.svg',
+    canonical: 'https://agentcache.run/docs',
+  })
   await initDb()
   const allJobs = await listCompletedJobs(100)
 
