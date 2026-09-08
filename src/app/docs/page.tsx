@@ -109,7 +109,7 @@ export const GET = async (_c: AppContext) => {
                     "
                   >
                     <div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; visibility: hidden;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
                           {j.logo_url && (
                             <img
@@ -138,7 +138,7 @@ export const GET = async (_c: AppContext) => {
                         </span>
                       </div>
 
-                      <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35;">
+                      <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35; visibility: hidden;">
                         <a href={`/docs/${j.id}`} style="color: var(--ink); text-decoration: none;">
                           <span
                             style="position: absolute; inset: 0; z-index: 1;"
