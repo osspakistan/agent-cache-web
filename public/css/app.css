@@ -26,6 +26,8 @@
   --sans:  "Inter", system-ui, sans-serif;
   --mono:  "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 :root[data-theme="dark"] {
   --dark:       #131211;
   --dark-ink:   #f5f2e9;
