@@ -60,14 +60,16 @@ export const GET = async (_c: AppContext) => {
             </a>
           </div>
         ) : (
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 48px; align-items: start;">
+          <div style="column-count: 2; column-gap: 16px; margin-bottom: 48px;">
             {grouped.map(({ latest: j, count }) => {
               return (
                 <div
                   key={j.id}
                   style={`
                   position: relative;
-                  ${count > 1 ? 'margin-right: 8px; margin-bottom: 8px;' : ''}
+                  break-inside: avoid;
+                  margin-bottom: 16px;
+                  ${count > 1 ? 'margin-right: 8px;' : ''}
                 `}
                 >
                   {count > 1 && (
