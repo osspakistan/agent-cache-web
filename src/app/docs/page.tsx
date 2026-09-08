@@ -109,7 +109,7 @@ export const GET = async (_c: AppContext) => {
                     "
                   >
                     <div>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; visibility: hidden;">
                         <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
                           {j.logo_url && (
                             <img
@@ -151,7 +151,7 @@ export const GET = async (_c: AppContext) => {
                       <div style="min-height: 24px; margin-bottom: 16px;"></div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 8px; visibility: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 8px;">
                       <span class="mono" style="font-size: 12px; color: var(--ink-soft);">
                         {formatBytes(j.zip_size_bytes).full} ZIP
                       </span>
