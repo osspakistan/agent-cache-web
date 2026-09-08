@@ -486,9 +486,11 @@ export const GET = async (c: AppContext) => {
                     email (so I can send you the fix)
                   </span>
                   <input
+                    id="fb-email"
                     name="email"
                     type="email"
                     placeholder="you@company.com"
+                    required
                     style="
                       font-size: 13px;
                       padding: 6px 10px;
@@ -498,6 +500,13 @@ export const GET = async (c: AppContext) => {
                       color: var(--ink);
                     "
                   />
+                  <span
+                    id="fb-err-email"
+                    class="mono"
+                    style="font-size: 11px; color: #dc2626; display: none;"
+                  >
+                    Enter a valid email
+                  </span>
                 </label>
 
                 <label style="display: grid; gap: 4px;">
@@ -505,9 +514,11 @@ export const GET = async (c: AppContext) => {
                     details
                   </span>
                   <textarea
+                    id="fb-details"
                     name="details"
                     rows={3}
                     placeholder="Describe what's missing or wrong…"
+                    required
                     style="
                       font-size: 13px;
                       padding: 8px 10px;
@@ -518,6 +529,13 @@ export const GET = async (c: AppContext) => {
                       resize: vertical;
                     "
                   ></textarea>
+                  <span
+                    id="fb-err-details"
+                    class="mono"
+                    style="font-size: 11px; color: #dc2626; display: none;"
+                  >
+                    Tell me a little more
+                  </span>
                 </label>
               </div>
             </div>
@@ -573,15 +591,23 @@ export const GET = async (c: AppContext) => {
               if(x) x.addEventListener('click', close);
               if(cancel) cancel.addEventListener('click', close);
               if(d) d.addEventListener('click', function(e){ if(e.target===d) close(); });
+              function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
               if(f) f.addEventListener('submit', function(e){
                 e.preventDefault();
+                var email = document.getElementById('fb-email');
+                var details = document.getElementById('fb-details');
+                var errE = document.getElementById('fb-err-email');
+                var errD = document.getElementById('fb-err-details');
+                var ok = true;
+                if(!validEmail(email.value.trim())){ errE.style.display = 'block'; email.style.borderColor = '#dc2626'; ok = false; } else { errE.style.display = 'none'; email.style.borderColor = ''; }
+                if(details.value.trim().length < 8){ errD.style.display = 'block'; details.style.borderColor = '#dc2626'; ok = false; } else { errD.style.display = 'none'; details.style.borderColor = ''; }
+                if(!ok) return;
                 submit.textContent = 'Sending…';
                 submit.disabled = true;
                 submit.style.opacity = '0.6';
                 setTimeout(function(){
-                  submit.textContent = 'Sent ✓';
-                  setTimeout(close, 700);
-                  setTimeout(function(){ submit.textContent = 'Send'; submit.disabled = false; submit.style.opacity = ''; }, 1000);
+                  document.getElementById('fb-success').style.display = 'block';
+                  document.getElementById('fb-actions').style.display = 'none';
                 }, 1200);
               });
             })();`,
