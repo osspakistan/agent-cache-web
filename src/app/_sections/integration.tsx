@@ -38,7 +38,15 @@ agent: <span class="path">"implement OAuth with Clerk"</span>
 export function Integration() {
   return (
     <section aria-labelledby="setup">
-      <h2 id="setup">Wire it in. One line.</h2>
+      <h2 id="setup" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        Wire it in. One line.
+        <span
+          class="mono"
+          style="font-size: 11px; color: var(--ink-soft); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; font-weight: 400; letter-spacing: normal;"
+        >
+          CLI & MCP coming soon
+        </span>
+      </h2>
       <p class="sec-note">
         Three ways. Pick the one that matches your stack. Drop-in works today. CLI and MCP ship with
         the web app.
@@ -52,18 +60,10 @@ export function Integration() {
           drop-in folder
         </label>
         <label class="tab" for="i2">
-          CLI{' '}
-          <span class="mono" style="font-size: 10px; opacity: 0.6;">
-            {' '}
-            not yet available
-          </span>
+          CLI
         </label>
         <label class="tab" for="i3">
-          MCP{' '}
-          <span class="mono" style="font-size: 10px; opacity: 0.6;">
-            {' '}
-            not yet available
-          </span>
+          MCP
         </label>
       </div>
 
