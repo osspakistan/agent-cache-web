@@ -591,7 +591,7 @@ export const GET = async (c: AppContext) => {
               if(x) x.addEventListener('click', close);
               if(cancel) cancel.addEventListener('click', close);
               if(d) d.addEventListener('click', function(e){ if(e.target===d) close(); });
-              function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+              function validEmail(v){ return v.indexOf('@') > 0 && v.lastIndexOf('.') > v.indexOf('@') + 1; }
               if(f) f.addEventListener('submit', function(e){
                 e.preventDefault();
                 var email = document.getElementById('fb-email');
