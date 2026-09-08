@@ -138,7 +138,7 @@ export const GET = async (c: AppContext) => {
     `/docs/${id}/download`
 
   const fmtDate = (ts: number) =>
-    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <>
@@ -369,6 +369,7 @@ export const GET = async (c: AppContext) => {
               background: var(--card);
               border: 1px solid var(--border);
               border-radius: var(--radius);
+              flex-wrap: wrap;
             "
           >
             <span
@@ -380,8 +381,8 @@ export const GET = async (c: AppContext) => {
             <select
               class="mono"
               style="
-                flex: 1;
-                max-width: 280px;
+                flex: 1 1 auto;
+                min-width: 240px;
                 font-size: 12.5px;
                 color: var(--ink);
                 background: var(--secondary);
@@ -389,6 +390,7 @@ export const GET = async (c: AppContext) => {
                 border-radius: 6px;
                 padding: 5px 10px;
                 cursor: pointer;
+                white-space: nowrap;
               "
               onchange="location.href='/docs/'+this.value"
             >
