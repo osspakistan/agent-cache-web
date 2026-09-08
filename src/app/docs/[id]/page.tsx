@@ -3,7 +3,7 @@ import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
 import { getFromR2, getPublicR2Url, listJobsByNakedDomain } from '../../../lib/clients'
-import { formatBytes } from '../../../lib/utils'
+import { formatBytes, nakedDomain } from '../../../lib/utils'
 import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
@@ -123,9 +123,10 @@ export const GET = async (c: AppContext) => {
     } catch {}
   }
 
+  const groupKey = job.naked_domain || nakedDomain(job.input_url)
   let variants: Awaited<ReturnType<typeof listJobsByNakedDomain>> = []
-  if (job.naked_domain) {
-    const all = await listJobsByNakedDomain(job.naked_domain, 50)
+  if (groupKey) {
+    const all = await listJobsByNakedDomain(groupKey, 50)
     variants = all.filter((v) => v.id !== job.id)
   }
 
@@ -372,7 +373,7 @@ export const GET = async (c: AppContext) => {
               class="mono"
               style="font-size: 11.5px; color: var(--ink-soft); white-space: nowrap;"
             >
-              {job.naked_domain} · {variants.length + 1} variants
+              {groupKey} · {variants.length + 1} variants
             </span>
             <select
               class="mono"
