@@ -11,7 +11,7 @@ export const GET = async (_c: AppContext) => {
 
   const groups = new Map<string, JobRecord[]>()
   for (const j of allJobs) {
-    const key = j.naked_domain || nakedDomain(j.input_url) || j.id
+    const key = nakedDomain(j.input_url) || j.id
     const arr = groups.get(key)
     if (arr) arr.push(j)
     else groups.set(key, [j])
@@ -22,7 +22,7 @@ export const GET = async (_c: AppContext) => {
       return {
         latest: arr[0],
         count: arr.length,
-        naked: arr[0].naked_domain || nakedDomain(arr[0].input_url),
+        naked: nakedDomain(arr[0].input_url),
       }
     })
     .sort((a, b) => b.latest.created_at - a.latest.created_at)
