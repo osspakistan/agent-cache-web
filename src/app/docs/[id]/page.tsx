@@ -407,6 +407,23 @@ export const GET = async (c: AppContext) => {
             <p style="color: var(--ink-soft);">No map manifest generated.</p>
           </section>
         )}
+
+        <div style="text-align: center; padding: 16px 0;">
+          <button
+            class="mono"
+            style="
+              font-size: 11.5px;
+              color: var(--ink-soft);
+              background: none;
+              border: none;
+              cursor: pointer;
+              text-decoration: underline;
+              text-underline-offset: 3px;
+            "
+          >
+            something missing? →
+          </button>
+        </div>
       </div>
       <Footer />
     </>
