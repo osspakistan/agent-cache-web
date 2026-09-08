@@ -361,36 +361,29 @@ export const GET = async (c: AppContext) => {
         {variants.length > 0 && (
           <div
             style="
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              padding: 12px 16px;
+              display: grid;
+              gap: 8px;
+              padding: 14px 16px;
               margin-bottom: 24px;
               background: var(--card);
               border: 1px solid var(--border);
               border-radius: var(--radius);
-              flex-wrap: wrap;
             "
           >
-            <span
-              class="mono"
-              style="font-size: 11.5px; color: var(--ink-soft); white-space: nowrap;"
-            >
+            <span class="mono" style="font-size: 11.5px; color: var(--ink-soft);">
               {groupKey} · {variants.length + 1} variants
             </span>
             <select
               class="mono"
               style="
-                flex: 1 1 auto;
-                min-width: 240px;
+                width: 100%;
                 font-size: 12.5px;
                 color: var(--ink);
                 background: var(--secondary);
                 border: 1px solid var(--border);
                 border-radius: 6px;
-                padding: 5px 10px;
+                padding: 6px 10px;
                 cursor: pointer;
-                white-space: nowrap;
               "
               onchange="location.href='/docs/'+this.value"
             >
