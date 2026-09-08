@@ -453,7 +453,7 @@ export const GET = async (c: AppContext) => {
                 </button>
               </div>
               <p style="font-size: 12.5px; color: var(--ink-body); margin: 0 0 18px;">
-                Tell us what's wrong — missing pages, wrong content, broken links.
+                Tell me what's wrong — missing pages, wrong content, broken links.
               </p>
 
               <div style="display: grid; gap: 12px;">
@@ -483,7 +483,7 @@ export const GET = async (c: AppContext) => {
 
                 <label style="display: grid; gap: 4px;">
                   <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
-                    email (so we can send you the fix)
+                    email (so I can send you the fix)
                   </span>
                   <input
                     name="email"
