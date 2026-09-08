@@ -28,6 +28,20 @@ export const GET = async (c: AppContext) => {
   const subtitle = sp.get('subtitle') || ''
   const pages = sp.get('pages')
   const source = sp.get('source') || ''
+  const date = sp.get('date') || ''
+
+  // compute x offset for footer items so they don't overlap
+  const footerItems: string[] = []
+  if (pages) footerItems.push(`<tspan fill="${t.primary}">●</tspan> ${esc(pages)} pages`)
+  if (source) footerItems.push(esc(source))
+  if (date) footerItems.push(esc(date))
+
+  const footerEls = footerItems
+    .map((item, i) => {
+      const x = 56 + i * 160
+      return `<text x="${x}" y="580" font-family="Inter, system-ui, sans-serif" font-size="18" fill="${t.muted}">${item}</text>`
+    })
+    .join('\n  ')
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
@@ -52,9 +66,8 @@ export const GET = async (c: AppContext) => {
   ${subtitle ? `<text x="56" y="380" font-family="Inter, system-ui, sans-serif" font-size="24" fill="${t.body}">${esc(subtitle)}</text>` : ''}
 
   <!-- footer meta -->
-  ${pages ? `<text x="56" y="580" font-family="Inter, system-ui, sans-serif" font-size="18" fill="${t.muted}"><tspan fill="${t.primary}">●</tspan> ${esc(pages)} pages</text>` : ''}
-  ${source ? `<text x="${pages ? 200 : 56}" y="580" font-family="Inter, system-ui, sans-serif" font-size="18" fill="${t.muted}">${esc(source)}</text>` : ''}
-</svg>`
+  ${footerEls}
+  </svg>`
 
   return new Response(svg, {
     headers: {

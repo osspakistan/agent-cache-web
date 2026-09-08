@@ -37,7 +37,7 @@ export const GET = async (c: AppContext) => {
   setPageMeta({
     title: `${product} — extraction in progress`,
     description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
-    image: `/og?title=${encodeURIComponent(product)}&subtitle=Extraction+in+progress&pages=${job.page_count}`,
+    image: `/og?title=${encodeURIComponent(product)}&subtitle=Extraction+in+progress&pages=${job.page_count}&date=${encodeURIComponent(new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}`,
   })
 
   // Pre-load past events directly from R2 for instant replay
