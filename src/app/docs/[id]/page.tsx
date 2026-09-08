@@ -410,6 +410,7 @@ export const GET = async (c: AppContext) => {
 
         <div style="text-align: center; padding: 16px 0;">
           <button
+            id="fb-open"
             class="mono"
             style="
               font-size: 11.5px;
@@ -420,10 +421,172 @@ export const GET = async (c: AppContext) => {
               text-decoration: underline;
               text-underline-offset: 3px;
             "
+            type="button"
           >
             something missing? →
           </button>
         </div>
+
+        <dialog
+          id="fb-dialog"
+          style="
+            max-width: 460px;
+            width: calc(100% - 40px);
+            padding: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--ink);
+          "
+        >
+          <form id="fb-form" method="dialog">
+            <div style="padding: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <h3 style="font-size: 15px; font-weight: 600; margin: 0;">Report an issue</h3>
+                <button
+                  type="button"
+                  id="fb-close-x"
+                  style="background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-soft); padding: 0 4px;"
+                  aria-label="close"
+                >
+                  ×
+                </button>
+              </div>
+              <p style="font-size: 12.5px; color: var(--ink-body); margin: 0 0 18px;">
+                Tell us what's wrong — missing pages, wrong content, broken links.
+              </p>
+
+              <div style="display: grid; gap: 12px;">
+                <label style="display: grid; gap: 4px;">
+                  <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                    what's missing
+                  </span>
+                  <select
+                    name="kind"
+                    class="mono"
+                    style="
+                      font-size: 12.5px;
+                      color: var(--ink);
+                      background: var(--secondary);
+                      border: 1px solid var(--border);
+                      border-radius: 6px;
+                      padding: 6px 10px;
+                    "
+                  >
+                    <option value="missing-page">Missing pages</option>
+                    <option value="wrong-content">Wrong content</option>
+                    <option value="outdated">Outdated docs</option>
+                    <option value="broken-links">Broken links</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+
+                <label style="display: grid; gap: 4px;">
+                  <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                    email (so we can send you the fix)
+                  </span>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="you@company.com"
+                    style="
+                      font-size: 13px;
+                      padding: 6px 10px;
+                      border: 1px solid var(--border);
+                      border-radius: 6px;
+                      background: var(--secondary);
+                      color: var(--ink);
+                    "
+                  />
+                </label>
+
+                <label style="display: grid; gap: 4px;">
+                  <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                    details
+                  </span>
+                  <textarea
+                    name="details"
+                    rows={3}
+                    placeholder="Describe what's missing or wrong…"
+                    style="
+                      font-size: 13px;
+                      padding: 8px 10px;
+                      border: 1px solid var(--border);
+                      border-radius: 6px;
+                      background: var(--secondary);
+                      color: var(--ink);
+                      resize: vertical;
+                    "
+                  ></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border);">
+              <button
+                type="button"
+                id="fb-cancel"
+                class="mono"
+                style="
+                  font-size: 12.5px;
+                  color: var(--ink-soft);
+                  background: none;
+                  border: 1px solid var(--border);
+                  border-radius: 999px;
+                  padding: 6px 16px;
+                  cursor: pointer;
+                "
+              >
+                Cancel
+              </button>
+              <button
+                id="fb-submit"
+                type="submit"
+                class="mono"
+                style="
+                  font-size: 12.5px;
+                  color: var(--primary-foreground);
+                  background: var(--primary);
+                  border: 1px solid var(--primary);
+                  border-radius: 999px;
+                  padding: 6px 16px;
+                  cursor: pointer;
+                "
+              >
+                Send
+              </button>
+            </div>
+          </form>
+        </dialog>
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+              var d = document.getElementById('fb-dialog');
+              var f = document.getElementById('fb-form');
+              var open = document.getElementById('fb-open');
+              var x = document.getElementById('fb-close-x');
+              var cancel = document.getElementById('fb-cancel');
+              var submit = document.getElementById('fb-submit');
+              function close(){ if(d.open) d.close(); }
+              if(open) open.addEventListener('click', function(){ d.showModal(); });
+              if(x) x.addEventListener('click', close);
+              if(cancel) cancel.addEventListener('click', close);
+              if(d) d.addEventListener('click', function(e){ if(e.target===d) close(); });
+              if(f) f.addEventListener('submit', function(e){
+                e.preventDefault();
+                submit.textContent = 'Sending…';
+                submit.disabled = true;
+                submit.style.opacity = '0.6';
+                setTimeout(function(){
+                  submit.textContent = 'Sent ✓';
+                  setTimeout(close, 700);
+                  setTimeout(function(){ submit.textContent = 'Send'; submit.disabled = false; submit.style.opacity = ''; }, 1000);
+                }, 1200);
+              });
+            })();`,
+          }}
+        />
       </div>
       <Footer />
     </>
