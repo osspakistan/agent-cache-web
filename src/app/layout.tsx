@@ -35,6 +35,27 @@ const Layout: LayoutComponent = ({ children }) => {
               }}
             />
           )}
+          {/* Organization JSON-LD - always present for brand verification */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'Agent Cache',
+                url: 'https://agentcache.run',
+                description:
+                  'Turn any documentation site into clean, agent-ready markdown docs.',
+                logo: 'https://agentcache.run/favicon.svg',
+                sameAs: ['https://github.com/agentcache/agent-cache'],
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  contactType: 'customer support',
+                  url: 'https://agentcache.run/contact',
+                },
+              }),
+            }}
+          />
 
           {/* Theme color - affects browser chrome (Safari tab bar, mobile status bar) */}
           <meta name="theme-color" content="#fffcf4" media="(prefers-color-scheme: light)" />
@@ -52,7 +73,7 @@ const Layout: LayoutComponent = ({ children }) => {
           />
           <link rel="stylesheet" href="/tokens.css" />
           <link rel="stylesheet" href="/css/fonts.css" />
-          <link rel="stylesheet" href="/css/app.css" />
+          <link rel="stylesheet" href="/css/app.css?v=2" />
           <script
             dangerouslySetInnerHTML={{
               __html: `(function(){var t=localStorage.getItem('ac-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();`,

@@ -35,7 +35,7 @@ export const GET = async (c: AppContext) => {
     job.product_name ||
     (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
   setPageMeta({
-    title: `${product} - extraction in progress`,
+    title: `${product} // extraction in progress`,
     description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
     image: `/og?title=${encodeURIComponent(product)}&subtitle=Extraction+in+progress&pages=${job.page_count}&date=${encodeURIComponent(new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}`,
   })

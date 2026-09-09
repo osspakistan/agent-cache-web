@@ -145,7 +145,7 @@ export const GET = async (c: AppContext) => {
     job.product_name ||
     (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
   setPageMeta({
-    title: `${product} docs - Agent Cache`,
+    title: `${product} docs // Agent Cache`,
     description:
       job.description ||
       `Documentation for ${product}, packaged as clean markdown for coding agents. ${job.page_count} pages.`,

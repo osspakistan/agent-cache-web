@@ -1,6 +1,7 @@
 import type { Context } from 'hono'
 import { Nav } from '../components/nav'
 import { setPageMeta } from '../lib/page-meta'
+import { prefersMarkdown, contentNegotiationVary } from '../lib/utils/markdown-negotiation'
 import { Batteries } from './_sections/batteries'
 import { Demo } from './_sections/demo'
 import { GetStarted } from './_sections/get-started'
@@ -11,6 +12,7 @@ import { Manifesto } from './_sections/manifesto'
 /**
  * GET / - the landing page. Composes its private sections; manifesto sits outside .wrap.
  * ?captured=<url> is the no-JS fallback feedback from POST /jobs/create (303 here).
+ * Supports markdown content negotiation via Accept header.
  */
 export const GET = (c: Context) => {
   setPageMeta({
@@ -30,6 +32,39 @@ export const GET = (c: Context) => {
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     },
   })
+
+  // Markdown content negotiation
+  if (prefersMarkdown(c)) {
+    const md = `# Agent Cache
+
+Turn any documentation site into clean, agent-ready markdown docs.
+
+## How it works
+
+1. Paste a docs URL
+2. We crawl the site and convert to clean markdown
+3. Download the ZIP or browse online
+
+## API
+
+- \`POST /api/jobs\` - Submit a docs URL for processing
+- \`GET /api/jobs\` - List completed jobs
+- \`GET /api/jobs/{id}\` - Get job details
+- \`POST /api/probe\` - Probe a URL without starting a job
+
+## Links
+
+- [Packaged Docs](/docs) - Browse completed bundles
+- [Health Check](/health) - Service status
+- [OpenAPI Spec](/openapi.json) - API documentation
+- [llms.txt](/llms.txt) - Agent-readable site index
+`
+    return c.text(md, 200, {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Vary': contentNegotiationVary(),
+    })
+  }
+
   const captured = c.req.query('captured')
   return (
     <>
