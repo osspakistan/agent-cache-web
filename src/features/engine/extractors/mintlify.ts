@@ -30,10 +30,16 @@ interface MintlifyGroup {
   pages?: (MintlifyPage | string)[]
 }
 
+interface MintlifyVersion {
+  version?: string
+  groups?: MintlifyGroup[]
+}
+
 interface MintlifyTab {
   tab?: string
   groups?: MintlifyGroup[]
   pages?: (MintlifyPage | string)[]
+  versions?: MintlifyVersion[]
   href?: string
 }
 
@@ -41,6 +47,7 @@ interface MintlifyDropdown {
   dropdown?: string
   groups?: MintlifyGroup[]
   pages?: (MintlifyPage | string)[]
+  versions?: MintlifyVersion[]
   href?: string
 }
 
@@ -249,27 +256,69 @@ export const mintlifyExtractor: DocExtractor = {
             tab: d.dropdown,
             groups: d.groups,
             pages: d.pages,
+            versions: d.versions,
             href: d.href,
           })) || []),
         ]
 
         for (const tab of currentTabs) {
           if (!tab.tab || processedTabs.has(tab.tab)) continue
-          if (!tab.groups || tab.groups.length === 0) continue
+          // Process tabs with groups, pages, or versions
+          const hasGroups = tab.groups && tab.groups.length > 0
+          const hasPages = tab.pages && tab.pages.length > 0
+          const hasVersions = tab.versions && tab.versions.length > 0
+          if (!hasGroups && !hasPages && !hasVersions) continue
 
           processedTabs.add(tab.tab)
 
-          for (const grp of tab.groups) {
-            const grpTitle = grp.group || tab.tab || 'General'
-            const items = processMintlifyPages(grp.pages || [], docsUrl)
+          // Process grouped pages
+          if (hasGroups) {
+            for (const grp of tab.groups) {
+              const grpTitle = grp.group || tab.tab || 'General'
+              const items = processMintlifyPages(grp.pages || [], docsUrl)
+              if (items.length > 0) {
+                sections.push({
+                  title: grpTitle,
+                  slug: grpTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                  tab: tab.tab,
+                  order: sIdx++,
+                  items,
+                })
+              }
+            }
+          }
+
+          // Process flat pages (tabs without groups)
+          if (!hasGroups && !hasVersions && hasPages) {
+            const items = processMintlifyPages(tab.pages || [], docsUrl)
             if (items.length > 0) {
               sections.push({
-                title: grpTitle,
-                slug: grpTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                title: tab.tab,
+                slug: tab.tab.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
                 tab: tab.tab,
                 order: sIdx++,
                 items,
               })
+            }
+          }
+
+          // Process versioned tabs (e.g. API Reference with versions array)
+          if (hasVersions) {
+            for (const ver of tab.versions) {
+              const verLabel = ver.version || 'Default'
+              for (const grp of ver.groups || []) {
+                const grpTitle = `${verLabel} - ${grp.group || 'General'}`
+                const items = processMintlifyPages(grp.pages || [], docsUrl)
+                if (items.length > 0) {
+                  sections.push({
+                    title: grpTitle,
+                    slug: grpTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                    tab: tab.tab,
+                    order: sIdx++,
+                    items,
+                  })
+                }
+              }
             }
           }
         }

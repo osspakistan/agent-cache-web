@@ -1,0 +1,17 @@
+agentcache.run {
+    encode gzip zstd
+
+    reverse_proxy localhost:10901 {
+        transport http {
+            read_timeout 300s
+            write_timeout 300s
+        }
+    }
+
+    @static path *.js *.css *.woff* *.ttf *.otf *.eot *.ico *.png *.jpg *.jpeg *.gif *.svg *.webp
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    header X-Content-Type-Options "nosniff"
+    header X-Frame-Options "DENY"
+    header Referrer-Policy "strict-origin-when-cross-origin"
+}

@@ -8,7 +8,7 @@ import type { AppContext, JobRecord } from '../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
   setPageMeta({
-    title: 'Agent Cache — packaged docs',
+    title: 'Agent Cache // packaged docs',
     description: 'Download full doc sites pre-converted for coding agents.',
   })
   await initDb()
@@ -41,7 +41,7 @@ export const GET = async (c: AppContext) => {
   const paged = grouped.slice(start, start + perPage)
 
   setPageMeta({
-    title: `Agent Cache — packaged docs${safePage > 1 ? ` (page ${safePage})` : ''}`,
+    title: `Agent Cache // packaged docs${safePage > 1 ? ` (page ${safePage})` : ''}`,
     description:
       'Download full doc sites pre-converted for coding agents. Drop them in your repo and stop watching your agent hallucinate outdated APIs.',
     image: '/og?title=Packaged+docs&subtitle=Full+doc+sites+for+coding+agents',
@@ -115,7 +115,7 @@ export const GET = async (c: AppContext) => {
           </div>
         ) : (
           <>
-            <div style="column-count: 2; column-gap: 16px; margin-bottom: 48px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 48px;">
               {paged.map(({ latest: j, count }) => {
                 return (
                   <div
@@ -162,11 +162,19 @@ export const GET = async (c: AppContext) => {
                             </span>
                           </div>
                           <span
-                            class="mono"
-                            style="font-size: 11.5px; color: var(--ink-soft); background: var(--secondary); padding: 2px 8px; border-radius: 999px; flex-shrink: 0;"
+                            class="mono card-pages-badge"
+                            style="font-size: 11.5px; color: var(--ink-soft); background: var(--secondary); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; cursor: help; position: relative;"
+                            title={count > 1 ? `${count} variants · ${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}` : `${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}`}
                           >
-                            {count > 1 ? `${count} variants · ` : ''}
                             {j.page_count} {j.page_count === 1 ? 'page' : 'pages'}
+                            {count > 1 && (
+                              <span
+                                style="position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--card); font-size: 11px; padding: 6px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s ease; z-index: 10;"
+                                class="card-tooltip"
+                              >
+                                {count} variants · {formatBytes(j.zip_size_bytes).full} ZIP · {j.strategy || 'html-purify'}
+                              </span>
+                            )}
                           </span>
                         </div>
                         <h3 style="font-family: var(--sans); font-size: 17px; font-weight: 600; margin: 0 0 8px; line-height: 1.35;">

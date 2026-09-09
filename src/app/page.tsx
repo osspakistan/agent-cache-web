@@ -9,12 +9,12 @@ import { Integration } from './_sections/integration'
 import { Manifesto } from './_sections/manifesto'
 
 /**
- * GET / — the landing page. Composes its private sections; manifesto sits outside .wrap.
+ * GET / - the landing page. Composes its private sections; manifesto sits outside .wrap.
  * ?captured=<url> is the no-JS fallback feedback from POST /jobs/create (303 here).
  */
 export const GET = (c: Context) => {
   setPageMeta({
-    title: 'Agent Cache — give your agents the docs',
+    title: 'Agent Cache // give your agents the docs',
     description:
       'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
     image: '/og?title=Agent+Cache&subtitle=Give+your+agents+the+docs',

@@ -3,7 +3,7 @@ import { resolveTargetDocs } from '../../../features/engine/resolver'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
- * POST /api/probe — Probes a documentation URL and tests the acquisition ladder
+ * POST /api/probe - Probes a documentation URL and tests the acquisition ladder
  * Body: { url: string }
  */
 export const POST = async (c: AppContext) => {

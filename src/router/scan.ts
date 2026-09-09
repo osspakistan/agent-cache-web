@@ -1,5 +1,5 @@
 /**
- * File-based router — the scanner.
+ * File-based router - the scanner.
  *
  * Walks src/app/ and registers routes on a Hono instance. The folder tree IS the
  * routing table (see docs/architecture.md → "Routing").
@@ -45,7 +45,7 @@ const FRAGMENT_RX = /^[\w-]+\.fragment\.(ts|tsx)$/
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir).sort()) {
-    if (entry.startsWith('_')) continue // private colocation — invisible
+    if (entry.startsWith('_')) continue // private colocation - invisible
     const full = join(dir, entry)
     if (statSync(full).isDirectory()) walk(full, out)
     else out.push(full)

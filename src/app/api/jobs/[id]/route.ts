@@ -3,7 +3,7 @@ import { getPublicR2Url } from '../../../../lib/clients'
 import type { AppContext } from '../../../../lib/utils/types'
 
 /**
- * GET /api/jobs/:id — Retrieve status and metadata for a specific job
+ * GET /api/jobs/:id - Retrieve status and metadata for a specific job
  */
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id')

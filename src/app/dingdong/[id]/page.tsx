@@ -35,7 +35,7 @@ export const GET = async (c: AppContext) => {
     job.product_name ||
     (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
   setPageMeta({
-    title: `${product} — extraction in progress`,
+    title: `${product} - extraction in progress`,
     description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
     image: `/og?title=${encodeURIComponent(product)}&subtitle=Extraction+in+progress&pages=${job.page_count}&date=${encodeURIComponent(new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}`,
   })
@@ -112,7 +112,7 @@ export const GET = async (c: AppContext) => {
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffbd2e; display: inline-block;"></span>
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #27c93f; display: inline-block;"></span>
             <span style="margin-left: 8px; font-size: 11.5px; color: #8d8a83;">
-              agent-cache-engine — job [{id}] · {job.input_url}
+              agent-cache-engine - job [{id}] · {job.input_url}
             </span>
           </div>
 

@@ -2,7 +2,7 @@ import { getFromR2 } from '../../../../../lib/clients'
 import type { AppContext, NavHierarchy } from '../../../../../lib/utils/types'
 
 /**
- * GET /api/jobs/:id/tree — Retrieve the mapped navigation hierarchy for a job
+ * GET /api/jobs/:id/tree - Retrieve the mapped navigation hierarchy for a job
  */
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id')

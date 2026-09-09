@@ -131,7 +131,7 @@ export function extractHierarchyPaths(_productName: string, hierarchy: NavHierar
 }
 
 /**
- * Generates a plain ASCII tree (not rendered in UI — kept for debugging/export).
+ * Generates a plain ASCII tree (not rendered in UI - kept for debugging/export).
  */
 export function generateAsciiTree(productName: string, hierarchy: NavHierarchy): string {
   const lines: string[] = []
@@ -223,7 +223,7 @@ function renderTreeNodes(nodes: TreeNode[], level: number): string {
         </li>`
       }
 
-      // File node — strip .md suffix for clean display
+      // File node - strip .md suffix for clean display
       const display = node.name.replace(/\.md$/, '')
       const titleAttr = node.title ? ` title="${node.title.replace(/"/g, '&quot;')}"` : ''
 
@@ -248,7 +248,7 @@ function renderTreeNodes(nodes: TreeNode[], level: number): string {
 }
 
 /**
- * Interactive collapsible file tree — pure SSR HTML + vanilla JS.
+ * Interactive collapsible file tree - pure SSR HTML + vanilla JS.
  * Includes direct external doc links for each file and live search.
  */
 export function DocumentationTreeSection({

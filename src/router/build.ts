@@ -20,7 +20,7 @@ import {
 
 const ROUTER_METHODS = ['GET', 'POST'] as const
 
-/** render a JSX node through c.html — JSX trees are string-branded by hono */
+/** render a JSX node through c.html - JSX trees are string-branded by hono */
 function htmlResponse(c: AppContext, node: JSXNode, status?: ContentfulStatusCode): Response {
   return c.html(node as unknown as string, status)
 }
@@ -32,7 +32,7 @@ export async function buildApp(
   const { Hono } = await import('hono')
   const app: Hono<EvlogVariables> = new Hono()
 
-  // request-scoped middleware (e.g. evlog) MUST register before routes —
+  // request-scoped middleware (e.g. evlog) MUST register before routes -
   // hono only applies middleware to handlers registered after it
   for (const mw of opts.middleware ?? []) app.use(mw)
 
@@ -70,7 +70,7 @@ export async function buildApp(
       statSync(f)
       set(await loadMod(f))
     } catch {
-      /* optional — handled below if required */
+      /* optional - handled below if required */
     }
   }
 
@@ -116,7 +116,7 @@ export async function buildApp(
     return c.text('not found', 404)
   })
 
-  // errors — htmx swaps get the bare component; navigations get root layout.
+  // errors - htmx swaps get the bare component; navigations get root layout.
   // evlog: structured grouping via Logger.error isolating machine from human error
   app.onError((err, c) => {
     const reqLog = c.get('log')

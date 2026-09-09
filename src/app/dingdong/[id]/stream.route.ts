@@ -4,7 +4,7 @@ import { readEventsFromR2 } from '../../../lib/clients'
 import type { AppContext, StreamEvent } from '../../../lib/utils/types'
 
 /**
- * GET /dingdong/:id/stream — SSE streaming endpoint.
+ * GET /dingdong/:id/stream - SSE streaming endpoint.
  * Plays back existing events from R2 first, subscribes to the decoupled background runner,
  * and handles client disconnections cleanly without stopping the crawl.
  */

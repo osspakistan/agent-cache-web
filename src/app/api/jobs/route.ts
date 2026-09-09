@@ -4,7 +4,7 @@ import { validateUrl } from '../../../lib/url-rules'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
- * POST /api/jobs — Submit a new crawl job via JSON API
+ * POST /api/jobs - Submit a new crawl job via JSON API
  * Body: { url: string }
  */
 export const POST = async (c: AppContext) => {
@@ -92,7 +92,7 @@ export const POST = async (c: AppContext) => {
 }
 
 /**
- * GET /api/jobs — List recent completed jobs
+ * GET /api/jobs - List recent completed jobs
  */
 export const GET = async (c: AppContext) => {
   try {

@@ -8,7 +8,7 @@
  * Port: .env (Bun auto-loads it) → PORT.
  */
 import { join } from 'node:path'
-import './lib/utils/logger' // initLogger at boot — side-effect import, safe re-entrance
+import './lib/utils/logger' // initLogger at boot - side-effect import, safe re-entrance
 import { evlog } from 'evlog/hono'
 import { serveStatic } from 'hono/bun'
 import { buildApp } from './router/build'
@@ -19,10 +19,10 @@ const app = await buildApp(join(import.meta.dir, 'app'), {
   middleware: [evlog()],
 })
 
-// htmx served from the npm package (htmx.org@4) — no vendored copies
+// htmx served from the npm package (htmx.org@4) - no vendored copies
 app.get('/js/htmx.esm.min.js', serveStatic({ path: 'node_modules/htmx.org/dist/htmx.esm.min.js' }))
 
-// static assets — serveStatic passes through to routes when a file doesn't exist
+// static assets - serveStatic passes through to routes when a file doesn't exist
 app.use('/*', serveStatic({ root: './public' }))
 
 console.log(`[agent-cache-web] routes registered, listening on :${PORT}`)

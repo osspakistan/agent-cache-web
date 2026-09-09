@@ -3,7 +3,7 @@ import { consumePageMeta } from '../lib/page-meta'
 import type { LayoutComponent } from '../router/scan'
 
 /**
- * Root layout — the ONE <html> shell.
+ * Root layout - the ONE <html> shell.
  * Theme init runs inline before paint (shared 'ac-theme' key with the logo preview).
  */
 const Layout: LayoutComponent = ({ children }) => {
@@ -18,7 +18,8 @@ const Layout: LayoutComponent = ({ children }) => {
           <title>{meta.title}</title>
           <meta name="description" content={meta.description} />
 
-          {/* OpenGraph / Twitter card — link previews */}
+          {/* OpenGraph / Twitter card - link previews */}
+          <meta name="og:site_name" content="Agent Cache" />
           <meta property="og:title" content={meta.title} />
           <meta property="og:description" content={meta.description} />
           <meta property="og:type" content="website" />
@@ -35,11 +36,11 @@ const Layout: LayoutComponent = ({ children }) => {
             />
           )}
 
-          {/* Theme color — affects browser chrome (Safari tab bar, mobile status bar) */}
+          {/* Theme color - affects browser chrome (Safari tab bar, mobile status bar) */}
           <meta name="theme-color" content="#fffcf4" media="(prefers-color-scheme: light)" />
           <meta name="theme-color" content="#1a1917" media="(prefers-color-scheme: dark)" />
 
-          {/* Favicon — SVG, no PNG fallbacks */}
+          {/* Favicon - SVG, no PNG fallbacks */}
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
           <link

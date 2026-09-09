@@ -18,7 +18,7 @@ import { llmsTxtExtractor } from './llms-txt'
 import { mintlifyExtractor } from './mintlify'
 import type { DocExtractor, ScopeCheck } from './types'
 
-// Priority order matters — put faster/cheaper detections first.
+// Priority order matters - put faster/cheaper detections first.
 // RSC-payload extractors (no DOM) come before DOM-based ones.
 const EXTRACTORS: DocExtractor[] = [
   mintlifyExtractor, // Mintlify scopedNav RSC

@@ -1,5 +1,5 @@
 /**
- * BrandMark — the agent-cache mark, inlined as SVG.
+ * BrandMark - the agent-cache mark, inlined as SVG.
  *
  * Inlined rather than <img src> because an SVG loaded through <img> is an isolated
  * document: it cannot see the page's CSS vars, so it cannot follow the theme toggle.

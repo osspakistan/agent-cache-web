@@ -177,7 +177,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       await emit({
         type: 'log',
         level: 'info',
-        message: `Discovered vendor llms-full.txt (${decision.llmsFullUrl}) — bundling as companion file`,
+        message: `Discovered vendor llms-full.txt (${decision.llmsFullUrl}) - bundling as companion file`,
         timestamp: Date.now(),
       })
     }
@@ -186,7 +186,7 @@ export async function runConversionEngine(opts: RunEngineOptions): Promise<void>
       await emit({
         type: 'log',
         level: 'info',
-        message: `Discovered vendor llms.txt (${decision.llmsTxtUrl}) — mapping link topology`,
+        message: `Discovered vendor llms.txt (${decision.llmsTxtUrl}) - mapping link topology`,
         timestamp: Date.now(),
       })
     }

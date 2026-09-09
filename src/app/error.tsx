@@ -1,4 +1,4 @@
-/** 500 component — rendered bare for htmx swaps, wrapped in layout for navigations. */
+/** 500 component - rendered bare for htmx swaps, wrapped in layout for navigations. */
 export default function ErrorPage(props: { message: string }) {
   const isDev = process.env.NODE_ENV !== 'production'
 

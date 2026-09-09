@@ -1,5 +1,5 @@
 /**
- * The pill URL input — the product's one input.
+ * The pill URL input - the product's one input.
  * Used by hero + get-started (two consumers → shared component, per architecture).
  * htmx: POST /jobs/create, swap replaces the form with the response fragment.
  * No-JS: real form POST → server decides (fragment handler handles both).

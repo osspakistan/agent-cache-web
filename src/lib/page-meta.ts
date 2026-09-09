@@ -1,4 +1,4 @@
-// Per-page meta store — set by each route before rendering, read by layout.
+// Per-page meta store - set by each route before rendering, read by layout.
 // Replaces the hardcoded title/description so every page is not a duplicate.
 
 export interface PageMeta {

@@ -260,3 +260,42 @@ input[name="demo"], input[name="install"] {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Card tooltip on hover */
+.card-pages-badge {
+  position: relative;
+}
+
+.card-pages-badge:hover .card-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-pages-badge .card-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%);
+  background: var(--ink);
+  color: var(--card);
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  font-family: var(--mono);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-pages-badge .card-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--ink);
+}

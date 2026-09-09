@@ -3,3 +3,4 @@ storage/jobs/*
 !storage/jobs/.gitkeep
 .env
 .pi
+.mcp.json

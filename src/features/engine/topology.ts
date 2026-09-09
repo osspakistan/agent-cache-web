@@ -1254,7 +1254,7 @@ export async function extractSiteTopology(
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: `Detected ${name} site — using extractor ${name}`,
+          message: `Detected ${name} site - using extractor ${name}`,
           timestamp: Date.now(),
         })
       })

@@ -56,7 +56,7 @@ async function probeDomainReachability(
 }
 
 /**
- * POST /jobs/create — creates the job record in Turso DB + disk, then redirects to /dingdong/ac-{id}
+ * POST /jobs/create - creates the job record in Turso DB + disk, then redirects to /dingdong/ac-{id}
  */
 export const POST = async (c: AppContext) => {
   const log = c.get('log')

@@ -1,0 +1,20 @@
+name: agent-cache-web
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: .env
+    ports:
+      - "${PORT:-10901}:${PORT:-10901}"
+    volumes:
+      - ./.env:/app/.env:ro
+      - ../storage:/app/storage
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:${PORT:-10901}/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    # SSE needs long-lived connections
+    stop_grace_period: 30s
