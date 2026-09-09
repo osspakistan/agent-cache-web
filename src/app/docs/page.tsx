@@ -168,10 +168,7 @@ export const GET = async (c: AppContext) => {
                           >
                             {j.page_count} {j.page_count === 1 ? 'page' : 'pages'}
                             {count > 1 && (
-                              <span
-                                style="position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--card); font-size: 11px; padding: 6px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s ease; z-index: 10;"
-                                class="card-tooltip"
-                              >
+                              <span class="card-tooltip">
                                 {count} variants · {formatBytes(j.zip_size_bytes).full} ZIP · {j.strategy || 'html-purify'}
                               </span>
                             )}
