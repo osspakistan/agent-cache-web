@@ -1,4 +1,3 @@
-import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
 import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
@@ -103,7 +102,6 @@ Have questions or feedback? Reach out via [our contact page](https://agentcache.
           an issue on GitHub.
         </p>
       </div>
-      <Footer />
     </>,
   )
 }

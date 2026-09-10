@@ -1,4 +1,3 @@
-import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { initDb, listCompletedJobs } from '../../features/jobs'
 import { setPageMeta } from '../../lib/page-meta'
@@ -213,7 +212,6 @@ export const GET = async (c: AppContext) => {
           </>
         )}
       </div>
-      <Footer />
     </>
   )
 }

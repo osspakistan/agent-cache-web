@@ -1,5 +1,4 @@
 import { DocumentationTreeSection } from '../../../components/doc-tree'
-import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getJobById } from '../../../features/jobs'
 import { getFromR2, getPublicR2Url, listCompletedJobs } from '../../../lib/clients'
@@ -28,7 +27,6 @@ export const GET = async (c: AppContext) => {
             Back to the docs pile →
           </a>
         </div>
-        <Footer />
       </>
     )
   }
@@ -105,7 +103,6 @@ export const GET = async (c: AppContext) => {
             </div>
           </div>
         </div>
-        <Footer />
       </>
     )
   }
@@ -634,7 +631,6 @@ export const GET = async (c: AppContext) => {
           }}
         />
       </div>
-      <Footer />
     </>
   )
 }

@@ -1,4 +1,3 @@
-import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
 import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
@@ -134,7 +133,6 @@ For privacy-related inquiries, please contact us via our GitHub repository.
         <h2>Contact</h2>
         <p>For privacy-related inquiries, please contact us via our GitHub repository.</p>
       </div>
-      <Footer />
     </>,
   )
 }

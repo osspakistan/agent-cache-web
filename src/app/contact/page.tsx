@@ -1,4 +1,3 @@
-import { Footer } from '../../components/footer'
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
 import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
@@ -61,7 +60,6 @@ We aim to respond to all inquiries within 2-3 business days. For urgent issues, 
           note this in your message subject.
         </p>
       </div>
-      <Footer />
     </>,
   )
 }

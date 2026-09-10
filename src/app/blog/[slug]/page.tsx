@@ -1,5 +1,4 @@
 import { raw } from 'hono/html'
-import { Footer } from '../../../components/footer'
 import { Nav } from '../../../components/nav'
 import { getPost } from '../../../lib/content'
 import { setPageMeta } from '../../../lib/page-meta'
@@ -30,7 +29,6 @@ export const GET = async (c: AppContext) => {
             Back to the blog →
           </a>
         </div>
-        <Footer />
       </>
     )
   }
@@ -59,7 +57,6 @@ export const GET = async (c: AppContext) => {
           </article>
         </main>
       </div>
-      <Footer />
     </>
   )
 }
