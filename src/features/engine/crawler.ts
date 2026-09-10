@@ -82,20 +82,22 @@ export async function crawlAndExtractPages(
 
       if (hasChildren) {
         const nestedFolder = `${parentFolder}/${String(iIdx + 1).padStart(2, '0')}-${slug}`
-        // Index page for folder
-        queue.push({
-          tab: sec.tab,
-          tabIndex: tIdx,
-          secIndex: sIdx + 1,
-          secTitle: sec.title,
-          secSlug: sec.slug,
-          itemTitle: item.title,
-          url: item.url,
-          folderPath: nestedFolder,
-          fileName: 'index.md',
-        })
+        // Index page for folder (pure grouping nodes have no page to fetch)
+        if (item.url) {
+          queue.push({
+            tab: sec.tab,
+            tabIndex: tIdx,
+            secIndex: sIdx + 1,
+            secTitle: sec.title,
+            secSlug: sec.slug,
+            itemTitle: item.title,
+            url: item.url,
+            folderPath: nestedFolder,
+            fileName: 'index.md',
+          })
+        }
         enqueueItems(item.items || [], nestedFolder, sec, sIdx, tIdx)
-      } else {
+      } else if (item.url) {
         queue.push({
           tab: sec.tab,
           tabIndex: tIdx,

@@ -2,6 +2,12 @@ import { spawn } from 'node:child_process'
 import { JSDOM } from 'jsdom'
 import type { NavHierarchy, NavItem, NavSection, StreamEvent } from '../../lib/utils/types'
 import { detectDocPlatform, runExtractors } from './extractors'
+import {
+  buildMarkdownNavHierarchy,
+  pickBetterTree,
+  scoreHierarchy,
+  type TreePick,
+} from './markdown-nav'
 
 const NON_DOCS_FILTER =
   /(?:^|\/)(?:blog|changelog|news|pricing|legal|careers|jobs|podcast|contact|privacy|terms|cookie|press|status|login|signup|marketplace|store|assets?)(?:\/|$)|_next|_astro|_nuxt|cdn-cgi|_static\/js\/|\$\{|%7B|\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot|json|map|zip|tar|gz)(\?.*)?$/i
@@ -864,7 +870,7 @@ async function extractHubSections(
       // Find longest common path prefix across all items in this section
       const pathLists = section.items.map((it) => {
         try {
-          return new URL(it.url).pathname.split('/').filter(Boolean)
+          return it.url ? new URL(it.url).pathname.split('/').filter(Boolean) : []
         } catch {
           return []
         }
@@ -1027,6 +1033,7 @@ async function extractHubSections(
       const batch = allCards.slice(i, i + concurrency)
       await Promise.all(
         batch.map(async (it) => {
+          if (!it.url) return
           const sub = await probeChildSidebar(it.url, isWithinScope)
           if (sub && sub.length >= 2) {
             it.items = sub.map((c, idx) => ({ ...c, order: idx + 1 }))
@@ -1233,6 +1240,10 @@ export async function extractSiteTopology(
   }
 
   // 1. Tier 1: HTML Inspection & Live DOM Sidebar Extraction
+  // markdown-nav tree lives at function scope: the final fallback below sits
+  // outside the try block that fetches the html
+  let mdTree: NavHierarchy | null = null
+
   try {
     const res = await fetch(docsUrl, {
       headers: {
@@ -1244,6 +1255,15 @@ export async function extractSiteTopology(
 
     if (res.ok) {
       const html = await res.text()
+
+      // Path B (runs alongside the DOM extractors): convert the page to
+      // markdown and parse the nav from the nested list structure. Cheap,
+      // deterministic, no LLM. Compared against every DOM tree below.
+      try {
+        mdTree = buildMarkdownNavHierarchy(html, baseDocsUrl, isWithinScope)
+      } catch {}
+      const pick = (domTree: NavHierarchy, source: string): TreePick =>
+        pickBetterTree(domTree, source, mdTree)
 
       // Detect and report the documentation platform
       const detectedPlatform = detectDocPlatform(html, docsUrl)
@@ -1259,19 +1279,27 @@ export async function extractSiteTopology(
         })
       })
       if (registryTree && registryTree.sections.length >= 1) {
-        return registryTree
+        const winner = pick(registryTree, 'framework registry')
+        void options?.onProgress?.({
+          type: 'log',
+          level: 'info',
+          message: `using extractor ${winner.source}`,
+          timestamp: Date.now(),
+        })
+        return winner.tree
       }
 
       // 1b. Check for Stripe multi-nested hydration navigation tree
       const stripeTree = extractStripeHierarchy(docsUrl, html)
       if (stripeTree && stripeTree.sections.length >= 2) {
+        const winner = pick(stripeTree, 'stripe')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor stripe',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return stripeTree
+        return winner.tree
       }
 
       const dom = new JSDOM(html)
@@ -1280,61 +1308,66 @@ export async function extractSiteTopology(
       // 1c. Check for mdBook chapter sidebar (Rust, Zed, Tokio, Tauri, etc.)
       const mdBookTree = extractMdBookHierarchy(doc, baseDocsUrl, isWithinScope)
       if (mdBookTree && mdBookTree.sections.length >= 1) {
+        const winner = pick(mdBookTree, 'mdbook')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor mdbook',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return mdBookTree
+        return winner.tree
       }
 
       // 1d. Check for GitHub Primer / ActionList navigation (docs.npmjs.com, GitHub Docs, etc.)
       const primerTree = extractPrimerHierarchy(doc, baseDocsUrl, isWithinScope)
       if (primerTree && primerTree.sections.length >= 2) {
+        const winner = pick(primerTree, 'primer')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor primer',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return primerTree
+        return winner.tree
       }
 
       // 1e. Check for modern structured sidebar groups (Cursor, Tailwind, Next, Radix, shadcn)
       const groupedTree = await extractGroupedSidebarHierarchy(doc, baseDocsUrl, isWithinScope)
       if (groupedTree && groupedTree.sections.length >= 2) {
+        const winner = pick(groupedTree, 'grouped-sidebar')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor grouped-sidebar',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return groupedTree
+        return winner.tree
       }
 
       // 1f. Check for documentation hub page (FFmpeg, legacy categorised index pages)
       const hubTree = await extractHubSections(doc, baseDocsUrl, isWithinScope)
       if (hubTree && hubTree.sections.length >= 2) {
+        const winner = pick(hubTree, 'doc-hub')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor doc-hub',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return hubTree
+        return winner.tree
       }
 
       // 1g. Check for Sphinx / ReadTheDocs navigation
       const sphinxTree = extractSphinxHierarchy(doc, baseDocsUrl, isWithinScope)
       if (sphinxTree && sphinxTree.sections.length >= 1) {
+        const winner = pick(sphinxTree, 'sphinx')
         void options?.onProgress?.({
           type: 'log',
           level: 'info',
-          message: 'using extractor sphinx',
+          message: `using extractor ${winner.source}`,
           timestamp: Date.now(),
         })
-        return sphinxTree
+        return winner.tree
       }
 
       // 1c. Generic Live DOM Sidebar Extraction (only target docs/sidebar navigation)
@@ -1374,7 +1407,7 @@ export async function extractSiteTopology(
                 const fullUrl = new URL(href, baseDocsUrl).href
                 if (isWithinScope(fullUrl)) {
                   const norm = normalizeUrl(fullUrl)
-                  if (!items.some((it) => normalizeUrl(it.url) === norm)) {
+                  if (!items.some((it) => it.url && normalizeUrl(it.url) === norm)) {
                     items.push({
                       title: itemTitle,
                       url: fullUrl,
@@ -1405,6 +1438,21 @@ export async function extractSiteTopology(
   // If DOM sidebar yielded rich structure (>= 2 sections and >= 4 items), return it directly!
   let domItemCount = 0
   for (const s of sections) domItemCount += s.items.length
+  // Markdown-nav fallback: every DOM extractor failed or was too weak, but the
+  // page converted to markdown may still hold a parseable nested nav.
+  if (mdTree) {
+    const mdScore = scoreHierarchy(mdTree)
+    if (mdScore >= 6) {
+      void options?.onProgress?.({
+        type: 'log',
+        level: 'info',
+        message: `using extractor markdown-nav (score ${mdScore})`,
+        timestamp: Date.now(),
+      })
+      return mdTree
+    }
+  }
+
   if (sections.length >= 2 && domItemCount >= 4) {
     void options?.onProgress?.({
       type: 'log',

@@ -55,7 +55,8 @@ export interface StreamEvent {
 
 export interface NavItem {
   title: string
-  url: string
+  /** page url; absent for pure grouping nodes (e.g. Frontend/Backend) */
+  url?: string
   file?: string
   order?: number
   slug?: string
