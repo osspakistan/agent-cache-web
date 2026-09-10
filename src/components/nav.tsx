@@ -47,7 +47,7 @@ export function Nav(props: {
           <a
             href="/"
             class="mono"
-            style="font-size: 13px; font-weight: 600; text-decoration: none; padding: 8px 16px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground);"
+            style="font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;"
           >
             add docs
           </a>
