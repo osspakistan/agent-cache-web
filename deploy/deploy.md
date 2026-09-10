@@ -18,12 +18,17 @@ Only production-relevant files. The Dockerfile references these — nothing else
 |---|---|
 | `src/` | Backend code (Hono, engine, lib, router) |
 | `public/` | Frontend assets (CSS, JS, fonts, logos) |
+| `content/` | Blog + compare articles (required — read by src/lib/content.ts) |
 | `package.json` | Dependencies |
 | `bun.lock` | Lockfile |
 | `deploy/` | Docker + Caddy config |
 | `.env` | Production secrets |
 
-**Do NOT copy:** `.wtf/`, `.agentcache/`, `.git/`, `node_modules/`, `storage/`, `docs/`, experiments, reports.
+**Do NOT copy:** `.wtf/`, `.agentcache/`, `.git/`, `node_modules/`, `storage/`, `docs/`, `experiments/`, reports.
+
+> ⚠️ **`content/` must ship.** It is the source for `/blog` and `/compare`. Do NOT add
+> `--exclude='content'` to the rsync, and NEVER remove `COPY content/ ./content/` from the
+> Dockerfile. The site serves empty blog/compare pages if it's missing.
 
 ## CRITICAL: Step 0 - Verify MCP Connection
 
