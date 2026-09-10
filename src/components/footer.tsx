@@ -32,97 +32,52 @@ export function Footer() {
                   library
                 </a>
               </li>
-              <li>
-                <a
-                  href="/pricing"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  pricing
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/frameworks"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  supported frameworks
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/use-cases"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  use cases
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/changelog"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  changelog
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/roadmap"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  roadmap
-                </a>
-              </li>
             </ul>
           </div>
 
-          {/* integrations */}
+          {/* compare */}
           <div>
             <p
               class="mono"
               style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;"
             >
-              integrations
+              compare
             </p>
             <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
               <li>
                 <a
-                  href="/integrations/claude-code"
+                  href="/compare"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"
                 >
-                  claude code
+                  all comparisons
                 </a>
               </li>
               <li>
                 <a
-                  href="/integrations/cursor"
+                  href="/compare/context7"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"
                 >
-                  cursor
+                  vs context7
                 </a>
               </li>
               <li>
                 <a
-                  href="/integrations/codex"
+                  href="/compare/firecrawl"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"
                 >
-                  openai codex
+                  vs firecrawl
                 </a>
               </li>
               <li>
                 <a
-                  href="/integrations/windsurf"
+                  href="/compare/tavily"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"
                 >
-                  windsurf
+                  vs tavily
                 </a>
               </li>
             </ul>
@@ -148,47 +103,20 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="/compare"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  compare
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/vs/context7"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  vs context7
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/vs/firecrawl"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  vs firecrawl
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/vs/tavily"
-                  class="mono"
-                  style="font-size: 13px; color: var(--body); text-decoration: none;"
-                >
-                  vs tavily
-                </a>
-              </li>
-              <li>
-                <a
                   href="/llms.txt"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"
                 >
                   llms.txt
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/sitemap.xml"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  sitemap
                 </a>
               </li>
             </ul>

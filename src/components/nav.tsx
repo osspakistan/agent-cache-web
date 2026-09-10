@@ -47,9 +47,9 @@ export function Nav(props: {
           <a
             href="/"
             class="mono"
-            style="font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;"
+            style="font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 4px 14px; border-radius: 999px; background: var(--primary); color: var(--primary-foreground);"
           >
-            add docs
+            add
           </a>
           <button class="toggle" id="theme-toggle" type="button">
             theme
