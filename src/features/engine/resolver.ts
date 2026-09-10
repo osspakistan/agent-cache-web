@@ -68,8 +68,11 @@ const GENERIC_WORDS = new Set([
   'welcome',
 ])
 
-const TAVILY_API_KEY =
-  process.env.TAVILY_API_KEY || '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'
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY
+
+if (!TAVILY_API_KEY) {
+  throw new Error('TAVILY_API_KEY environment variable is required')
+}
 
 export function getRootWebsiteUrl(inputUrl: string): string {
   try {
