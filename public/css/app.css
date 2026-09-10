@@ -299,3 +299,86 @@ input[name="demo"], input[name="install"] {
   border: 5px solid transparent;
   border-right-color: var(--ink);
 }
+
+/* ============================================================
+   Reading / prose — rendered markdown (blog + compare pages)
+   Content comes from comark as HTML inside .prose
+   ============================================================ */
+.prose-wrap { max-width: 72ch; margin: 0 auto; padding: 0 20px 24px; }
+.post-head { padding: 8px 0 4px; }
+.post-head h1 {
+  font-family: var(--serif); font-weight: 500; font-size: 38px;
+  line-height: 1.12; letter-spacing: -0.01em; color: var(--ink);
+  margin: 0 0 12px;
+}
+.post-meta { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); margin: 0 0 8px; }
+.post-title-sep { border: 0; border-top: 1px solid var(--rule); margin: 0 0 26px; }
+
+.prose { font-size: 16.5px; line-height: 1.7; color: var(--ink-body); }
+.prose > *:first-child { margin-top: 0; }
+.prose h2 {
+  font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.2;
+  color: var(--ink); margin: 36px 0 12px; letter-spacing: -0.01em;
+}
+.prose h3 {
+  font-family: var(--serif); font-weight: 500; font-size: 20px; line-height: 1.25;
+  color: var(--ink); margin: 28px 0 10px;
+}
+.prose h4 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 24px 0 8px; letter-spacing: 0.02em; }
+.prose p { margin: 0 0 18px; }
+.prose a { color: var(--accent-ink); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent-ink) 40%, transparent); text-underline-offset: 3px; }
+.prose a:hover { color: var(--ink); }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose ul, .prose ol { margin: 0 0 18px; padding-left: 24px; }
+.prose li { margin: 0 0 8px; }
+.prose li::marker { color: var(--ink-soft); }
+.prose code {
+  font-family: var(--mono); font-size: 0.86em; font-weight: 400;
+  background: var(--secondary); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 1px 5px; color: var(--ink);
+}
+.prose pre {
+  background: var(--secondary); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 16px 18px; overflow-x: auto;
+  margin: 0 0 20px; font-size: 14px; line-height: 1.6;
+}
+.prose pre code { background: none; border: 0; padding: 0; font-size: inherit; color: var(--ink-body); }
+.prose blockquote {
+  margin: 0 0 20px; padding: 4px 0 4px 18px; border-left: 3px solid var(--accent);
+  color: var(--ink-body); font-style: normal;
+}
+.prose blockquote p { margin: 0 0 8px; }
+.prose hr { border: 0; border-top: 1px solid var(--rule); margin: 32px 0; }
+.prose table { border-collapse: collapse; width: 100%; margin: 0 0 20px; font-size: 14px; }
+.prose th { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--rule); }
+.prose td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink-body); }
+.prose tr:last-child td { border-bottom: 0; }
+.prose img { max-width: 100%; border-radius: 8px; }
+
+/* post footer: internal links from the `related:` block stay as list items */
+
+/* list index page */
+.index-wrap { max-width: 76ch; margin: 0 auto; padding: 0 20px 40px; }
+.index-head { padding: 8px 0 6px; }
+.index-head h1 {
+  font-family: var(--serif); font-weight: 500; font-size: 38px; line-height: 1.12;
+  color: var(--ink); margin: 0 0 10px; letter-spacing: -0.01em;
+}
+.index-head .lede { color: var(--ink-body); max-width: 60ch; }
+.post-item {
+  display: block; padding: 18px 0; border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+}
+.post-item:first-of-type { border-top: 1px solid var(--rule); }
+.post-item:hover h3 { color: var(--accent-ink); }
+.post-item h3 {
+  font-family: var(--serif); font-weight: 500; font-size: 21px; line-height: 1.3;
+  color: var(--ink); margin: 0 0 6px; letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+}
+.post-item p { font-size: 15px; color: var(--ink-body); margin: 0 0 8px; max-width: 64ch; line-height: 1.55; }
+.post-item .item-meta { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+.section-label { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-ink); margin: 0 0 6px; }
+.back-link { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); text-decoration: none; }
+.back-link:hover { color: var(--ink); }
+.blog-list-sep { border: 0; border-top: 1px solid var(--rule); margin: 0 0 8px; }

@@ -8,6 +8,7 @@ RUN bun install --production
 # Copy app source
 COPY src/ ./src/
 COPY public/ ./public/
+COPY content/ ./content/
 COPY tsconfig.json ./
 
 # Runtime

@@ -1,4 +1,4 @@
-import type { AppContext } from '../lib/utils/types'
+import type { AppContext } from '../../lib/utils/types'
 
 /**
  * GET /openapi.json - OpenAPI 3.0 specification
@@ -27,7 +27,8 @@ export const GET = (c: AppContext) => {
         get: {
           operationId: 'getHealth',
           summary: 'Health check',
-          description: 'Returns service uptime status. Used by monitoring and agents to verify availability.',
+          description:
+            'Returns service uptime status. Used by monitoring and agents to verify availability.',
           tags: ['System'],
           responses: {
             '200': {
@@ -344,7 +345,10 @@ export const GET = (c: AppContext) => {
           type: 'object',
           properties: {
             id: { type: 'string' },
-            status: { type: 'string', enum: ['pending', 'probing', 'crawling', 'packaging', 'complete', 'failed'] },
+            status: {
+              type: 'string',
+              enum: ['pending', 'probing', 'crawling', 'packaging', 'complete', 'failed'],
+            },
             input_url: { type: 'string' },
             resolved_url: { type: 'string' },
             product_name: { type: 'string' },

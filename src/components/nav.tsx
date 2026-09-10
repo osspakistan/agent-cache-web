@@ -1,6 +1,8 @@
 import { BrandMark } from './brand-mark'
 
-export function Nav(props: { active?: 'home' | 'docs' | 'about' | 'contact' | 'privacy' | 'dingdong' }) {
+export function Nav(props: {
+  active?: 'home' | 'docs' | 'about' | 'contact' | 'privacy' | 'dingdong' | 'blog' | 'compare'
+}) {
   return (
     <header style="padding: 20px 0; border-bottom: 1px solid var(--border-soft); margin-bottom: 32px; view-transition-name: site-header;">
       <div class="wrap" style="display: flex; align-items: center; justify-content: space-between;">
@@ -34,6 +36,20 @@ export function Nav(props: { active?: 'home' | 'docs' | 'about' | 'contact' | 'p
               }`}
             >
               library
+            </a>
+            <a
+              href="/blog"
+              class="mono"
+              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${props.active === 'blog' ? 'color: var(--ink); font-weight: 600; background: var(--secondary);' : 'color: var(--ink-soft);'}`}
+            >
+              blog
+            </a>
+            <a
+              href="/compare"
+              class="mono"
+              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${props.active === 'compare' ? 'color: var(--ink); font-weight: 600; background: var(--secondary);' : 'color: var(--ink-soft);'}`}
+            >
+              compare
             </a>
             <a
               href="/about"
