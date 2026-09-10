@@ -2,7 +2,7 @@
  * File-based router - the scanner.
  *
  * Walks src/app/ and registers routes on a Hono instance. The folder tree IS the
- * routing table (see docs/architecture.md → "Routing").
+ * routing table (see library/architecture.md → "Routing").
  *
  * Magic file names:
  *   page.ts(x)            GET, full page, wrapped in nearest layout.ts chain

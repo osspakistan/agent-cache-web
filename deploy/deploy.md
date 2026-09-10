@@ -24,11 +24,15 @@ Only production-relevant files. The Dockerfile references these — nothing else
 | `deploy/` | Docker + Caddy config |
 | `.env` | Production secrets |
 
-**Do NOT copy:** `.wtf/`, `.agentcache/`, `.git/`, `node_modules/`, `storage/`, `docs/`, `experiments/`, reports.
+**Do NOT copy:** `.wtf/`, `.agentcache/`, `.git/`, `node_modules/`, `storage/`, `library/`, `experiments/`, reports.
 
 > ⚠️ **`content/` must ship.** It is the source for `/blog` and `/compare`. Do NOT add
 > `--exclude='content'` to the rsync, and NEVER remove `COPY content/ ./content/` from the
 > Dockerfile. The site serves empty blog/compare pages if it's missing.
+>
+> ⚠️ **`src/app/docs/` (the `/docs` web route) must ship too.** Only the internal `library/`
+> engineering-docs folder is excluded — use the root-anchored `--exclude='/library'`, NEVER a bare
+> `--exclude='docs'`, which would also delete the `/docs` route and make it 404 in production.
 
 ## CRITICAL: Step 0 - Verify MCP Connection
 
@@ -103,7 +107,7 @@ rsync -avz -e 'ssh -p 2222' \
   --exclude='.git' \
   --exclude='node_modules' \
   --exclude='storage' \
-  --exclude='docs' \
+  --exclude='/library' \
   --exclude='.pi' \
   --exclude='.codegraph' \
   --exclude='report.html' \
@@ -178,7 +182,7 @@ rsync -avz -e 'ssh -p 2222' \
   --exclude='.git' \
   --exclude='node_modules' \
   --exclude='storage' \
-  --exclude='docs' \
+  --exclude='/library' \
   --exclude='.pi' \
   --exclude='.codegraph' \
   --exclude='report.html' \

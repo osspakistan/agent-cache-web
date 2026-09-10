@@ -1,7 +1,7 @@
 # Agent Cache Web — Architecture & Technical Reference
 
 Status: **Implementation Phase (v1 MVP Monolith)**.
-Feature specs live in `docs/system-design.md` and `.wtf/00.chats/experiments-playbooks/`.
+Feature specs live in `library/system-design.md` and `.wtf/00.chats/experiments-playbooks/`.
 
 ---
 
