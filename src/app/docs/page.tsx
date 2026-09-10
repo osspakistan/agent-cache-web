@@ -114,19 +114,22 @@ export const GET = async (c: AppContext) => {
           </div>
         ) : (
           <>
-            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 48px;">
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; margin-bottom: 48px;">
               {paged.map(({ latest: j, count }) => {
                 return (
-                  <div key={j.id} style="position: relative; break-inside: avoid; min-width: 0;">
+                  <div
+                    key={j.id}
+                    style="position: relative; break-inside: avoid; min-width: 0; padding: 0 6px 6px 0;"
+                  >
                     {count > 1 && (
                       <div
-                        style="position: absolute; inset: 0; transform: translate(6px, 6px); background: var(--border-soft); border: 1px solid var(--border); border-radius: var(--radius);"
+                        style="position: absolute; top: 6px; left: 6px; right: 0; bottom: 0; background: var(--border-soft); border: 1px solid var(--border); border-radius: var(--radius);"
                         aria-hidden="true"
                       />
                     )}
                     {count > 1 && (
                       <div
-                        style="position: absolute; inset: 0; transform: translate(3px, 3px); background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius);"
+                        style="position: absolute; top: 3px; left: 3px; right: 0; bottom: 0; background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius);"
                         aria-hidden="true"
                       />
                     )}
