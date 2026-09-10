@@ -273,7 +273,7 @@ export const mintlifyExtractor: DocExtractor = {
 
           // Process grouped pages
           if (hasGroups) {
-            for (const grp of tab.groups) {
+            for (const grp of tab.groups ?? []) {
               const grpTitle = grp.group || tab.tab || 'General'
               const items = processMintlifyPages(grp.pages || [], docsUrl)
               if (items.length > 0) {
@@ -304,7 +304,7 @@ export const mintlifyExtractor: DocExtractor = {
 
           // Process versioned tabs (e.g. API Reference with versions array)
           if (hasVersions) {
-            for (const ver of tab.versions) {
+            for (const ver of tab.versions ?? []) {
               const verLabel = ver.version || 'Default'
               for (const grp of ver.groups || []) {
                 const grpTitle = `${verLabel} - ${grp.group || 'General'}`
