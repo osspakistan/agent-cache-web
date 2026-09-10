@@ -12,25 +12,10 @@ export const GET = async (c: AppContext) => {
   const slug = c.req.param('slug') || ''
   const post = await getPost('blog', slug)
 
-  if (!post) {
-    return (
-      <>
-        <Nav active="blog" />
-        <div class="wrap" style="padding: 96px 20px; text-align: center;">
-          <h1>Post not found.</h1>
-          <p class="lede">
-            No blog post at{' '}
-            <span class="mono" style="color: var(--accent-ink);">
-              /blog/{slug}
-            </span>
-            .
-          </p>
-          <a href="/blog" class="secondary" style="margin-top: 24px;">
-            Back to the blog →
-          </a>
-        </div>
-      </>
-    )
+  if (!post) return c.notFound()
+
+  if (slug !== post.slug) {
+    return c.redirect(`${post.route}${new URL(c.req.url).search}`, 301)
   }
 
   setPageMeta({

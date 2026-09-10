@@ -13,7 +13,7 @@ they're not interchangeable. they're built for different philosophies. different
 
 here's how they compare on what actually matters.
 
-## the short version
+## hosting, setup, and agent access side by side
 
 | | mintlify | docusaurus | fumadocs |
 |---|---|---|---|
@@ -41,7 +41,7 @@ mintlify is a platform, not just a framework. you connect your github repo. they
 
 **fast.** cdn-backed. global edge distribution. your docs load fast everywhere.
 
-**beautiful default design.** mintlify sites look good without customization. typography, spacing, dark mode, mobile responsiveness — all polished.
+**beautiful default design.** mintlify sites look good without customization. typography, spacing, dark mode, mobile responsiveness. all polished.
 
 ### where mintlify falls short
 
@@ -145,7 +145,7 @@ fumadocs wins on speed. mintlify wins on convenience (no build needed). docusaur
 - you prefer minimal, modern tools
 - you're comfortable with a newer ecosystem
 
-## our recommendation
+## mintlify for zero ops, fumadocs for self-hosted next.js
 
 for most new projects in 2026: **mintlify or fumadocs.**
 
@@ -153,7 +153,7 @@ both are fast, modern, and agent-ready. mintlify if you want zero-ops saas. fuma
 
 docusaurus is still excellent for large, complex projects that need its ecosystem. but for a typical docs site, mintlify or fumadocs will get you there faster.
 
-## bottom line
+## judge the raw docs alongside the rendered site
 
 documentation frameworks are not just about how the site looks to humans. in 2026, they're also about how accessible the content is to machines.
 
@@ -163,4 +163,4 @@ mintlify and fumadocs understand this. docusaurus is catching up. the future bel
 
 **related:**
 - [framework extractor rankings](/blog/docs-framework-agent-readability)
-- [the state of docs for agents (2026 report)](/blog/state-of-docs-for-agents-2026)
+- [how agent-readable docs are in 2026](/blog/state-of-docs-for-agents-2026)

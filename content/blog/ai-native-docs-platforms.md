@@ -1,7 +1,7 @@
 # ai-native documentation platforms: hype or actual future?
 
 **meta title:** ai-native documentation platforms: hype or the future of docs?
-**meta description:** documentation.ai, docsalot, hyperdocs, docsio — ai-native docs platforms are everywhere. we tested them. here's what's real and what's marketing.
+**meta description:** documentation.ai, docsalot, hyperdocs, docsio. ai-native docs platforms are everywhere. i tested them. here's what's real and what's marketing.
 **slug:** /blog/ai-native-documentation-platforms
 **target keywords:** ai native documentation, ai docs platform, documentation ai tool, docsalot vs mintlify, hyperdocs documentation
 
@@ -11,27 +11,27 @@
 
 at least, that's what the landing pages say. "ai writes your docs." "ai updates your docs." "ai-powered developer portals."
 
-we looked at the players. tested what we could. here's what's real and what's just seo juice.
+i looked at the players. tested what i could. here's what's real and what's just seo juice.
 
-## the players
+## who's selling ai-native docs
 
-**Documentation.AI** — connects to your codebase and prs. continuously writes and updates docs with autonomous agents.
+**Documentation.AI**: connects to your codebase and prs. continuously writes and updates docs with autonomous agents.
 
-**DocsAlot** — unifies product manuals and dev docs into a single source of truth. optimized for humans and agents. native mcp server.
+**DocsAlot**: unifies product manuals and dev docs into a single source of truth. optimized for humans and agents. native mcp server.
 
-**Hyperdocs** — automatic change detection from git prs. ai content publishing.
+**Hyperdocs**: automatic change detection from git prs. ai content publishing.
 
-**Docsio** — ingests repos or web content. outputs hosted sites with automatic `llms.txt` generation and mcp support.
+**Docsio**: ingests repos or web content. outputs hosted sites with automatic `llms.txt` generation and mcp support.
 
-**DocuWriter.ai** — inspects source code across 20+ languages. generates api references and tutorials.
+**DocuWriter.ai**: inspects source code across 20+ languages. generates api references and tutorials.
 
-**Unmint** — open-source, self-hosted alternative to mintlify. zero subscription fees. (not strictly ai-native, but positioned against saas tools.)
+**Unmint**: open-source, self-hosted alternative to mintlify. zero subscription fees. (not strictly ai-native, but positioned against saas tools.)
 
-**Jamdesk** — docs-as-code with ai search and api testing widgets.
+**Jamdesk**: docs-as-code with ai search and api testing widgets.
 
-**Papervine** — git-synced docs with ai assistance.
+**Papervine**: git-synced docs with ai assistance.
 
-## the promise: ai writes documentation
+## connect a repo, get updated docs?
 
 the pitch is attractive:
 
@@ -43,15 +43,15 @@ the pitch is attractive:
 
 sounds like the end of "docs are outdated" forever.
 
-## the reality: what actually works
+## what i could check in public demos and tools
 
-we tested the parts we could access (public demos, open-source tools, documentation):
+i tested the parts i could access (public demos, open-source tools, documentation):
 
 ### what works well
 
 **auto-generating api references from code.** this is the oldest and most solved problem. tools like jsdoc, typedoc, and rustdoc have done this for years. ai-native tools just wrap this with better presentation.
 
-**summarizing existing content.** if you have a 5,000-word design doc, an ai can produce a 500-word summary. this is useful. it's also not new — just faster and more accessible.
+**summarizing existing content.** if you have a 5,000-word design doc, an ai can produce a 500-word summary. this is useful. it's also not new, just faster and more accessible.
 
 **detecting stale docs.** comparing code changes to doc files and flagging "this section might be outdated." this is genuinely useful. manually checking every doc page after a release is tedious. automation helps.
 
@@ -59,15 +59,15 @@ we tested the parts we could access (public demos, open-source tools, documentat
 
 ### what doesn't work well
 
-**writing conceptual documentation from code.** code tells you what a function does. it doesn't tell you why a design decision was made, what tradeoffs exist, or how concepts relate to each other. ai-generated conceptual docs read like expanded api references — technically accurate, conceptually hollow.
+**writing conceptual documentation from code.** code tells you what a function does. it doesn't tell you why a design decision was made, what tradeoffs exist, or how concepts relate to each other. ai-generated conceptual docs read like expanded api references, technically accurate, conceptually hollow.
 
-**understanding domain-specific context.** "this endpoint accepts a `user_id`." ai knows that. "this endpoint accepts a `user_id` which must be the same as the authenticated user's id, or the request returns 403" — the second part comes from business logic, not code. ai misses this constantly.
+**understanding domain-specific context.** "this endpoint accepts a `user_id`." ai knows that. "this endpoint accepts a `user_id` which must be the same as the authenticated user's id, or the request returns 403". the second part comes from business logic, not code. ai misses this constantly.
 
 **maintaining tone and voice.** every company has a docs voice. stripe is precise and terse. twilio is friendly and tutorial-heavy. vercel is modern and minimalist. ai generates generic corporate docs-speak. it doesn't match your voice without extensive tuning.
 
 **handling edge cases and errors.** code paths that don't execute in the happy path. error states. race conditions. timeout handling. these are documented in comments, design docs, and tribal knowledge. ai can't extract what isn't explicitly written.
 
-## the category problem: "ai-native" is a marketing label
+## "ai-native" covers very different products
 
 what makes a documentation platform "ai-native"?
 
@@ -95,7 +95,7 @@ the line is blurry. "ai-native" is being applied to anything with an ai feature.
 | output quality | mixed (good for references, weak for concepts) | depends on human writer |
 | agent-readiness | varies | mintlify, fumadocs excellent |
 
-## the honest assessment
+## references are easier to automate than explanations
 
 ai-native documentation tools are useful for specific tasks:
 - api reference generation
@@ -110,7 +110,7 @@ they are not useful (yet) for:
 - voice and tone consistency
 - edge case documentation
 
-the best workflow in 2026 is hybrid: humans write conceptual and tutorial content. ai assists with references, summaries, and maintenance. tools that understand this hybrid model (mintlify's approach — human writes, ai enhances) are more practical than pure ai generation.
+the best workflow in 2026 is hybrid: humans write conceptual and tutorial content. ai assists with references, summaries, and maintenance. tools that understand this hybrid model (mintlify's approach, human writes, ai enhances) are more practical than pure ai generation.
 
 ## will they replace traditional docs platforms?
 
@@ -130,7 +130,7 @@ pure ai-generated documentation without human review is unreliable. pure human d
 
 the middle path wins.
 
-## bottom line
+## use ai for maintenance, keep humans on concepts
 
 ai-native documentation is a real category. the tools do things that weren't possible five years ago.
 
@@ -141,5 +141,5 @@ use ai for what it does well: reference generation, summarization, stale detecti
 ---
 
 **related:**
-- [why we don't use llms for extraction](/blog/why-no-llm-extraction)
+- [why i extract docs without an llm](/blog/why-no-llm-extraction)
 - [deterministic extraction vs llm](/blog/deterministic-vs-llm-extraction)

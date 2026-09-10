@@ -27,10 +27,10 @@ export const GET = async (_c: AppContext) => {
             <h1>writing on docs for agents</h1>
             <p class="lede">
               Notes on extraction, documentation frameworks, and building docs a coding agent can
-              actually read. Written in the open, as we build agent cache.
+              actually read. Written in the open, as i build agent cache.
             </p>
           </header>
-          <hr class="blog-list-sep" />
+
           <div>
             {posts.map((p) => (
               <a class="post-item" href={p.route} key={p.slug}>

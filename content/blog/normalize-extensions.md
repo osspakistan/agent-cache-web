@@ -1,7 +1,7 @@
-# the .md.md bug: why url normalization matters in docs extraction
+# i requested page.md.md and wondered why it returned 404
 
-**meta title:** the .md.md bug: url normalization in docs extraction
-**meta description:** a simple bug caused us to request `page.md.md` instead of `page.md`. here's why url normalization is critical.
+**meta title:** how a double .md extension broke docs extraction
+**meta description:** a simple bug caused me to request `page.md.md` instead of `page.md`. here's why url normalization is critical.
 **slug:** /blog/md-md-extension-bug
 **target keywords:** md.md extension bug, documentation extension normalization, double md extension, markdown extraction bug, url normalization docs
 
@@ -9,9 +9,9 @@
 
 a bug that cost hours to debug. the symptom: `404` for urls that should've worked. the cause: double extensions. `page.md.md` instead of `page.md`.
 
-## the bug
+## appending .md to a path that already had it
 
-our acquisition ladder constructs `.md` urls by appending `.md` to the path:
+my acquisition ladder constructs `.md` urls by appending `.md` to the path:
 
 ```
 base url: /docs/getting-started
@@ -42,7 +42,7 @@ sites where this happened:
 - some docusaurus configurations
 - sites with custom routing that includes `.md`
 
-## the fix
+## normalize the extension before adding .md
 
 normalize before constructing:
 
@@ -64,12 +64,12 @@ simple. but critical.
 it's not just `.md.md`:
 
 - `.html.html`
-- `.mdx.md` (site uses `.mdx`, we append `.md`)
+- `.mdx.md` (site uses `.mdx`, i append `.md`)
 - `.php.md`
 
 any site that includes extensions in canonical paths needs normalization.
 
-## the general rule
+## strip the existing extension before constructing a url
 
 before constructing any url with a known extension, strip existing extensions first.
 
@@ -92,7 +92,7 @@ url normalization is full of edge cases:
 
 each of these needs careful handling.
 
-## bottom line
+## test url construction against real docs paths
 
 url normalization sounds simple. it's not.
 
@@ -101,5 +101,5 @@ tiny bugs in url construction cause extraction failures that are hard to debug. 
 ---
 
 **related:**
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [how i probe docs endpoints](/blog/acquisition-ladder)
 - [html extraction](/blog/html-to-markdown-extraction)

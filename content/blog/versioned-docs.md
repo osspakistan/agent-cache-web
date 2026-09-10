@@ -1,4 +1,4 @@
-# how we handle versioned documentation (v1, v2, v3)
+# how i handle versioned documentation (v1, v2, v3)
 
 **meta title:** how agent cache handles versioned documentation
 **meta description:** many docs sites have version selectors. here's how agent cache extracts versioned docs and which version you get.
@@ -11,7 +11,7 @@ many documentation sites have version selectors. "v1" vs "v2." "latest" vs "lega
 
 when you paste a docs url, which version does agent cache extract?
 
-## the versioning problem
+## versions can live in paths, subdomains, or dropdowns
 
 | site | version pattern | example |
 |---|---|---|
@@ -22,9 +22,9 @@ when you paste a docs url, which version does agent cache extract?
 
 different sites handle versions differently. some put the version in the url. some use a dropdown rendered by javascript. some default to the latest version.
 
-## our strategy: extract the default version
+## my strategy: extract the default version
 
-for most sites, the "default" url serves the latest version. that's what we extract.
+for most sites, the "default" url serves the latest version. that's what i extract.
 
 examples:
 - `https://hono.dev/docs` → whatever version hono serves by default (currently v4)
@@ -35,7 +35,7 @@ this is the version most users want. most agents need the current stable docs, n
 
 ## version detection methods
 
-we detect versions in several ways:
+i detect versions in several ways:
 
 **url path:** `/v1/`, `/v2/`, `/docs/v18/`
 
@@ -43,11 +43,11 @@ we detect versions in several ways:
 
 **meta tags:** `<meta name="doc-version" content="v2">`
 
-**framework-specific docusaurus and mintlify expose version info in their apis. fumadocs has version tabs.
+**framework-specific:** docusaurus and mintlify expose version info in their apis. fumadocs has version tabs.
 
 ## variant support (future)
 
-we're adding variant support. extractions will be tagged with version info:
+i'm adding variant support. extractions will be tagged with version info:
 
 ```
 .agentcache/docs/hono-v3/
@@ -76,7 +76,7 @@ if you need a specific version, paste the versioned url:
 
 agent cache extracts the url you give it. if that url points to a specific version, that's what you get.
 
-## the ui (future)
+## showing detected versions in the ui, later
 
 a future version of the web app might show:
 
@@ -88,7 +88,7 @@ also available: v3 (extract separately if needed)
 
 giving users awareness without forcing all versions.
 
-## bottom line
+## paste a versioned url when latest isn't right
 
 agent cache extracts the default (usually latest) version.
 
@@ -102,4 +102,4 @@ variant support is coming. but latest-first is the right default.
 
 **related:**
 - [framework extractor rankings](/blog/docs-framework-agent-readability)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [how docs urls become markdown](/blog/acquisition-ladder)

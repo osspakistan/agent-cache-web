@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs context7 (2026): free offline docs vs $10/seat api
 **meta description:** context7 charges $10/seat for 5,000 api calls. agent cache is free. you own the docs. works offline. here's the honest comparison.
-**slug:** /vs/context7
+**slug:** /compare/context7
 **target keywords:** agent cache vs context7, context7 alternative, local docs for agents, context7 vs agent cache, context7 pricing
 
 ---
@@ -13,7 +13,7 @@ agent cache is a tool that downloads docs once and gives you a zip file. plus an
 
 both get docs into your agent's context. one rents access. one gives you ownership. this is the honest breakdown.
 
-## what context7 actually does
+## context7 retrieves snippets while your agent works
 
 context7 is a runtime retrieval api. your agent asks context7 for docs while it works. context7 searches their index of 126,000+ libraries. returns snippets. your agent uses those snippets to write code.
 
@@ -23,7 +23,7 @@ they have an mcp server. plug it into claude code, cursor, codex, whatever. your
 
 **but you don't own anything.** every call goes to their api. you rent access.
 
-## what agent cache actually does
+## agent cache downloads a reference you can keep
 
 agent cache is a one-time extraction tool. paste a docs url. agent cache crawls the whole site. converts everything to clean markdown. gives you a zip file.
 
@@ -33,7 +33,7 @@ the mcp server (coming soon) scans your `.agentcache/` folder and surfaces docs 
 
 **and it's free.** no tiers. no credits. no "per seat." no "freemium." no meter running. extracting documentation should be free. it's a public resource. you shouldn't pay rent to access docs that are already public.
 
-## the pricing difference
+## context7 meters api calls; agent cache doesn't
 
 this is where it gets real.
 
@@ -57,7 +57,7 @@ for docs. public documentation. information that is already on the internet.
 
 i think that's wrong. docs should be free to access. the fact that someone built an indexer and put a meter on it doesn't change that.
 
-## where context7 wins
+## context7 is easier for fresh, popular libraries
 
 i'm not here to trash them. they're better at some things.
 
@@ -71,7 +71,7 @@ i'm not here to trash them. they're better at some things.
 
 if you work with rapidly-changing libraries and prefer convenience over ownership, context7 is the pragmatic choice.
 
-## where agent cache wins
+## local bundles work offline and include the whole site
 
 **completeness.** context7 returns snippets. agent cache returns the entire site. i extracted stripe docs once: 8.7 mb, hundreds of pages. context7 gives you relevant snippets. agent cache gives you everything.
 
@@ -87,7 +87,7 @@ if you work with rapidly-changing libraries and prefer convenience over ownershi
 
 **mcp too.** context7 has an mcp server that calls their remote api. agent cache will have an mcp server that reads from your local disk. same convenience. different data source. you get mcp integration without the per-call fees.
 
-## the mcp difference
+## context7 calls upstash; my planned mcp reads disk
 
 both have mcp servers. the difference is what they serve.
 
@@ -97,7 +97,7 @@ agent cache's mcp reads from your disk. the mcp server scans `.agentcache/`, rea
 
 same convenience. fundamentally different architecture.
 
-## the hidden cost of "just query it"
+## repeated lookups use up the call allowance
 
 context7's model seems cheap until you scale. $10/seat, 5,000 calls.
 
@@ -117,7 +117,7 @@ use agent cache for stable apis your agent references constantly. stripe, supaba
 
 i do this. context7 for the fast-moving stuff. agent cache for the references i need every day.
 
-## the bottom line
+## pay for freshness only where you need it
 
 context7 is convenient and fresh. you pay for that convenience. i think that convenience is overpriced.
 
@@ -142,6 +142,6 @@ use agent cache for everything else: stable apis, offline work, ownership, and n
 ---
 
 **related:**
-- [agent cache vs firecrawl](/vs/firecrawl)
-- [how to use agent cache with claude code](/integrations/claude-code)
-- [i extracted 100 docs sites — here's what broke](/blog/100-docs-sites-what-broke)
+- [agent cache vs firecrawl](/compare/firecrawl)
+- [keeping reference docs beside your code](/blog/agentcache-dot-folder)
+- [i extracted 100 docs sites. here's what broke](/blog/100-docs-sites-what-broke)

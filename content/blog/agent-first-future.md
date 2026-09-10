@@ -1,7 +1,7 @@
-# the future of documentation: agent-first or human-first?
+# should docs put agents or humans first?
 
-**meta title:** documentation in 2026: agent-first or human-first? our take.
-**meta description:** ai agents are reading docs. should documentation be written for humans or agents? here's our prediction for the future of docs.
+**meta title:** documentation in 2026: agent-first or human-first? my take.
+**meta description:** ai agents are reading docs. should documentation be written for humans or agents? here's my prediction for the future of docs.
 **slug:** /blog/agent-first-documentation-future
 **target keywords:** agent first documentation, future of documentation, docs for ai agents, documentation trends 2026, ai readable documentation
 
@@ -13,7 +13,7 @@ should docs be written for humans with agent support? or for agents with human r
 
 this isn't just theoretical. it's already changing how docs frameworks are built.
 
-## the current state: human-first
+## docs still assume a human reader
 
 most documentation is written for humans.
 
@@ -26,7 +26,7 @@ most documentation is written for humans.
 
 all of this is noise to an agent. the agent can't see the design. it reads the raw text. it gets confused by marketing copy mixed with api reference.
 
-## the emerging alternative: agent-first
+## markdown as the source, html as the skin
 
 agent-first documentation:
 - clean markdown as primary format
@@ -41,11 +41,11 @@ the source of truth is the markdown. the html is a skin.
 
 ## why agent-first makes sense
 
-efficiency one source of truth. write once, render for any channel.
+one source of truth is more efficient. write once, render for any channel.
 
 agents can consume the raw docs. humans can view rendered versions. both use the same content.
 
-future-proof as agents become more common, agent-first docs will be the standard.
+as agents become more common, agent-first docs will be the standard.
 
 ## why human-first still wins
 
@@ -55,7 +55,7 @@ discoverability: a beautiful docs site attracts users. raw markdown doesn't.
 
 trust: polished docs signal quality. rough markdown signals "work in progress."
 
- ## the hybrid approach: best of both
+ ## write for humans, expose the source for agents
 
  the answer is both. write for humans. structure for agents.
 
@@ -69,11 +69,11 @@ trust: polished docs signal quality. rough markdown signals "work in progress."
 
  humans get the pretty version. agents get the raw version. both use the same source.
 
- ## llms.txt: the bridge
+ ## llms.txt gives agents a way in
 
  `llms.txt` is the first widely-adopted agent-first standard. a single text file at the site's root that tells agents what's available.
 
- it's a small step. but it signals intent: "we support agent consumption."
+ it's a small step. but it signals intent: "agents can read these docs too."
 
  current adoption is low but growing fast. mintlify and fumadocs support it natively.
 
@@ -99,16 +99,16 @@ trust: polished docs signal quality. rough markdown signals "work in progress."
 
  the long-term trend: docs frameworks will expose agent-ready content natively. agent cache will evolve from a converter to a packager.
 
- ## our bet: hybrid, leaning agent-first
+ ## my bet: hybrid, leaning agent-first
 
  documentation should always be human-readable. but it should also be machine-consumable.
 
  the frameworks that do both well will win. mintlify and fumadocs are leading.
 
- the future: docs sites are humans. underneath, they're structured markdown with rich metadata. both audiences served.
+ the future: docs sites are for humans. underneath, they're structured markdown with rich metadata. both audiences served.
 
  ---
 
  **related:**
  - [mintlify vs docusaurus: framework rankings](/blog/docs-framework-agent-readability)
- - [the acquisition ladder](/blog/acquisition-ladder)
+ - [where to find raw docs before scraping](/blog/acquisition-ladder)

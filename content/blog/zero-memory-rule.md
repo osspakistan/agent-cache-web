@@ -1,6 +1,6 @@
-# the zero-in-memory rule: why agent cache never holds state in ram
+# if state matters, agent cache writes it to disk
 
-**meta title:** zero-memory architecture: how we built a crash-proof crawler
+**meta title:** zero-memory architecture: how i built a crash-proof crawler
 **meta description:** agent cache uses a zero-memory rule where nothing stays in ram. everything streams to disk. here's why this matters for reliability.
 **slug:** /blog/zero-memory-architecture
 **target keywords:** zero memory architecture, disk backed processing, append only ledger, stateless documentation extraction, disk backed state
@@ -13,7 +13,7 @@ if the process crashes, that state is gone. if the server restarts, it's gone. y
 
 agent cache uses a different rule: **nothing meaningful stays in ram.** everything that matters streams to disk immediately.
 
-## the zero-memory rule
+## important data must be recoverable from disk
 
 rule: **if data is important, it must be reconstructable from disk.**
 
@@ -79,7 +79,7 @@ what happens when the process dies during extraction?
 
 no state lost. no user confusion. the extraction just continues.
 
-## the tradeoff: disk is slower than ram
+## disk is slower, but the crawler waits on the network
 
 ram access: ~10 nanoseconds.
 disk access (ssd): ~100 microseconds.
@@ -107,7 +107,7 @@ zero-memory is a deliberate choice. it's not always right.
 
 ## implementation: evlog and jsonl
 
-we use evlog for structured logging to jsonl files.
+i use evlog for structured logging to jsonl files.
 
 jsonl (json lines) is the format: one json object per line. append-only. human-readable. machine-parseable.
 
@@ -124,7 +124,7 @@ log.append('job.completed', { pages, totalSize })
 
 each call appends to disk. no buffering.
 
-## bottom line
+## treat ram as disposable, not the source of truth
 
 the zero-memory rule sounds extreme. but it's surprisingly simple to implement. and it makes the system crash-proof.
 
@@ -136,4 +136,4 @@ this is how agent cache stays simple, reliable, and debuggable.
 
 **related:**
 - [agent cache architecture deep dive](/blog/architecture-deep-dive)
-- [cloudflare workers killed our serverless dream](/blog/cloudflare-workers-50-subrequest-limit)
+- [cloudflare workers killed my serverless dream](/blog/cloudflare-workers-50-subrequest-limit)

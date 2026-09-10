@@ -12,9 +12,9 @@ Use Agent Cache when:
 - You're working with a coding agent (Claude Code, Cursor, Codex, Windsurf) and need unfamiliar-API docs in the agent's context
 
 Do NOT use Agent Cache when:
-- You need real-time/live documentation (we produce static snapshots)
-- You need summarized or condensed docs (we preserve the whole site)
-- The documentation is behind authentication (we only handle public docs)
+- You need real-time/live documentation (this tool produces static snapshots)
+- You need summarized or condensed docs (the whole site is preserved)
+- The documentation is behind authentication (only public docs are handled)
 
 ## How to Use (for Agents)
 
@@ -45,6 +45,11 @@ Do NOT use Agent Cache when:
 - [OpenAPI Spec](https://agentcache.run/openapi.json): API documentation (JSON)
 - [Sitemap](https://agentcache.run/sitemap.xml): XML sitemap
 - [Feature specs](https://github.com/agentcache/agent-cache): f01-f04 web MVP, f05-f07 CLI + MCP
+
+## Writing
+
+- [Blog](https://agentcache.run/blog): Field notes on docs extraction and agent-readable documentation
+- [Comparisons](https://agentcache.run/compare): Honest comparisons against Context7, Firecrawl, Tavily, and other tooling
 
 ## Pipeline
 

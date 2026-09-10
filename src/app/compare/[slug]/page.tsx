@@ -12,25 +12,10 @@ export const GET = async (c: AppContext) => {
   const slug = c.req.param('slug') || ''
   const post = await getPost('compare', slug)
 
-  if (!post) {
-    return (
-      <>
-        <Nav active="compare" />
-        <div class="wrap" style="padding: 96px 20px; text-align: center;">
-          <h1>Comparison not found.</h1>
-          <p class="lede">
-            No comparison at{' '}
-            <span class="mono" style="color: var(--accent-ink);">
-              /compare/{slug}
-            </span>
-            .
-          </p>
-          <a href="/compare" class="secondary" style="margin-top: 24px;">
-            All comparisons →
-          </a>
-        </div>
-      </>
-    )
+  if (!post) return c.notFound()
+
+  if (slug !== post.slug) {
+    return c.redirect(`${post.route}${new URL(c.req.url).search}`, 301)
   }
 
   setPageMeta({

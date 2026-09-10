@@ -1,7 +1,7 @@
-# why cloudflare r2 beats s3 for our documentation bundles
+# why cloudflare r2 beats s3 for my documentation bundles
 
 **meta title:** cloudflare r2 vs s3: why r2 won for docs storage
-**meta description:** we use cloudflare r2 instead of s3 for storing documentation bundles. here's why zero egress fees matter when you serve zip downloads.
+**meta description:** i use cloudflare r2 instead of s3 for storing documentation bundles. here's why zero egress fees matter when you serve zip downloads.
 **slug:** /blog/r2-vs-s3-storage
 **target keywords:** cloudflare r2 vs s3, r2 documentation storage, zero egress r2, r2 object storage, s3 alternative r2
 
@@ -9,9 +9,9 @@
 
 s3 is the default object store. it's everywhere. amazon built it. it works.
 
-we chose cloudflare r2.
+i chose cloudflare r2.
 
-## the difference: egress fees
+## s3 bills for downloads; r2 doesn't
 
 s3 charges for data egress. when someone downloads a file from s3, amazon charges you for the bandwidth.
 
@@ -21,7 +21,7 @@ for most use cases, this doesn't matter. you store backups in s3. you retrieve t
 
 for agent cache, egress is the primary cost.
 
-## our use case: zip file downloads
+## my use case: zip file downloads
 
 every extraction produces a zip file. users download that zip.
 
@@ -41,17 +41,17 @@ yes. a few:
 
 **console experience.** s3 console is mature. r2 console is newer. simpler. fewer features.
 
-**list performance.** r2 can be slower when listing many objects. we don't list objects much.
+**list performance.** r2 can be slower when listing many objects. i don't list objects much.
 
-**region availability.** s3 has more regions. r2 is newer. but for our scale, the available regions are sufficient.
+**region availability.** s3 has more regions. r2 is newer. but for my scale, the available regions are sufficient.
 
-**no lifecycle management (yet).** s3 has sophisticated lifecycle rules. r2's are simpler. again, we don't need complex rules.
+**no lifecycle management (yet).** s3 has sophisticated lifecycle rules. r2's are simpler. again, i don't need complex rules.
 
-for our workload (put object, get object, occasional delete), r2 is perfect.
+for my workload (put object, get object, occasional delete), r2 is perfect.
 
-## the numbers
+## download costs at three traffic levels
 
-assuming our launch goes moderately well:
+assuming my launch goes moderately well:
 
 | downloads/month | avg zip size | s3 egress | r2 egress |
 |---|---|---|---|
@@ -73,11 +73,11 @@ r2 is slightly cheaper for storage too. but the real savings is egress.
 - need glacier/archive tiers
 - already invested in aws ecosystem
 
-for agent cache, none of these apply. r2 wins on cost for our specific workload.
+for agent cache, none of these apply. r2 wins on cost for my specific workload.
 
 ## implementation
 
-r2 is s3-compatible. we use the aws sdk with an r2 endpoint:
+r2 is s3-compatible. i use the aws sdk with an r2 endpoint:
 
 ```javascript
 const s3 = new S3Client({
@@ -104,13 +104,13 @@ await s3.send(new GetObjectCommand({
 }))
 ```
 
-if r2 didn't exist, we'd use s3. the code is identical.
+if r2 didn't exist, i'd use s3. the code is identical.
 
-## bottom line
+## r2 fits a product that mostly serves downloads
 
-r2 is not universally better than s3. it's better for our specific use case: serving zip file downloads.
+r2 is not universally better than s3. it's better for my specific use case: serving zip file downloads.
 
-zero egress fees make it the obvious choice. we're not paying amazon for bandwidth we didn't ask for.
+zero egress fees make it the obvious choice. i'm not paying amazon for bandwidth i didn't ask for.
 
 if you're building anything with significant download volume, r2 is worth considering.
 

@@ -1,7 +1,7 @@
 # agent cache architecture: zero-memory, disk-backed, sse-streamed
 
-**meta title:** agent cache architecture: how we built a crash-proof docs crawler
-**meta description:** agent cache uses a zero-memory architecture where nothing stays in ram. everything streams to disk. here's how we built a deterministic, replayable docs extraction pipeline.
+**meta title:** agent cache architecture: how i built a crash-proof docs crawler
+**meta description:** agent cache uses a zero-memory architecture where nothing stays in ram. everything streams to disk. here's how i built a deterministic, replayable docs extraction pipeline.
 **slug:** /blog/architecture-deep-dive
 **target keywords:** agent cache architecture, zero-memory architecture, disk-backed processing, sse streaming architecture, hono htmx architecture
 
@@ -13,33 +13,33 @@ agent cache uses a different rule: **zero in-memory state.** every log line, eve
 
 here's the full architecture.
 
-## the zero-memory rule
+## if it matters, write it to disk
 
 rule: **no state is stored in memory unless it can be reconstructed from disk.**
 
 this means:
 - no in-memory job queues
 - no in-memory caches with "back to cache later"
-- no "we'll write to disk at the end"
+- no "i'll write to disk at the end"
 - if the process dies mid-crawl, restart and resume from disk
 
 everything that matters goes to an append-only event ledger on disk. everything else is disposable.
 
-## the disk-backed append-only ledger
+## every job gets an append-only event log
 
 every extraction job gets a directory: `storage/jobs/ac-{id}/`
 
 inside:
-- `events.jsonl` — append-only event log. every event timestamps and serializes to this file.
-- `logs.txt` — human-readable logs for terminal viewing
-- `final/` — extracted docs in their final structure
-- `bundle.zip` — the final packaged output
+- `events.jsonl`: append-only event log. every event timestamps and serializes to this file.
+- `logs.txt`: human-readable logs for terminal viewing
+- `final/`: extracted docs in their final structure
+- `bundle.zip`: the final packaged output
 
-the event log is the source of truth. it's append-only. no events are ever modified or deleted. to "cancel" a crawl, we append a cancellation event.
+the event log is the source of truth. it's append-only. no events are ever modified or deleted. to "cancel" a crawl, i append a cancellation event.
 
 this makes the system trivially replayable. any agent or human can `cat events.jsonl` and see exactly what happened.
 
-## the 5-phase pipeline
+## from url to zip in five phases
 
 ```
 User Input URL
@@ -116,7 +116,7 @@ each tier writes to disk independently. no tier depends on another tier's memory
 
 workers are independent. one worker crashing doesn't affect others. the main process restarts crashed workers.
 
-concurrency is bounded: 8-12 workers is the sweet spot. below 8, we leave speed on the table. above 12, diminishing returns and potential for rate limiting.
+concurrency is bounded: 8-12 workers is the sweet spot. below 8, i leave speed on the table. above 12, diminishing returns and potential for rate limiting.
 
 ## phase 5: packager
 
@@ -124,7 +124,7 @@ after all pages are extracted, the packager:
 1. reads all extracted markdown files from disk
 2. generates `meta.yaml` with metadata (name, url, keywords, etc.)
 3. generates `_map.json` with the navigation tree
-4. generates `INDEX.md` — a table of contents
+4. generates `INDEX.md`: a table of contents
 5. structures the output: `docs/<chapter>/<section>/<page>.md`
 6. zips everything into `bundle.zip`
 7. uploads to r2 for permanent storage
@@ -181,7 +181,7 @@ machine errors are for me. human errors are for users. both are correct for thei
 - **not horizontally scalable.** i don't need horizontal scaling. one vps handles everything.
 - **replay takes time.** if a job has 10,000 events, replaying them takes a few seconds. acceptable.
 
-## the bottom line
+## disk, one process, and a browser stream
 
 the architecture is intentionally boring. no fancy distributed systems. no kubernetes. no event sourcing framework.
 
@@ -192,6 +192,6 @@ the simplicity is the feature.
 ---
 
 **related:**
-- [cloudflare workers killed our serverless dream](/blog/cloudflare-workers-50-subrequest-limit)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [cloudflare workers killed my serverless dream](/blog/cloudflare-workers-50-subrequest-limit)
+- [trying cheaper extraction methods first](/blog/acquisition-ladder)
 - [100 sites extracted](/blog/100-docs-sites-what-broke)

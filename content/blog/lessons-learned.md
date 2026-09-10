@@ -7,7 +7,7 @@
 
 ---
 
-we've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. built the entire pipeline. here are 30 lessons.
+i've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. built the entire pipeline. here are 30 lessons.
 
 ## lessons 1-10: about documentation
 
@@ -15,7 +15,7 @@ we've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. bui
 
 2. **docs sites redesign frequently.** html selectors break. framework extractors need updates. extraction is maintenance, not a one-time thing.
 
-3. **version selectors are the hardest ui element to handle.** tabs, dropdowns, sidebar toggles — all invisible to simple extractors.
+3. **version selectors are the hardest ui element to handle.** tabs, dropdowns, sidebar toggles. all invisible to simple extractors.
 
 4. **code blocks are fragile.** some frameworks split them across divs. some use custom syntax highlighting. some embed code in data attributes.
 
@@ -23,9 +23,9 @@ we've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. bui
 
 6. **mobile and desktop versions differ.** some sites serve different content. responsive design hides content with `display: none`. extraction needs desktop user-agents.
 
-7. **search functionality is never extractable.** search needs a backend. the frontend is just a query box. we ignore search.
+7. **search functionality is never extractable.** search needs a backend. the frontend is just a query box. i ignore search.
 
-8. **images and diagrams are usually outside the scope.** we focus on text and code. visual content is hard to convert meaningfully.
+8. **images and diagrams are usually outside the scope.** i focus on text and code. visual content is hard to convert meaningfully.
 
 9. **the "pretty" docs site is often a skin.** the real content is markdown or json underneath. the rendered html is just one view.
 
@@ -39,7 +39,7 @@ we've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. bui
 
 13. **rate limiting is the biggest practical challenge.** not parsing. not conversion. just getting permission to fetch the pages.
 
-14. **headless browsers would solve most extraction problems.** but they're 10x slower, 10x heavier, and unreliable at scale. we avoid them.
+14. **headless browsers would solve most extraction problems.** but they're 10x slower, 10x heavier, and unreliable at scale. i avoid them.
 
 15. **github tree api is the fastest extraction method.** when it works, nothing else comes close. always check for open-source docs repos.
 
@@ -71,31 +71,31 @@ we've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. bui
 
 28. **user experience matters more than features.** a clean form + status page + download button beats a dozen half-finished features.
 
-29. **marketing is harder than engineering.** the product works. distribution doesn't. seo content is our strategy.
+29. **marketing is harder than engineering.** the product works. distribution doesn't. seo content is my strategy.
 
 30. **docs extraction should be free.** charging for access to public documentation is wrong. open source extraction ensures it stays free.
 
-## the biggest surprise
+## raw markdown was already there on 61% of sites
 
-the number of sites that already expose raw markdown. 61%. the frameworks are designed for it. developers built it in. we just need to know where to look.
+the number of sites that already expose raw markdown. 61%. the frameworks are designed for it. developers built it in. i just need to know where to look.
 
-## the hardest problem
+## finding the right extraction path took the most work
 
 not extraction. not parsing. not html cleaning.
 
 it's **discovering the right extraction path.** given a random docs url, which tier of the ladder works? that's 80% of the complexity.
 
-## what we'd do differently
+## what i'd do differently
 
 1. **spend more time on framework detection.** early versions had generic extraction. adding framework-specific extractors improved quality 10x.
 
-2. **start with the cdn/github paths.** we initially built html extraction first. reversing the order would have been faster.
+2. **start with the cdn/github paths.** i initially built html extraction first. reversing the order would have been faster.
 
 3. **build meta.yaml early.** metadata is what makes docs useful to agents. without it, it's just a folder of markdown files.
 
-## bottom line
+## public docs still aren't always fetchable
 
-building a docs extraction tool taught us more about how documentation works than we expected.
+building a docs extraction tool taught me more about how documentation works than i expected.
 
 the diversity of docs frameworks. the creativity of web development. the gap between "publicly readable" and "programmatically accessible."
 
@@ -107,5 +107,5 @@ agent cache is one of those tools.
 
 **related:**
 - [100 sites extracted: what broke](/blog/100-docs-sites-what-broke)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [choosing an extraction path, cheapest first](/blog/acquisition-ladder)
 - [agent cache architecture](/blog/architecture-deep-dive)

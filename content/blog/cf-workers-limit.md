@@ -1,7 +1,7 @@
 # cloudflare workers' 50 subrequest limit killed my serverless dream
 
-**meta title:** cloudflare workers killed our serverless docs extraction pipeline
-**meta description:** i tried to run agent cache on cloudflare workers. the 50 subrequest limit made it impossible for large docs sites. here's why we switched to a vps.
+**meta title:** cloudflare workers killed my serverless docs extraction pipeline
+**meta description:** i tried to run agent cache on cloudflare workers. the 50 subrequest limit made it impossible for large docs sites. here's why i switched to a vps.
 **slug:** /blog/cloudflare-workers-50-subrequest-limit
 **target keywords:** cloudflare workers subrequest limit, cloudflare workers 50 subrequest, workers subrequest limit, serverless documentation extraction, cf workers limit
 
@@ -20,13 +20,13 @@ sounds like a perfect serverless workload: trigger on request, process in the ba
 cloudflare workers specifically:
 - 0ms cold starts (v8 isolates)
 - runs at the edge (low latency for users)
-- integrates with r2 (our storage)
+- integrates with r2 (my storage)
 - durable objects for state management
 - native fetch api for crawling
 
 i was sold.
 
-## the 50 subrequest limit
+## 50 fetches won't cover a typical docs site
 
 cloudflare workers limits each request to **50 subrequests**.
 
@@ -36,12 +36,12 @@ each one counts.
 
 for a single-page extraction, 50 subrequests sounds like plenty. but documentation sites have hundreds of pages. thousands, sometimes.
 
-let's count: extracting a medium-sized docs site like supabase or convex requires fetching:
+counting the requests: extracting a medium-sized docs site like supabase or convex requires fetching:
 - the main page (1)
 - the sitemap (1)
 - navigation/sidebar to discover structure (2-3)
 - each individual page content (100-500)
-- images/assets (optional, we skip these)
+- images/assets (optional, i skip these)
 
 **that's 100+ subrequests for a typical docs site.**
 
@@ -49,9 +49,9 @@ for large sites like stripe (8.7 MB of docs, thousands of pages), it's 500+ subr
 
 cloudflare workers caps at 50. total.
 
-## the stripe problem
+## stripe would need chained batches
 
-stripe docs is one of the hardest extractions we do. it's large. it's custom. it has multiple tabs and versions.
+stripe docs is one of the hardest extractions i do. it's large. it's custom. it has multiple tabs and versions.
 
 breaking that extraction into batches that fit within 50 subrequests per request? practically impossible. you'd need to chain 10+ sequential requests, each triggered by the previous. durable objects for state. queues for orchestration.
 
@@ -76,13 +76,13 @@ for a 500-page site: 500 / 40 = 13 sequential requests. taking 15+ seconds total
 
 ### workaround 3: waiting for a limit increase
 
-cloudflare's enterprise plan can increase limits. but we're a side project. enterprise is $5,000+/month minimum.
+cloudflare's enterprise plan can increase limits. but this is a side project. enterprise is $5,000+/month minimum.
 
 not happening.
 
 ## why a vps monolith won
 
-we switched to a vps. a single $6/month instance running bun + hono.
+i switched to a vps. a single $6/month instance running bun + hono.
 
 no subrequest limits. crawl 500 pages concurrently. use as many `fetch()` calls as you want. store results on local disk. zip them. upload to r2.
 
@@ -100,7 +100,7 @@ workers is perfect for:
 
 it's just not designed for crawling documentation sites with hundreds of pages.
 
-## the lesson: match your architecture to your workload
+## crawling doesn't fit a short, stateless request
 
 serverless is great for request-response patterns. small units of work. stateless transformations.
 
@@ -110,7 +110,7 @@ the industry pushes serverless as the default. but defaults are just defaults. t
 
 for documentation extraction, a traditional server is the pragmatic choice. sometimes boring architecture is the right architecture.
 
-## bottom line
+## i'm keeping the crawler on a $6 vps
 
 cloudflare workers is great technology. i'm a fan. i've used it for other projects.
 

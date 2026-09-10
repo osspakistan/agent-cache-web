@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs parallel web: docs tool vs scraping engine
 **meta description:** parallel web is a parallel scraping infrastructure. agent cache is a docs extraction product. different tools, different jobs. here's why they're not competitors.
-**slug:** /vs-parallel-web
+**slug:** /compare/parallel-web
 **target keywords:** agent cache vs parallel web, parallel web alternative, docs extraction vs scraping, parallel scraping engine
 
 ---
@@ -13,7 +13,7 @@ agent cache turns documentation sites into agent-ready markdown.
 
 people might list them as "competitors" in a broad sense. they're not. this article is short because the distinction is obvious once you get it.
 
-## what parallel web actually does
+## parallel web is built to fetch pages at volume
 
 parallel web is a scraping engine optimized for parallel execution. it launches many browser instances simultaneously. crawls thousands of pages in parallel. returns raw data at high throughput.
 
@@ -25,7 +25,7 @@ it's designed for scenarios like:
 
 it's infrastructure. it gives you raw pages fast.
 
-## what agent cache actually does
+## agent cache spends its effort on docs structure
 
 agent cache is not infrastructure. it's not built for scale. it's built for quality.
 
@@ -33,7 +33,7 @@ it does one thing: extract documentation sites with structure, navigation, and c
 
 it's slow by design. 8-12 workers. polite crawling. careful parsing. framework-specific extraction logic.
 
-## the difference
+## fetching pages quickly vs organizing a docs site
 
 parallel web is fast and shallow. agent cache is slow and deep.
 
@@ -45,7 +45,7 @@ parallel web doesn't care about mintlify vs. docusaurus. agent cache cares deepl
 
 parallel web gives you raw material. agent cache gives you a finished product.
 
-## where parallel web wins
+## parallel web fits a high-volume scraping pipeline
 
 **scale.** if you need to scrape 100,000 pages across 500 sites, parallel web handles it. agent cache crawls one docs site at a time with 8-12 workers. not the same league.
 
@@ -53,7 +53,7 @@ parallel web gives you raw material. agent cache gives you a finished product.
 
 **infrastructure flexibility.** parallel web is a platform. integrate it into your own system. run it at scale. agent cache is a product with a specific workflow.
 
-## where agent cache wins
+## a docs bundle saves you the setup and cleanup
 
 **documentation-specific quality.** agent cache knows docs sites. it handles navigation, versioning, tab structures, code blocks, inline code, api reference formatting. parallel web just scrapes html.
 
@@ -63,7 +63,7 @@ parallel web gives you raw material. agent cache gives you a finished product.
 
 **free.** parallel web charges for compute and bandwidth at scale. agent cache is free.
 
-## not competitors
+## a scraping engine still needs post-processing
 
 these aren't competitors. they're different tools for different jobs.
 
@@ -73,7 +73,7 @@ if you build a massive web scraping platform, you might use parallel web under t
 
 if you were building a general-purpose web data platform, you'd integrate parallel web (or something like it) for the scraping layer, then add your own post-processing, structuring, and cleaning on top. that's what agent cache is: the post-processing and structuring layer for docs.
 
-## the bottom line
+## choose by the output: raw pages or organized docs
 
 parallel web is a scraping tool. agent cache is a documentation tool.
 
@@ -86,5 +86,5 @@ evaluating them as "competitors" is like evaluating a cnc router against a 3d pr
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [agent cache vs firecrawl](/vs/firecrawl)
+- [agent cache vs context7](/compare/context7)
+- [agent cache vs firecrawl](/compare/firecrawl)

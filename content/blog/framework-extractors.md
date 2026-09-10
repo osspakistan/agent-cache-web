@@ -1,7 +1,7 @@
 # mintlify vs docusaurus vs gitbook: which docs framework is best for agents?
 
 **meta title:** mintlify vs docusaurus vs gitbook: agent-readability rankings (2026)
-**meta description:** we extracted docs from 100 sites across 8 frameworks. here's our ranking of documentation framework agent-readability — from best to worst.
+**meta description:** i extracted docs from 100 sites across 8 frameworks. here's my ranking of documentation framework agent-readability, from best to worst.
 **slug:** /blog/docs-framework-agent-readability
 **target keywords:** mintlify agent readability, docusaurus agent readability, gitbook agent readability, docs framework comparison, best docs framework for agents
 
@@ -9,18 +9,18 @@
 
 not all docs frameworks are equal. some expose raw markdown. some hide everything behind javascript. some have clean urls. some require headless browsers.
 
-we extracted documentation from 100 sites across 8 frameworks. here's our ranking of documentation frameworks by how well they work for agent consumption.
+i extracted documentation from 100 sites across 8 frameworks. here's my ranking of documentation frameworks by how well they work for agent consumption.
 
-## the ranking criteria
+## what i check before scoring a framework
 
-we score frameworks on:
+i score frameworks on:
 - **raw markdown availability:** can you get markdown without html scraping?
 - **url structure:** clean, predictable urls?
 - **navigation exposure:** can you extract the page tree programmatically?
 - **content cleanliness:** minimal noise in extracted output?
 - **framework velocity:** actively maintained? agent-first features?
 
-## #1: mintlify — best for agents
+## #1: mintlify, best for agents
 
 mintlify is the clear winner. they built agent-first features.
 
@@ -38,7 +38,7 @@ examples: hono, better-auth, context7, resend.
 
 score: 95/100
 
-## #2: fumadocs — close second
+## #2: fumadocs, close second
 
 fumadocs is mintlify's closest competitor for agent-friendliness.
 
@@ -56,7 +56,7 @@ examples: acme, various newer tools.
 
 score: 88/100
 
-## #3: gitbook — solid, structured
+## #3: gitbook, solid, structured
 
 gitbook is a mature platform with decent extraction support.
 
@@ -72,7 +72,7 @@ gitbook is a mature platform with decent extraction support.
 
 score: 75/100
 
-## #4: docusaurus — good, but heavy
+## #4: docusaurus, good, but heavy
 
 docusaurus is powerful. too powerful for simple extraction.
 
@@ -90,7 +90,7 @@ examples: react native, redux, jest.
 
 score: 65/100
 
-## #5: nextra — clean, minimal
+## #5: nextra, clean, minimal
 
 nextra sites are minimal and clean. low noise.
 
@@ -104,7 +104,7 @@ nextra sites are minimal and clean. low noise.
 
 score: 80/100
 
-## #6: mdbook — simple, effective
+## #6: mdbook, simple, effective
 
 mdbook is explicitly designed for rust projects. simple html output with clean structure.
 
@@ -118,7 +118,7 @@ mdbook is explicitly designed for rust projects. simple html output with clean s
 
 score: 78/100
 
-## #7: readthedocs / sphinx — legacy but workable
+## #7: readthedocs / sphinx, legacy but workable
 
 older docs framework. common in python world.
 
@@ -132,7 +132,7 @@ older docs framework. common in python world.
 
 score: 55/100
 
-## #8: custom frameworks — wild card
+## #8: custom frameworks, wild card
 
 every company that rolls its own docs framework. stripe. notion. linear.
 
@@ -144,7 +144,7 @@ every company that rolls its own docs framework. stripe. notion. linear.
 
 **the problem:** each one requires bespoke extraction logic. no standardization.
 
-stripe's docs are the hardest we've extracted. 8.7 mb. custom components. dynamic rendering. but we got it working with framework-specific extractors.
+stripe's docs are the hardest i've extracted. 8.7 mb. custom components. dynamic rendering. but i got it working with framework-specific extractors.
 
 score: 30-70/100 (varies massively)
 
@@ -156,7 +156,7 @@ frameworks built before 2020 are human-only. they render html and assume a brows
 
 the trend is accelerating. llms.txt adoption is growing. direct markdown endpoints are becoming standard. the next generation of docs frameworks will be agent-first by default.
 
-## the bottom line
+## mintlify for easy access, docusaurus if you need the power
 
 if you're choosing a docs framework in 2026:
 
@@ -166,11 +166,11 @@ if you're choosing a docs framework in 2026:
 
 **avoid custom frameworks** unless you have resources to build and maintain agent support.
 
-the good news: even if you're on an older framework, agent cache can extract it. we just work harder for it.
+the good news: even if you're on an older framework, agent cache can extract it. i just work harder for it.
 
 ---
 
 **related:**
-- [html extraction: how we clean docs](/blog/html-to-markdown-extraction)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [html extraction: how i clean docs](/blog/html-to-markdown-extraction)
+- [finding raw docs before falling back to html](/blog/acquisition-ladder)
 - [100 sites extracted](/blog/100-docs-sites-what-broke)

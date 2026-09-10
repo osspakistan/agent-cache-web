@@ -31,7 +31,7 @@ examples:
 - wrong parameter names (`email` instead of `email_address`)
 - wrong method names (`delete` instead of `remove`)
 - wrong types (string instead of object)
-- non-existent features ("stripe supports crypto payments" — it doesn't, yet)
+- non-existent features ("stripe supports crypto payments", it doesn't, yet)
 - outdated apis (using deprecated methods from training data)
 
 each one is minor. but together, they make generated code unreliable.
@@ -42,7 +42,7 @@ agents don't know facts. they know patterns.
 
 ### reason 1: training data cutoff
 
-models are trained on data up to a certain date. new apis, new features, new versions — the model hasn't seen them.
+models are trained on data up to a certain date. new apis, new features, new versions. the model hasn't seen them.
 
 if stripe shipped a new feature last month, the model might not know about it. or worse, it might hallucinate what it _should_ look like.
 
@@ -66,7 +66,7 @@ libraries with similar names cause cross-pollination. if an agent knows django's
 
 `filter()` in django returns a queryset. in fastapi/sqlalchemy it's different. the model might apply the wrong behavior.
 
-## the fix: give your agent the actual docs
+## give your agent the actual api reference
 
 the only reliable fix: put the actual api documentation in the agent's context.
 
@@ -119,7 +119,7 @@ the improvement is massive. and it scales: more docs, more coverage, fewer hallu
 
 **local docs (agent cache):** full docs in context. offline. zero api calls. all content available. this is the most reliable approach.
 
-## bottom line
+## put the docs in context before asking for code
 
 agents hallucinate because they don't have access to facts. they interpolate from patterns.
 
@@ -132,4 +132,4 @@ it's not about better models. it's about better context.
 **related:**
 - [why local docs beat remote retrieval](/blog/why-local-docs)
 - [deterministic extraction vs llm](/blog/deterministic-vs-llm-extraction)
-- [how to use agent cache with claude code](/integrations/claude-code)
+- [keeping reference docs beside your code](/blog/agentcache-dot-folder)

@@ -1,7 +1,7 @@
 # pure documentation generators ranked for agent-readability
 
 **meta title:** best documentation site generators for ai agents (2026)
-**meta description:** not all docs generators are equal for ai agents. here's our ranking of pure documentation ssgs based on extraction experience from 100+ sites.
+**meta description:** not all docs generators are equal for ai agents. here's my ranking of pure documentation ssgs based on extraction experience from 100+ sites.
 **slug:** /blog/pure-docs-generators-ranked
 **target keywords:** best docs generator, documentation ssg ranking, agent readable documentation, docs framework for ai, static site generator docs
 
@@ -15,7 +15,7 @@ these are the pure tools. and they're not all equal when it comes to ai agents r
 
 **mintlify**
 
-saas docs platform. auto-generates `llms.txt`. every page has a `.md` endpoint. our extraction pipeline reaches mintlify sites and immediately thinks "this is too easy."
+saas docs platform. auto-generates `llms.txt`. every page has a `.md` endpoint. my extraction pipeline reaches mintlify sites and immediately thinks "this is too easy."
 
 the tradeoff is saas lock-in for hosting. the content stays in your repo. the rendering, search, and ai features are on mintlify's infrastructure.
 
@@ -51,7 +51,7 @@ vercel's docs framework for next.js. raw mdx files in your repo. no hosted servi
 
 nuxt labs' docs framework. built on nuxt 3 and `@nuxt/content`. lets you embed vue components directly in markdown. clean output. fast ssr. but same problem as docusaurus: markdown source is in your repo, and the rendered site is html. no `.md` endpoints. no auto `llms.txt`.
 
-if your project is already nuxt/vue, docus is natural. for extraction, it's moderate difficulty — parse the html or fetch from the repo.
+if your project is already nuxt/vue, docus is natural. for extraction, it's moderate difficulty: parse the html or fetch from the repo.
 
 **gitbook**
 
@@ -73,7 +73,7 @@ rust-powered. zero dependencies. outputs clean static html. the tool behind "the
 
 **11ty**
 
-javascript ssg with zero client-side js. maximum flexibility. not docs-specific — you configure it for docs. requires more setup than dedicated tools. extraction depends on how you structure it.
+javascript ssg with zero client-side js. maximum flexibility. not docs-specific, you configure it for docs. requires more setup than dedicated tools. extraction depends on how you structure it.
 
 **hugo + docsy/hextra**
 
@@ -83,7 +83,7 @@ go-based ssg. builds thousands of pages in milliseconds. docsy (google-maintaine
 
 **docsify**
 
-renders markdown in the browser via javascript. no build step. sounds convenient. but the html contains zero content — it's all loaded by js. extraction requires headless browsers or reverse-engineering the markdown urls. we try to extract docsify sites. we mostly fail.
+renders markdown in the browser via javascript. no build step. sounds convenient. but the html contains zero content, it's all loaded by js. extraction requires headless browsers or reverse-engineering the markdown urls. i try to extract docsify sites. i mostly fail.
 
 docsify was made for humans with browsers. not for agents.
 
@@ -111,7 +111,7 @@ fork of the old gitbook cli. exists for backward compatibility. don't use for ne
 | 9 | gitbook | partial | no | moderate |
 | 10 | docsify | no | no | very hard |
 
-## our recommendation
+## my recommendation
 
 **for new projects:** pick from tier 1. the agent-readiness difference is real and growing.
 
@@ -127,7 +127,7 @@ fork of the old gitbook cli. exists for backward compatibility. don't use for ne
 
 **avoid:** docsify for anything public you want agents to read.
 
-## the trend
+## raw markdown is becoming an expected feature
 
 frameworks that expose markdown natively are winning. mintlify and fumadocs are growing fastest. docusaurus is stable but not innovating on agent-readiness. starlight is new but gaining because of its performance.
 
@@ -135,7 +135,7 @@ the gap between tier 1 and tier 2 will widen. tier 1 frameworks are optimizing f
 
 in 2027, "does your docs framework expose raw markdown?" will be a standard evaluation question. right now, most people don't ask it. they will.
 
-## bottom line
+## ask how agents will get the content before you choose
 
 pure documentation generators are simple tools. the difference between them is small for human readers.
 

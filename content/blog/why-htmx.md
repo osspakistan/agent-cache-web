@@ -25,7 +25,9 @@ there are no real-time dashboards. no drag-and-drop. no complex state. no user a
 
 it's a form, a terminal-like stream, and a download button. that's the whole ui.
 
-## the case against spaspas are for apps with lots of client-side interactivity. dashboards with real-time charts. collaborative editors. image editors. anything where the ui state changes constantly based on user input.
+## a form and a progress stream don't need a spa
+
+spas are for apps with lots of client-side interactivity. dashboards with real-time charts. collaborative editors. image editors. anything where the ui state changes constantly based on user input.
 
 agent cache has none of that.
 
@@ -45,7 +47,7 @@ want to stream progress from the server? server-sent events (sse) with `hx-sse`.
 
 the server sends html fragments. the browser swaps them into the dom. no javascript state management. no virtual dom. no diffing.
 
-## the stack: bun + hono + htmx + turso + r2
+## bun and hono on the server, htmx in the browser
 
 - **bun:** fast typescript runtime. starts instantly.
 - **hono:** ultra-lightweight web framework. middleware-based. handles sse natively.
@@ -87,12 +89,12 @@ that's the entire frontend.
 
 react would be better if agent cache had:
 - a real-time dashboard with charts
-- drag-and-drop file uploads (well, we have a simple form)
+- drag-and-drop file uploads (well, i have a simple form)
 - offline mode
 - complex client-side state (filters, search, sorting)
 - user accounts with client-side navigation
 
-none of these exist. so react would be solving problems we don't have.
+none of these exist. so react would be solving problems i don't have.
 
 ## results: performance numbers
 
@@ -122,7 +124,7 @@ use react (or similar) if your app is:
 
 for agent cache, the choice was obvious. it's a server-heavy app with minimal interactivity. server-rendered html + htmx is exactly the right abstraction.
 
-## the bottom line
+## htmx is enough for this server-rendered app
 
 developers reach for react by default. that's a habit, not a requirement.
 

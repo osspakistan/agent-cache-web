@@ -1,6 +1,6 @@
 # why i didn't use an llm for documentation extraction (and never will)
 
-**meta title:** why we don't use llms for docs extraction (and never will)
+**meta title:** why i don't use llms for docs extraction (and never will)
 **meta description:** agent cache extracts documentation without any llm calls. here's why deterministic extraction beats ai for docs, and where llms actually help.
 **slug:** /blog/why-no-llm-extraction
 **target keywords:** no llm extraction, deterministic documentation extraction, llm vs deterministic extraction, why not llm, docs extraction without ai
@@ -37,7 +37,7 @@ llms fail on almost all of these.
 
 ## problem 1: cost
 
-let's do the math.
+consider a 100-page site.
 
 extracting a medium-sized docs site: 100 pages of html. each page is ~50 KB of raw html. total: 5 MB of html.
 
@@ -87,7 +87,7 @@ for creative writing, this is a feature. for api documentation, it's catastrophi
 
 your agent reads the docs and writes code. if the docs are wrong, the code is wrong. hallucinated documentation is worse than no documentation.
 
-## the one place we do use llms
+## metadata gets one llm call after extraction
 
 metadata generation.
 
@@ -125,7 +125,7 @@ there are edge cases where llms could help:
 
 for these rare cases, an llm could be a fallback. but for 95%+ of docs sites, code is sufficient. and better.
 
-## bottom line
+## transform the docs with code; don't ask a model to interpret them
 
 llms are amazing tools. but they're not the right tool for documentation extraction.
 
@@ -143,5 +143,5 @@ use code for what it's good at: precision, speed, determinism.
 
 **related:**
 - [deterministic extraction vs llm summarization](/blog/deterministic-vs-llm-extraction)
-- [the acquisition ladder](/blog/acquisition-ladder)
-- [html extraction: how we clean docs](/blog/html-to-markdown-extraction)
+- [my code-only extraction paths](/blog/acquisition-ladder)
+- [html extraction: how i clean docs](/blog/html-to-markdown-extraction)

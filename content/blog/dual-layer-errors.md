@@ -1,6 +1,6 @@
 # building a dual-layer error system: machine errors vs human errors
 
-**meta title:** dual-layer error system: how we handle errors at agent cache
+**meta title:** dual-layer error system: how i handle errors at agent cache
 **meta description:** agent cache uses two error layers: machine errors for logs and human errors for users. here's why and how it makes debugging easier.
 **slug:** /blog/dual-layer-error-system
 **target keywords:** dual layer error handling, machine error human error, error handling pattern, witty error messages, developer experience errors
@@ -13,9 +13,9 @@ agent cache has two layers. every error gets split:
 - **machine error:** technical, exhaustive, for logs
 - **human error:** plain, actionable, for users
 
-## the problem: one error message serves nobody
+## vague for developers, cryptic for users
 
-before dual-layer errors, our approach was like everyone else's:
+before dual-layer errors, my approach was like everyone else's:
 
 ```
 error: "failed to extract documentation"
@@ -56,7 +56,7 @@ example:
 this goes to:
 - stdout logs
 - event ledger (`events.jsonl`)
-- error tracking (if we had it)
+- error tracking (if i had it)
 
 it's for developers and operators. not for end users.
 
@@ -66,11 +66,11 @@ human errors are for users. plain language. actionable. sometimes funny.
 
 example:
 ```
-cloudflare blocked us. tried 3 times with polite delays. still got challenged.
+cloudflare blocked me. tried 3 times with polite delays. still got challenged.
 this happens when docs sites have aggressive bot protection.
 suggestions:
-- if you own this site, consider whitelisting our crawler
-- if not, we can't extract this site right now
+- if you own this site, consider whitelisting my crawler
+- if not, i can't extract this site right now
 - try again later, some sites loosen restrictions during off-peak
 ```
 
@@ -79,24 +79,24 @@ this goes to:
 - sse stream (what the user sees)
 - logs (as a summary)
 
-## what we never say
+## what i never say
 
-- "something went wrong" — meaningless
-- "an unexpected error occurred" — expected by whom?
-- "please try again later" — why? what changed?
-- "contact support" — no. tell them what to do.
+- "something went wrong", meaningless
+- "an unexpected error occurred", expected by whom?
+- "please try again later", why? what changed?
+- "contact support", no. tell them what to do.
 
 ## what makes a good human error
 
 1. **say what happened.** "cloudflare issued a javascript challenge" > "an error occurred"
-2. **say why it matters.** "we can't extract sites behind captchas" > "extraction failed"
+2. **say why it matters.** "i can't extract sites behind captchas" > "extraction failed"
 3. **give actionable next steps.** "try again in 1 hour" or "this site uses bot protection, so extraction isn't possible"
 4. **be honest.** don't blame the user. don't pretend everything is fine.
 
 ## bad vs good examples
 
 **bad:** "extraction failed due to network error"
-**good:** "docs.example.com returned a 403 with cloudflare challenge page. this site uses bot protection that blocks automated access. we can't extract it right now."
+**good:** "docs.example.com returned a 403 with cloudflare challenge page. this site uses bot protection that blocks automated access. i can't extract it right now."
 
 **bad:** "rate limit exceeded"
 **good:** "hit the rate limit for this site after 12 requests. some docs providers throttle crawlers. waiting 60 seconds before retry."
@@ -104,7 +104,7 @@ this goes to:
 **bad:** "failed to parse html"
 **good:** "encountered unexpected html structure. this might be a single-page app (spa) or custom framework. tried framework detection but no known pattern matched."
 
-## the results
+## detailed logs and fewer support questions
 
 dual-layer errors make debugging trivial. when something breaks, i open the event log. every machine error is there. every detail.
 
@@ -129,7 +129,7 @@ try {
 
 each error type knows how to format itself for both audiences.
 
-## bottom line
+## log the details, show users what they can do
 
 one error message can't serve both audiences. don't try.
 

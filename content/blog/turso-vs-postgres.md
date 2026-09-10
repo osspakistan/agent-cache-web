@@ -1,6 +1,6 @@
-# why we chose turso (libsql) over postgresql for job metadata
+# why i chose turso (libsql) over postgresql for job metadata
 
-**meta title:** turso vs postgresql: why sqlite won for our use case
+**meta title:** turso vs postgresql: why sqlite won for my use case
 **meta description:** agent cache uses turso (libsql) instead of postgresql for job metadata. here's why serverless sqlite was the right call.
 **slug:** /blog/why-turso-over-postgres
 **target keywords:** turso vs postgresql, turso libsql, sqlite for job metadata, turso database, edge sqlite
@@ -9,11 +9,11 @@
 
 most web apps use postgresql. it's the default. robust, proven, relational.
 
-agent cache uses turso — a serverless sqlite database.
+agent cache uses turso, a serverless sqlite database.
 
 here's why.
 
-## what we store
+## what i store
 
 agent cache's database stores:
 - job metadata: id, url, status, timestamps
@@ -26,14 +26,14 @@ this is not a complex workload. no complex joins. no transactions spanning multi
 
 ## postgresql: overkill for this workload
 
-postgresql features we don't need:
-- advanced query planner (we have simple selects)
-- full-text search (we search the filesystem, not the db)
+postgresql features i don't need:
+- advanced query planner (i have simple selects)
+- full-text search (i search the filesystem, not the db)
 - partitioning (3 tables don't need partitioning)
 - replication (single instance is fine)
 - complex types (jsonb, arrays, custom types)
 
-postgresql features we'd pay for but not use:
+postgresql features i'd pay for but not use:
 - managed instance at $15+/month
 - connection pooling
 - backup and recovery
@@ -45,30 +45,31 @@ postgresql is a great database. just not for this.
 
 turso is sqlite deployed as a serverless service.
 
-what we get:
+what i get:
 - **zero ops.** no database to manage. no migrations to run manually. no connection strings to configure.
 - **libsql protocol.** runs locally in development. scales to turso cloud in production.
-- **tiny cost.** free tier handles our workload. paid tier is $9/month if we ever need it.
+- **tiny cost.** free tier handles my workload. paid tier is $9/month if i ever need it.
 - **sqlite features.** acid transactions. relational queries. small footprint.
 
 ## why sqlite works for metadata
 
-sqlite handles our workload perfectly:
+sqlite handles my workload perfectly:
 - simple schema
 - single-writer (job processing is sequential by nature)
 - fast reads (status checks, job listing)
-- no concurrency conflicts (we control concurrency at the application level)
+- no concurrency conflicts (i control concurrency at the application level)
 
-sqlite's single-writer model is actually fine here. we don't have multiple processes writing simultaneously. the worker pool writes results, the status endpoint reads results. that's acceptable sqlite concurrency.
+sqlite's single-writer model is actually fine here. i don't have multiple processes writing simultaneously. the worker pool writes results, the status endpoint reads results. that's acceptable sqlite concurrency.
 
-## the edge benefit
+## turso leaves room for an edge deployment
+
 turso is designed for edge deployments. libsql replicates across regions. low latency for reads.
 
-we're currently deployed on a single vps. but if we ever move to an edge architecture (cloudflare workers for api, r2 for storage), turso fits naturally.
+i'm currently deployed on a single vps. but if i ever move to an edge architecture (cloudflare workers for api, r2 for storage), turso fits naturally.
 
 ## when postgresql would be better
 
-postgresql would be the right choice if we had:
+postgresql would be the right choice if i had:
 - multiple writers (many workers updating the same row)
 - complex reports and aggregations
 - full-text search requirements
@@ -77,19 +78,19 @@ postgresql would be the right choice if we had:
 
 none of these apply to agent cache.
 
-## the migration path
+## moving to postgres if the workload outgrows sqlite
 
-if we outgrow turso, migrating to postgresql is straightforward:
+if i outgrow turso, migrating to postgresql is straightforward:
 - dump sqlite database
 - import to postgresql
 - change connection string
 - adjust a few queries (sqlite is close to postgresql dialect)
 
-it's not hard. but we probably won't need to. sqlite handles our scale easily.
+it's not hard. but i probably won't need to. sqlite handles my scale easily.
 
-## bottom line
+## three small tables don't need postgres
 
-postgreql is the industry's default database. that's fine.
+postgresql is the industry's default database. that's fine.
 
 but not every app needs postgresql. agent cache is a simple tool with simple data needs. sqlite (via turso) handles it perfectly.
 

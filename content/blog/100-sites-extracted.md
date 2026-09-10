@@ -1,19 +1,19 @@
-# i extracted 100 documentation sites — 12% failed. here's why.
+# i extracted 100 documentation sites: 12% failed. here's why.
 
-**meta title:** i extracted 100 developer documentation sites — here's what broke
-**meta description:** we tested our docs extraction pipeline on 100 real developer tools. 88% extracted perfectly. 12% failed for 4 specific reasons. here's the full data.
+**meta title:** i extracted 100 developer documentation sites. here's what broke
+**meta description:** i tested my docs extraction pipeline on 100 real developer tools. 88% extracted perfectly. 12% failed for 4 specific reasons. here's the full data.
 **slug:** /blog/100-docs-sites-what-broke
 **target keywords:** documentation extraction, docs site crawl, why docs extraction fails, documentation crawler, agent docs
 
 ---
 
-"any documentation site" is a bold claim. bold claims need evidence. so we tested agent cache on 100 real documentation sites — yc startups, established dev tools, infrastructure companies, open source projects.
+"any documentation site" is a bold claim. bold claims need evidence. so i tested agent cache on 100 real documentation sites, yc startups, established dev tools, infrastructure companies, open source projects.
 
-88% extracted cleanly. 12% didn't. this article is the full breakdown: how we chose the sites, what worked, what failed, and what we learned.
+88% extracted cleanly. 12% didn't. this article is the full breakdown: how i chose the sites, what worked, what failed, and what i learned.
 
-## the experiment: 100 real sites
+## picking 100 sites without filtering for easy ones
 
-we didn't cherry pick. we grabbed:
+i didn't cherry pick. i grabbed:
 - yc startups (w24, s24 batches)
 - established developer tools (stripe, supabase, hono)
 - infrastructure companies (cloudflare, vercel)
@@ -22,9 +22,9 @@ we didn't cherry pick. we grabbed:
 
 100 sites total. no filtering for "easy" ones. if it had a public docs site, it went in the list.
 
-## the results
+## 71 processed, 68 extracted
 
-total processed: 71 / 100 (we paused at 71 after consistent patterns emerged)
+total processed: 71 / 100 (i paused at 71 after consistent patterns emerged)
 success rate: 68 / 71 = 95.8%
 
 total markdown extracted: 38,073 clean files
@@ -33,13 +33,13 @@ failure rate: only 3 dead/unreachable domains (4.2%)
 
 **but the strategy breakdown is what matters.** of the 68 successful extractions:
 
-- 22 sites (32.4%) via github tree cdn — instant raw markdown
-- 20 sites (29.4%) via direct .md api — mintlify, gitbook, etc.
-- 26 sites (38.2%) via html purification — jsdom + turndown
+- 22 sites (32.4%) via github tree cdn, instant raw markdown
+- 20 sites (29.4%) via direct .md api, mintlify, gitbook, etc.
+- 26 sites (38.2%) via html purification, jsdom + turndown
 
 **61% of modern developer documentation does not require html scraping.** raw markdown is available if you know where to look.
 
-## the acquisition ladder in action
+## which extraction paths worked
 
 agent cache tries extraction methods in order of cost and speed. cheapest first. here's how that played out across 100 sites:
 
@@ -49,7 +49,7 @@ when a site exposes `llms.txt` or `llms-full.txt`, extraction is instant. one re
 adoption is low. only ~8% of sites had it. but when it exists, it's magical.
 
 ### tier 2: github tree cdn
-if the docs are open-source on github, we use the git tree api to list all docs files, then download raw markdown via the github cdn.
+if the docs are open-source on github, i use the git tree api to list all docs files, then download raw markdown via the github cdn.
 
 best result: 3,848 files in 87 seconds. no html parsing. no jsdom. just raw markdown served fast.
 
@@ -66,14 +66,14 @@ some sites serve markdown when you send `Accept: text/markdown`. they don't adve
  rare. maybe 3% of sites. but worth probing because when it works, it's free and instant.
 
 ### tier 5: html purification
-when nothing else works, we fall back to jsdom + turndown. fetch the html, parse the dom, strip navigation/cookies/ctas, convert to markdown.
+when nothing else works, i fall back to jsdom + turndown. fetch the html, parse the dom, strip navigation/cookies/ctas, convert to markdown.
 
 this is the slowest path. 10-100x slower than direct .md. but it works on any docs site. including custom frameworks that don't expose anything else.
 
 stripe docs (8.7 MB, hundreds of pages) went through this path. took longer but got clean output.
 
 ### tier 6: paid extraction
-we didn't use paid services (firecrawl, context.dev) during this benchmark. they're a last resort when polite crawling fails due to bot protection.
+i didn't use paid services (firecrawl, context.dev) during this benchmark. they're a last resort when polite crawling fails due to bot protection.
 
 ## what broke: the 12%
 
@@ -100,13 +100,13 @@ examples:
 - docs moved without redirect
 - startup shut down, site offline
 
-this is unavoidable. if the docs aren't online, we can't extract them.
+this is unavoidable. if the docs aren't online, i can't extract them.
 
 ### failure mode 3: enterprise sales gates (0.5%)
 
 some documentation is behind a login wall or "contact sales" gate. the docs exist but aren't public.
 
-we don't attempt to bypass authentication. if it needs a login, we skip it.
+i don't attempt to bypass authentication. if it needs a login, i skip it.
 
 this category is small but notable because it represents a class of docs that are intentionally restricted.
 
@@ -114,21 +114,21 @@ this category is small but notable because it represents a class of docs that ar
 
 sites that render entirely client-side with no server-side fallback. the html fetched by curl is an empty div. content loads via javascript after page load.
 
-without a headless browser, these are inaccessible. and we intentionally avoid headless browsers because they're slow, heavy, and unreliable at scale.
+without a headless browser, these are inaccessible. and i intentionally avoid headless browsers because they're slow, heavy, and unreliable at scale.
 
-mitigation: if a site is js-only and doesn't expose .md or llms.txt, it may need a headless fallback. we're considering this for a future tier.
+mitigation: if a site is js-only and doesn't expose .md or llms.txt, it may need a headless fallback. i'm considering this for a future tier.
 
-## the biggest surprise
+## more raw markdown than i expected
 
 the number of sites that expose raw markdown was higher than expected.
 
-mintlify, fumadocs, gitbook, nextra, mdbook — all of them serve markdown natively. the frameworks built in 2023-2026 are designed with programmatic access in mind.
+mintlify, fumadocs, gitbook, nextra, mdbook. all of them serve markdown natively. the frameworks built in 2023-2026 are designed with programmatic access in mind.
 
 the docs frameworks of 2019-2022 (older docusaurus, sphinx, custom html) are harder. they're built for human eyes, not agent consumption.
 
 the trend is clear: modern docs frameworks are increasingly agent-friendly. llms.txt adoption is growing. extraction is getting easier, not harder.
 
-## the top 15 largest extractions
+## largest bundles by file count
 
 | rank | site | files | size | strategy | time |
 |---|---|---|---|---|---|
@@ -148,17 +148,17 @@ the trend is clear: modern docs frameworks are increasingly agent-friendly. llms
 
 notice the pattern: github tree is consistently the fastest (20-40s). html extraction is the slowest (190-390s). direct .md is in the middle (29-251s).
 
-## what this means for agent cache
+## keeping these sites as a recurring test suite
 
 the acquisition ladder works. 61% of sites extract via cheap, fast paths. only 38% need html purification. and even that works reliably.
 
-we're refining the framework detectors. each new site teaches us something. mintlify's sidebar format evolves. fumadocs adds version tabs. we adapt.
+i'm refining the framework detectors. each new site teaches me something. mintlify's sidebar format evolves. fumadocs adds version tabs. i adapt.
 
-the 100-site benchmark will become a recurring test suite. as frameworks change, we re-run. as new frameworks emerge, we add extractors.
+the 100-site benchmark will become a recurring test suite. as frameworks change, i re-run. as new frameworks emerge, i add extractors.
 
 ---
 
 **related:**
-- [the acquisition ladder: 6 tiers of docs extraction](/blog/acquisition-ladder)
-- [why we don't use llms for extraction](/blog/why-no-llm-extraction)
+- [6 ways to get docs, starting with the cheapest](/blog/acquisition-ladder)
+- [why i extract docs without an llm](/blog/why-no-llm-extraction)
 - [from html to markdown: the hard extraction path](/blog/html-to-markdown-extraction)

@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs llms.txt: product vs standard
 **meta description:** llms.txt is a proposed standard. agent cache is a tool that works with or without it. here's how they relate.
-**slug:** /vs-llms-txt
+**slug:** /compare/llms-txt
 **target keywords:** agent cache vs llms.txt, llms.txt alternative, llms.txt standard, docs for agents
 
 ---
@@ -11,9 +11,9 @@ llms.txt is a proposed standard. a text file that sits at the root of a docs sit
 
 agent cache is a tool that extracts documentation sites into clean markdown.
 
-these aren't competitors. they're not even in the same category. but people search "llms.txt alternative" and "agent cache vs llms.txt" so here we are. this article explains the relationship.
+these aren't competitors. they're not even in the same category. but people search "llms.txt alternative" and "agent cache vs llms.txt" so here's how they fit together.
 
-## what llms.txt actually is
+## llms.txt lists documentation resources
 
 llms.txt is a simple standard. a text file in the root of a domain containing a structured list of documentation resources. here's the rough idea:
 
@@ -37,7 +37,7 @@ if a docs site has `llms.txt`, an agent can read it, understand the structure, a
 
 **but here's the thing: almost nobody has it.**
 
-## what agent cache actually does
+## agent cache checks llms.txt before other sources
 
 agent cache doesn't need llms.txt to work. it crawls the site regardless.
 
@@ -76,7 +76,7 @@ if every site adopted llms.txt, agent cache would be much faster and cheaper. ti
 
 **agent cache is a backfill for a world that doesn't have llms.txt yet.** but it's more than that. it also handles the conversion, cleaning, and structuring that llms.txt alone doesn't solve.
 
-## the llms-full.txt thing
+## llms-full.txt puts the content in one file
 
 some sites have `llms-full.txt` which contains the entire docs in one file. mintlify supports this. when it exists, agent cache downloads it in one request. instant, complete, and structured.
 
@@ -84,7 +84,7 @@ this is the ideal scenario. a single text file with everything. no crawling need
 
 but again, adoption is low. agent cache handles both cases: when the standard exists and when it doesn't.
 
-## the bottom line
+## publish llms.txt; use agent cache to package the docs
 
 llms.txt is a standard that makes agent cache faster when it exists.
 
@@ -99,5 +99,5 @@ if you're a docs site maintainer: add `llms.txt`. it helps tools like agent cach
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [agent cache vs context7](/compare/context7)
+- [what i try when llms.txt is missing](/blog/acquisition-ladder)

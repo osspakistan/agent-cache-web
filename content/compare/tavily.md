@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs tavily: docs bundles vs ai search api
 **meta description:** tavily is an ai search engine for agents. agent cache is a docs extraction tool. they solve different problems. here's why.
-**slug:** /vs/tavily
+**slug:** /compare/tavily
 **target keywords:** agent cache vs tavily, tavily alternative, tavily vs agent cache, docs for ai agents, documentation search
 
 ---
@@ -13,7 +13,7 @@ agent cache is a tool that downloads docs and gives you a zip file.
 
 people confuse them. "they both give agents information from the web." no. tavily searches the internet for answers. agent cache gives your agent documentation to read. totally different use cases.
 
-## what tavily actually does
+## tavily finds current sources for a question
 
 tavily is a search api. you ask it something like "what's new in react 19?" or "how do i implement rate limiting in hono?" tavily searches the web, finds relevant sources, extracts key content, and returns structured results with citations.
 
@@ -21,7 +21,7 @@ it's real-time. it searches the live web. it retrieves current information. it's
 
 pricing is roughly $7.50-8 per 1,000 searches. $0.005 per basic search, $0.01 per advanced search. 1,000 free credits per month on the free tier.
 
-## what agent cache actually does
+## agent cache starts with a docs url and ends with files
 
 agent cache doesn't search. it downloads.
 
@@ -31,7 +31,7 @@ your agent reads these docs like any other file. not through an api. not at runt
 
 **and it's free.**
 
-## the difference: search vs reference
+## searching for an answer vs downloading a known reference
 
 this is the key distinction.
 
@@ -47,7 +47,7 @@ agent cache is for **reference material you already know you need.**
 
 tavily discovers. agent cache owns.
 
-## where tavily wins
+## tavily helps when you don't know which docs you need
 
 **discovery.** when you need to find information you don't have, tavily is unbeatable. it's a search engine. that's what it's for.
 
@@ -57,7 +57,7 @@ tavily discovers. agent cache owns.
 
 **no setup for new topics.** want to learn about a library you haven't used? tavily finds docs, blog posts, tutorials, github issues. agent cache requires you to know the docs url and extract it.
 
-## where agent cache wins
+## repeated api work is easier with a complete local reference
 
 **complete reference.** tavily returns snippets. agent cache gives you everything. every page. every code example. every edge case. agent cache > tavily for deep api work.
 
@@ -87,7 +87,7 @@ the real workflow is both.
 
 use tavily to figure out what you need. use agent cache to get it.
 
-## the "just use tavily" fallacy
+## a search summary isn't the full parameter reference
 
 some people say "just use tavily" when they hear about agent cache. they think they're similar.
 
@@ -99,7 +99,7 @@ with agent cache, your agent reads the actual docs file. exact parameters. exact
 
 **tavily is a starting point. agent cache is the foundation.**
 
-## the bottom line
+## find the library with tavily, then download its docs
 
 tavily is a search engine. agent cache is a docs downloader.
 
@@ -116,6 +116,6 @@ use both: discovery phase with tavily, implementation phase with agent cache.
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [agent cache vs firecrawl](/vs/firecrawl)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [agent cache vs context7](/compare/context7)
+- [agent cache vs firecrawl](/compare/firecrawl)
+- [how i turn a docs url into markdown](/blog/acquisition-ladder)

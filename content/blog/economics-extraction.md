@@ -1,4 +1,4 @@
-# the economics of documentation extraction: 1x to 10x cost
+# why some docs sites cost 10x more to extract
 
 **meta title:** docs extraction cost breakdown: 1x (free) to 10x (expensive)
 **meta description:** extracting documentation costs anywhere from free (direct markdown) to $$$ (paid services). here's the full cost breakdown across 100 extracted sites.
@@ -11,7 +11,7 @@ not all documentation extraction costs the same. some sites expose raw markdown 
 
 the cost difference is 10x from cheapest to most expensive. here's the full economics.
 
-## the cost spectrum
+## cost and time by extraction method
 
 | tier | method | cost | time | success rate |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@ the cost difference is 10x from cheapest to most expensive. here's the full econ
 | tier 5 | html purification | cpu | 5-10s/page | 38% |
 | tier 6 | paid extraction | $$$ | 5-10s/page | remaining |
 
-## tier 1: llms.txt — free, instant
+## tier 1: llms.txt, free, instant
 
 when a site has `/llms.txt` or `/llms-full.txt`, extraction costs nothing.
 
@@ -32,7 +32,7 @@ llms-full.txt includes the full docs content. `llms.txt` includes a table of con
 
 adoption is growing but still low (~8%). cost: $0.
 
-## tier 2: github tree — free, fast
+## tier 2: github tree, free, fast
 
 if docs are open-source on github:
 - one free api call for the git tree
@@ -41,23 +41,23 @@ if docs are open-source on github:
 cost: $0.
 time: 20-60 seconds for typical sites.
 
-## tier 3: direct .md — free, fast
+## tier 3: direct .md, free, fast
 
 mintlify, fumadocs, gitbook, and others expose `.md` endpoints.
 
 cost: $0.
 time: 1-2 seconds per page, concurrent.
 
-## tier 4: content negotiation — free, rare
+## tier 4: content negotiation, free, rare
 
 sites that serve markdown via `Accept: text/markdown`.
 
 cost: $0.
 rarity: ~3%. but worth probing.
 
-## tier 5: html purification — cpu cost
+## tier 5: html purification, cpu cost
 
-when free methods don't work, we fall back to html extraction.
+when free methods don't work, i fall back to html extraction.
 
 stack: jsdom + turndown + custom cleaners.
 
@@ -66,7 +66,7 @@ time: 5-10 seconds per page (slower than direct .md).
 
 price estimate: on a $6/month vps with shared cpu, 100 pages costs maybe $0.02 in compute time. negligible.
 
-## tier 6: paid extraction — $$$, last resort
+## tier 6: paid extraction, $$$, last resort
 
 firecrawl, context.dev, and similar services.
 
@@ -74,15 +74,15 @@ pricing:
 - firecrawl: $83/month standard, 100,000 pages
 - ~$0.001 per page
 
-for our scale, we'd only use this for sites that actively block free extraction.
+for my scale, i'd only use this for sites that actively block free extraction.
 
-## the acquisition ladder saves money
+## free methods keep the average cost down
 
 the ladder tries free methods first. 88% of sites succeed with free methods.
 
 so the average cost per site is close to zero. only the 12% that need paid services cost money.
 
-if we extracted 100 sites/month:
+if i extracted 100 sites/month:
 - 88 sites: $0
 - 12 sites: maybe $0.50 in compute (html purification)
 - total: ~$6/month
@@ -96,7 +96,7 @@ if agent cache processes 10,000 extractions/month:
 | cost | amount |
 |---|---|
 | vps (bigger) | $20/month |
-| bandwidth | negligible (most extraction is from docs sites to us) |
+| bandwidth | negligible (most extraction is from docs sites to me) |
 | r2 storage | ~$10/month for 500 GB |
 | total | ~$30/month |
 
@@ -114,7 +114,7 @@ agent cache doesn't do those things. it extracts once. stores locally. gives you
 
 that's why it can be free. the scope is smaller.
 
-## bottom line
+## look for markdown before budgeting for scraping
 
 61% of extraction is completely free.
 38% costs negligible cpu.
@@ -127,5 +127,5 @@ docs extraction is a discovery problem, not a cost problem.
 ---
 
 **related:**
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [extraction methods in cost order](/blog/acquisition-ladder)
 - [100 sites extracted](/blog/100-docs-sites-what-broke)

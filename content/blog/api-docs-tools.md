@@ -43,43 +43,43 @@ the original. still maintained by smartbear. executes live api calls from the br
 
 ## modern alternatives worth knowing
 
-**stoplight elements** — embeddable web components. converts openapi + asyncapi into standalone web apps or react portals. good if you need to embed api docs inside an existing application.
+**stoplight elements**: embeddable web components. converts openapi + asyncapi into standalone web apps or react portals. good if you need to embed api docs inside an existing application.
 
-**rapidoc** — zero-dependency web component. parses openapi specs directly inside standard html. no build pipeline. just a `<script>` tag.
+**rapidoc**: zero-dependency web component. parses openapi specs directly inside standard html. no build pipeline. just a `<script>` tag.
 
-**zuplo** — edge-based api gateway that auto-converts openapi specs to hosted developer portals. includes rate-limiting controls and live request consoles.
+**zuplo**: edge-based api gateway that auto-converts openapi specs to hosted developer portals. includes rate-limiting controls and live request consoles.
 
-**bump.sh** — hosted api portals that track breaking changes between spec releases. ci/cd integration. good for teams that release api versions frequently.
+**bump.sh**: hosted api portals that track breaking changes between spec releases. ci/cd integration. good for teams that release api versions frequently.
 
-## the hidden gems
+## markdown output and guides alongside specs
 
-**widdershins** — converts openapi 3.0, swagger 2.0, and asyncapi definitions into clean markdown. formatted for docusaurus, mkdocs, or slate. this is actually the most agent-friendly tool in the category: it produces markdown that agents can read natively.
+**widdershins**: converts openapi 3.0, swagger 2.0, and asyncapi definitions into clean markdown. formatted for docusaurus, mkdocs, or slate. this is actually the most agent-friendly tool in the category: it produces markdown that agents can read natively.
 
-**spectacle** — generates static html from openapi specs using handlebars templates. multi-page or single-page output.
+**spectacle**: generates static html from openapi specs using handlebars templates. multi-page or single-page output.
 
-**dapperdox** — embeds markdown conceptual guides alongside openapi endpoints. unified developer portal.
+**dapperdox**: embeds markdown conceptual guides alongside openapi endpoints. unified developer portal.
 
 ## graphql documentation: different problem
 
 graphql apis don't have openapi specs. they have schemas. the documentation tools extract the schema via introspection and render it.
 
-**magidoc** — static site generator built for graphql. inspects schemas via introspection. outputs svelte-powered searchable sites. the introspection query is the agent-readable source. the rendered site is for humans.
+**magidoc**: static site generator built for graphql. inspects schemas via introspection. outputs svelte-powered searchable sites. the introspection query is the agent-readable source. the rendered site is for humans.
 
-**spectaql** — node.js generator. parses schema files or introspection queries. multi-column html with customizable css. also outputs markdown if configured.
+**spectaql**: node.js generator. parses schema files or introspection queries. multi-column html with customizable css. also outputs markdown if configured.
 
-**graphdoc** — static html from graphql schemas. no runtime dependencies. simple and lightweight.
+**graphdoc**: static html from graphql schemas. no runtime dependencies. simple and lightweight.
 
 **agent-readiness for graphql:** introspection queries (`__schema`, `__types`) are the machine-readable source. agents can query these directly. the rendered documentation is a human convenience.
 
 ## protobuf, asyncapi, and other protocols
 
-**asyncapi generator** — official tooling for event-driven architectures. websockets, kafka, mqtt topics. outputs html, markdown, or react apps. the asyncapi spec is machine-readable.
+**asyncapi generator**: official tooling for event-driven architectures. websockets, kafka, mqtt topics. outputs html, markdown, or react apps. the asyncapi spec is machine-readable.
 
-**protoc-gen-doc** — plugin for the protocol buffer compiler. extracts inline comments from `.proto` files. outputs html, markdown, or json. the `.proto` files with comments are the source.
+**protoc-gen-doc**: plugin for the protocol buffer compiler. extracts inline comments from `.proto` files. outputs html, markdown, or json. the `.proto` files with comments are the source.
 
-**typespec** — microsoft's language for api definitions. typescript-like syntax. compiles to openapi + html docs. also outputs the spec file.
+**typespec**: microsoft's language for api definitions. typescript-like syntax. compiles to openapi + html docs. also outputs the spec file.
 
-## the extraction reality
+## fetch the spec instead of parsing the site
 
 for api documentation tools, the rendered website is almost always secondary to the spec.
 
@@ -109,7 +109,7 @@ some teams don't publish their openapi spec publicly. they only publish the rend
 
 if the spec truly isn't exposed, extraction becomes hard. but this is rare. most api docs tools want the spec to be accessible.
 
-## bottom line
+## choose a renderer for people, a spec for agents
 
 api documentation tools are simpler to extract than product docs because they have a machine-readable source: the spec.
 

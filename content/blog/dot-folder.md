@@ -1,7 +1,7 @@
-# the .agentcache dot-folder: gitignore-ready docs for your repo
+# keeping reference docs in .agentcache, beside your code
 
-**meta title:** the .agentcache folder: how we structure local documentation
-**meta description:** agent cache outputs to .agentcache/docs/<slug>/ — a hidden, gitignore-ready folder structure. here's why dot-folders are right for docs.
+**meta title:** how i organize local docs in .agentcache
+**meta description:** agent cache outputs to .agentcache/docs/<slug>/, a hidden, gitignore-ready folder structure. here's why dot-folders are right for docs.
 **slug:** /blog/agentcache-dot-folder
 **target keywords:** agentcache dot folder, documentation dot folder, gitignore docs, repo documentation folder, local docs repo
 
@@ -20,7 +20,7 @@ dot-folders (starting with `.`) are hidden by default in most systems:
 
 this is good. docs are reference material, not source code. they shouldn't clutter your view.
 
-## the structure
+## one folder per library, with content and metadata
 
 ```
 .agentcache/
@@ -42,10 +42,10 @@ this is good. docs are reference material, not source code. they shouldn't clutt
 ```
 
 each project gets its own folder. each folder has:
-- `docs/` — the actual markdown files
-- `meta.yaml` — metadata for agent discovery
-- `_map.json` — navigation tree
-- `INDEX.md` — table of contents
+- `docs/`: the actual markdown files
+- `meta.yaml`: metadata for agent discovery
+- `_map.json`: navigation tree
+- `INDEX.md`: table of contents
 
 ## why not `docs/` directly?
 
@@ -90,11 +90,11 @@ what happens when hono releases version 4?
 options:
 1. **re-extract:** run agent cache again with the same url. existing docs are replaced.
 2. **version-specific:** extract to `.agentcache/docs/hono-v4/` alongside `.agentcache/docs/hono-v3/`
-3. **partial update:** we don't support this yet. full re-extraction only.
+3. **partial update:** i don't support this yet. full re-extraction only.
 
 in practice: re-extract when you need a new version. most stable apis don't change often enough to need frequent updates.
 
-## the mcp connection
+## a predictable path for the planned mcp server
 
 the future mcp server for agent cache will:
 1. scan `.agentcache/` for `meta.yaml` files
@@ -125,7 +125,7 @@ the folder structure enables these commands. each command maps to a filesystem o
 
 **inline in `package.json` metadata**: too limited. not suitable for full docs.
 
-## bottom line
+## reference docs stay nearby without cluttering the repo
 
 `.agentcache/` is a simple, predictable, hidden location for documentation.
 

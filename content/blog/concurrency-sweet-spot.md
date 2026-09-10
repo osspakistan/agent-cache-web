@@ -1,7 +1,7 @@
 # 8-12 workers: finding the sweet spot for parallel docs extraction
 
 **meta title:** optimal concurrency for docs extraction: why 8-12 workers wins
-**meta description:** we tested 1 to 50 concurrent workers for documentation extraction. 8-12 was the sweet spot. here's why more workers actually hurts.
+**meta description:** i tested 1 to 50 concurrent workers for documentation extraction. 8-12 was the sweet spot. here's why more workers actually hurts.
 **slug:** /blog/concurrency-sweet-spot-extraction
 **target keywords:** concurrency sweet spot, parallel extraction workers, optimal concurrency crawling, worker pool documentation, 8 workers extraction
 
@@ -9,11 +9,11 @@
 
 when crawling in parallel, more workers should mean faster extraction, right?
 
-we tested it. concurrency from 1 to 50 workers. the results were surprising.
+i tested it. concurrency from 1 to 50 workers. the results were surprising.
 
 **8-12 workers is the sweet spot.** below 8, you're slow. above 12, you hit diminishing returns. at 50, things actually get slower.
 
-## the intuition: more workers = faster
+## adding workers looks like a shortcut
 
 naive assumption: if 1 worker takes 10 minutes, 10 workers take 1 minute. linear scaling.
 
@@ -21,7 +21,7 @@ reality: extraction has bottlenecks. and they aren't cpu.
 
 ## test methodology
 
-we ran the same extraction job (a 500-page docs site) with different concurrency levels:
+i ran the same extraction job (a 500-page docs site) with different concurrency levels:
 
 - 1 worker
 - 4 workers
@@ -73,19 +73,19 @@ docs extraction is io-bound. mostly waiting for network responses. mostly idle.
 
 at some point, adding more workers doesn't add more throughput because the network is the bottleneck, not the cpu.
 
-## the 8-12 sweet spot
+## why i default to 10 workers
 
 8 workers crawl fast without being aggressive. 12 workers push it slightly. both keep extraction reliable.
 
-we default to 10 workers. that covers 95% of use cases.
+i default to 10 workers. that covers 95% of use cases.
 
-for small sites with known rate limits, we drop to 4-6.
+for small sites with known rate limits, i drop to 4-6.
 
-for large sites with confirmed high rate limits, we might try 15-20. but that's rare.
+for large sites with confirmed high rate limits, i might try 15-20. but that's rare.
 
 ## adaptive concurrency
 
-we have a simple adaptive strategy:
+i have a simple adaptive strategy:
 1. start with 10 workers
 2. if requests start failing with 429, reduce by 2
 3. if requests succeed consistently for 20 seconds, increase by 1
@@ -97,7 +97,7 @@ in practice, 95% of extractions stay at 10. only aggressive rate limiters force 
 
 single-worker extraction is _slow_. but it's the most polite. if a site is known to be sensitive, single-worker with 1-second delays between requests is the safest option.
 
-we only use this for sites that have already shown signs of rate limiting on previous attempts.
+i only use this for sites that have already shown signs of rate limiting on previous attempts.
 
 ## cloudflare-protected sites
 
@@ -105,7 +105,7 @@ sites behind cloudflare are the most rate-limit-sensitive. cloudflare's rate lim
 
 for cloudflare sites, 6-8 workers with 500ms delays between requests usually works. above that, you trigger challenges.
 
-## bottom line
+## start at 10 rather than maxing out concurrency
 
 start with 10 workers. it's fast enough for most cases. polite enough for most servers.
 

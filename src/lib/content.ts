@@ -1,51 +1,26 @@
-// Content registry - reads content/{blog,compare}/*.md, parses the bold-meta
-// frontmatter convention, and renders bodies via @comark/html.
-//
-// Content format (developer-first, no YAML):
-//   # Title
-//
-//   **meta title:** ...
-//   **meta description:** ...
-//   **slug:** /blog/my-post
-//   **target keywords:** ...
-//
-//   ---
-//   body markdown...
-//
-// The route slug is derived from the FILENAME (not the **slug:** line, which is
-// only kept as reference). This gives us predictable URLs: /blog/<base>,
-// /compare/<base>. Filenames are already cleaned (numeric prefixes stripped,
-// comparison names normalized).
-//
-// Everything is parsed once at startup and cached. Content is a static part of
-// the bundle - it does not change at runtime.
+// Server-side registry for the Markdown collections in content/.
+// Blog URLs come from **slug:** metadata; filenames remain redirect aliases.
+// Comparisons use the /compare namespace. All lists, detail pages and the
+// sitemap read this registry so their URLs cannot drift apart.
 
 import { readdir, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { renderHtml } from '@comark/html'
 
 export type ContentSection = 'blog' | 'compare'
 
 export interface ContentPost {
-  /** url-path-safe slug, e.g. '100-sites-extracted' */
   slug: string
-  /** absolute route, e.g. '/blog/100-sites-extracted' */
   route: string
-  /** markdown h1 (first heading) - used as the display title */
+  /** Previous filename-based URLs, retained for bookmarks and indexed pages. */
+  aliases: string[]
   title: string
-  /** meta title for SEO <title> */
   metaTitle: string
-  /** meta description / excerpt */
   description: string
-  /** from the **slug:** reference line, informational only */
   sourceSlug?: string
-  /** from the **target keywords:** line */
   keywords?: string
-  /** rendered HTML body (the content after the --- marker) */
   html: string
-  /** raw markdown body (with meta block stripped) */
   body: string
-  /** original filename */
   file: string
 }
 
@@ -54,65 +29,72 @@ interface ParseResult {
   body: string
 }
 
-const CACHE: Record<ContentSection, ContentPost[]> = { blog: [], compare: [] }
+const CONTENT_DIR = resolve(import.meta.dir, '../../content')
+const SECTIONS: ContentSection[] = ['blog', 'compare']
+let pending: Promise<Record<ContentSection, ContentPost[]>> | undefined
 
-const CONTENT_DIR = join(process.cwd(), 'content')
-
-/** Parse the bold-meta frontmatter block and split off the body. */
-export function parseContent(raw: string): ParseResult {
-  // Split on the first line that is exactly '---'.
-  const sepIdx = raw.indexOf('\n---\n')
-  const header = sepIdx === -1 ? raw : raw.slice(0, sepIdx)
-  const body = sepIdx === -1 ? '' : raw.slice(sepIdx + 4).trim()
-
+/** Draft format: H1 + **key:** value lines, then a --- body separator. */
+export function parseContent(source: string): ParseResult {
+  const raw = source.replace(/\r\n/g, '\n')
+  const separator = raw.indexOf('\n---\n')
+  if (separator === -1) throw new Error('Content is missing its metadata separator')
   const meta: Record<string, string> = {}
-  // Bold-meta convention is **key:** value — the colon is INSIDE the bold
-  // markers (**meta title:** ...), so the close comes after the colon.
-  for (const line of header.split('\n')) {
-    const m = line.match(/^\*\*(.+?):\*\*\s*(.*)$/)
-    if (m) meta[m[1].trim()] = m[2].trim()
+  for (const line of raw.slice(0, separator).split('\n')) {
+    const match = line.match(/^\*\*(.+?):\*\*\s*(.*)$/)
+    if (match) meta[match[1].trim()] = match[2].trim()
   }
-
-  return { meta, body }
+  return { meta, body: raw.slice(separator + 5).trim() }
 }
 
-/** Extract the first markdown H1 from the header (title is on its own line
- *  before the meta block). Falls back to the first line of the body. */
-function extractTitle(header: string, body: string): string {
-  const m = header.match(/^#{1,2}\s+(.+)$/m)
-  if (m) return m[1].trim()
-  const b = body.match(/^#{1,2}\s+(.+)$/m)
-  if (b) return b[1].trim()
-  return (header.split('\n')[0] || body.split('\n')[0] || 'Untitled').trim()
+/** Validate metadata rather than silently publishing an unexpected URL. */
+export function contentAddress(section: ContentSection, file: string, sourceSlug?: string) {
+  const filename = file.replace(/\.md$/, '')
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(filename)) {
+    throw new Error(`Invalid content filename: ${file}`)
+  }
+  const route = sourceSlug ?? `/${section}/${filename}`
+  const pattern = new RegExp(`^/${section}/([a-z0-9]+(?:-[a-z0-9]+)*)$`)
+  const match = route.match(pattern)
+  if (!match) throw new Error(`Invalid ${section} slug in ${file}: ${route}`)
+  const previousRoute = `/${section}/${filename}`
+  return {
+    slug: match[1],
+    route,
+    aliases: route === previousRoute ? [] : [previousRoute],
+  }
 }
 
-function slugFromFile(file: string): string {
-  return file.replace(/\.md$/, '')
-}
-
-async function load(): Promise<void> {
-  if (CACHE.blog.length > 0 || CACHE.compare.length > 0) return
-
-  for (const section of ['blog', 'compare'] as ContentSection[]) {
-    let files: string[] = []
-    try {
-      files = (await readdir(join(CONTENT_DIR, section))).filter((f) => f.endsWith('.md')).sort()
-    } catch {
-      files = [] // content dir missing - no posts
+/** Canonical URLs and aliases must both be unique within a collection. */
+export function validateContentAddresses(posts: Pick<ContentPost, 'route' | 'aliases' | 'file'>[]) {
+  const owners = new Map<string, string>()
+  for (const post of posts) {
+    for (const route of [post.route, ...post.aliases]) {
+      const owner = owners.get(route)
+      if (owner) throw new Error(`Content URL collision at ${route}: ${owner}, ${post.file}`)
+      owners.set(route, post.file)
     }
+  }
+}
 
-    const posts: ContentPost[] = []
+async function load(): Promise<Record<ContentSection, ContentPost[]>> {
+  const collections: Record<ContentSection, ContentPost[]> = { blog: [], compare: [] }
+  for (const section of SECTIONS) {
+    // Missing shipped content is an error, not a successful empty index.
+    const files = (await readdir(join(CONTENT_DIR, section)))
+      .filter((file) => file.endsWith('.md'))
+      .sort()
     for (const file of files) {
       const raw = await readFile(join(CONTENT_DIR, section, file), 'utf-8')
       const { meta, body } = parseContent(raw)
-      const slug = slugFromFile(file)
-      const title = extractTitle(raw.split('\n---\n')[0] ?? '', body)
-      posts.push({
-        slug,
-        route: `/${section}/${slug}`,
+      const title = raw.match(/^#\s+(.+)$/m)?.[1].trim()
+      if (!title || !body || !meta['meta description']) {
+        throw new Error(`Incomplete content: ${section}/${file}`)
+      }
+      collections[section].push({
+        ...contentAddress(section, file, meta.slug),
         title,
-        metaTitle: meta['meta title'] ?? title,
-        description: meta['meta description'] ?? '',
+        metaTitle: meta['meta title'] || title,
+        description: meta['meta description'],
         sourceSlug: meta.slug,
         keywords: meta['target keywords'],
         html: await renderHtml(body),
@@ -120,19 +102,27 @@ async function load(): Promise<void> {
         file,
       })
     }
-    CACHE[section] = posts
+    validateContentAddresses(collections[section])
   }
+  return collections
 }
 
 export async function getContent(section: ContentSection): Promise<ContentPost[]> {
-  await load()
-  return CACHE[section]
+  // Share one complete load across concurrent requests; never expose a partial
+  // collection. A failed load may be retried on the next request.
+  pending ??= load().catch((error) => {
+    pending = undefined
+    throw error
+  })
+  return (await pending)[section]
 }
 
 export async function getPost(
   section: ContentSection,
   slug: string,
 ): Promise<ContentPost | undefined> {
-  const posts = await getContent(section)
-  return posts.find((p) => p.slug === slug)
+  const route = `/${section}/${slug}`
+  return (await getContent(section)).find(
+    (post) => post.route === route || post.aliases.includes(route),
+  )
 }

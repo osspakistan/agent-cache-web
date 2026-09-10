@@ -1,7 +1,7 @@
 # why agent cache is going open source (and what that means)
 
 **meta title:** agent cache is going open source. here's why.
-**meta description:** we're open sourcing the agent cache extraction engine under mit. here's what that means and why we did it.
+**meta description:** i'm open sourcing the agent cache extraction engine under mit. here's what that means and why i did it.
 **slug:** /blog/open-source-direction
 **target keywords:** agent cache open source, open source documentation extraction, mit license docs tool, open source crawler, agent cache github
 
@@ -13,7 +13,7 @@ the extraction engine. the cli. the mcp server. all of it.
 
 under mit license. free to use. free to modify. free to fork.
 
-## why
+## charging for public docs extraction feels wrong
 
 charging for docs extraction feels wrong.
 
@@ -24,23 +24,23 @@ open source aligns with that: the tool is free. anyone can extract docs.
 ## what's open source
 
 these components will be open sourced:
-- **extraction engine** — the core crawler, framework extractors, acquisition ladder
-- **cli** — `agentcache add <url>`, `agentcache list`, etc.
-- **mcp server** — serves local docs to agents via model context protocol
-- **utility libraries** — url normalization, html cleaning, etc.
+- **extraction engine**: the core crawler, framework extractors, acquisition ladder
+- **cli**: `agentcache add <url>`, `agentcache list`, etc.
+- **mcp server**: serves local docs to agents via model context protocol
+- **utility libraries**: url normalization, html cleaning, etc.
 
 ## what's not open source
 
 these stay proprietary:
-- **web app** (`agentcache.run`) — the hosted service
-- **infrastructure** — deployment, monitoring, billing
-- **branding** — name, logo, domain
+- **web app** (`agentcache.run`): the hosted service
+- **infrastructure**: deployment, monitoring, billing
+- **branding**: name, logo, domain
 
 ## why the split
 
 the extraction technology is a public good. it should be open. anyone should be able to extract docs.
 
-the hosted service is our business. convenience, reliability, and support.
+the hosted service is my business. convenience, reliability, and support.
 
 this is a common model. linux is open source. red hat sells support. wordpress is open source. wordpress.com sells hosting.
 
@@ -53,19 +53,19 @@ mit license is the most permissive:
 - no attribution required (but appreciated)
 - no warranty
 
-basically: do whatever you want. just don't blame us if something breaks.
+basically: do whatever you want. just don't blame me if something breaks.
 
 ## what it means for users
 
 **as a free user:** nothing changes. the web app stays free.
 
-**as a self-hoster:** you can run the extraction engine locally. no dependency on our infrastructure. extract docs on your own server.
+**as a self-hoster:** you can run the extraction engine locally. no dependency on my infrastructure. extract docs on your own server.
 
 **as a developer:** you can modify the extraction logic. add support for new frameworks. integrate into your own tools.
 
-**as a competitor:** you can fork it. build your own product. we can't stop you and don't want to. the extraction itself is not a moat.
+**as a competitor:** you can fork it. build your own product. i can't stop you and don't want to. the extraction itself is not a moat.
 
-## what is the moat
+## hosting is what i'd charge for
 
 the hosted service. convenience. zero setup. reliability.
 
@@ -80,11 +80,11 @@ if you need to extract docs at scale, in a pipeline, or inside your own infrastr
 3. **later:** cli and mcp server released
 4. **eventually:** web app stays as hosted service
 
-## bottom line
+## open the engine, sell the convenience
 
 the technology to extract docs should be free and open. the service to make it convenient can be monetized.
 
-we open source the tool. we sell the convenience.
+i open source the tool. i sell the convenience.
 
 ---
 

@@ -1,7 +1,7 @@
 # content negotiation: getting markdown from sites that don't advertise it
 
 **meta title:** content negotiation for docs: getting markdown with http headers
-**meta description:** some docs sites serve raw markdown when you send accept: text/markdown. they don't advertise it. here's how we found them.
+**meta description:** some docs sites serve raw markdown when you send accept: text/markdown. they don't advertise it. here's how i found them.
 **slug:** /blog/content-negotiation-markdown
 **target keywords:** content negotiation markdown, accept header markdown, hidden markdown endpoints, documentation content negotiation, accept text markdown
 
@@ -27,13 +27,13 @@ if the server supports both, it picks the best match. if it only supports html, 
 
 but here's the trick: many sites support markdown without advertising it.
 
-## how we discovered hidden markdown endpoints
+## how i discovered hidden markdown endpoints
 
-we discovered this accidentally.
+i discovered this accidentally.
 
-while building the acquisition ladder, we tried appending `.md` to urls. that worked for mintlify and fumadocs. but for some sites, `.md` returned 404.
+while building the acquisition ladder, i tried appending `.md` to urls. that worked for mintlify and fumadocs. but for some sites, `.md` returned 404.
 
-on a hunch, we tried:
+on a hunch, i tried:
 ```
 GET /docs/page
 Accept: text/markdown
@@ -53,7 +53,7 @@ the capability exists but is invisible.
 
 ## which sites support it
 
-we've found content negotiation support on:
+i've found content negotiation support on:
 - some docusaurus sites (surprisingly)
 - a few nextra sites
 - some custom next.js docs sites
@@ -61,9 +61,9 @@ we've found content negotiation support on:
 
 it's not universal. maybe 3-5% of sites support it. but when it works, it's the fastest path to clean markdown.
 
-## how we detect it
+## how i detect it
 
-the detection is part of our tier 4 probe:
+the detection is part of my tier 4 probe:
 
 ```
 GET /docs/some-known-page
@@ -74,7 +74,7 @@ if the response content-type is `text/markdown` → tier 4 works.
 
 if the response is still `text/html` → tier 4 doesn't work. move to tier 5 (html purification).
 
-we test with a known page (usually the getting-started or overview page) because those are most likely to exist.
+i test with a known page (usually the getting-started or overview page) because those are most likely to exist.
 
 ## why this matters
 
@@ -108,7 +108,7 @@ tier 4 of the acquisition ladder:
 5. html purification
 6. paid extraction
 
-## the future
+## your docs site might already support this
 
 more sites will support content negotiation as developers learn about it. the accept header is a standard http feature. it's free to implement.
 
@@ -116,7 +116,7 @@ the bigger problem is awareness. most developers don't know their framework supp
 
 if you're reading this and maintain a docs site: try `curl -H "Accept: text/markdown" your-docs-url`. you might already support it.
 
-## bottom line
+## spend one request checking the accept header
 
 content negotiation is a hidden gem. most sites that support it don't know they support it.
 
@@ -125,5 +125,5 @@ if you're building a docs extraction pipeline, probe for this. it's a free tier 
 ---
 
 **related:**
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [six ways to acquire documentation](/blog/acquisition-ladder)
 - [html extraction: the hard path](/blog/html-to-markdown-extraction)

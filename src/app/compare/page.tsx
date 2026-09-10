@@ -13,7 +13,7 @@ export const GET = async (_c: AppContext) => {
   setPageMeta({
     title: 'Compare // Agent Cache',
     description:
-      'Honest comparisons of agent cache against context7, firecrawl, tavily, and other docs tooling. Where we win, where we lose.',
+      'Honest comparisons of agent cache against context7, firecrawl, tavily, and other docs tooling. Where it wins, where it loses.',
     canonical: 'https://agentcache.run/compare',
   })
 
@@ -31,7 +31,7 @@ export const GET = async (_c: AppContext) => {
               want both.
             </p>
           </header>
-          <hr class="blog-list-sep" />
+
           <div>
             {pages.map((p) => (
               <a class="post-item" href={p.route} key={p.slug}>

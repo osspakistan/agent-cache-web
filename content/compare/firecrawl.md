@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs firecrawl: free docs extraction vs $83/month scraper
 **meta description:** firecrawl is a web scraping api. agent cache is a docs extraction tool. same extraction, completely different use cases. here's the honest breakdown.
-**slug:** /vs/firecrawl
+**slug:** /compare/firecrawl
 **target keywords:** agent cache vs firecrawl, firecrawl alternative, firecrawl vs agent cache, docs extraction tool, documentation crawler
 
 ---
@@ -13,7 +13,7 @@ agent cache is a tool that turns documentation sites into clean markdown. that's
 
 both extract content from websites. that's where the similarity ends. firecrawl is a bulldozer. agent cache is a garden trowel. this article explains why you don't need a bulldozer to plant flowers.
 
-## what firecrawl actually does
+## firecrawl scrapes, searches, and interacts with pages
 
 firecrawl is a general-purpose web scraping api. you give it a url. it scrapes the page. returns clean markdown or structured json. can handle javascript rendering, dynamic content, login flows, multi-step interactions.
 
@@ -35,7 +35,7 @@ pay-as-you-go kicks in when you run out. $5 buys you extra credits. increments v
 
 if you exceed your plan, the meter runs. set a monthly cap or it keeps charging.
 
-## what agent cache actually does
+## agent cache packages documentation, not arbitrary web data
 
 agent cache doesn't scrape the web. agent cache turns documentation sites into agent-ready markdown bundles.
 
@@ -45,7 +45,7 @@ it's not a general-purpose scraper. it doesn't click buttons. it doesn't fill fo
 
 **and it's free.** no credits. no tiers. no meter. just free.
 
-## the fundamental difference
+## scraped pages still need a docs pipeline
 
 firecrawl is infrastructure. it's a building block for applications that need web data. r&d agents, lead enrichment, competitive intelligence, price monitoring, content generation. any app that needs to read the live web.
 
@@ -55,7 +55,7 @@ firecrawl gives you raw material. you still need to build the pipeline that turn
 
 agent cache gives you the finished bundle. structured, indexed, ready to drop into your agent's context.
 
-## where firecrawl wins
+## reach for firecrawl beyond public docs
 
 firecrawl is genuinely impressive. it's good at what it does.
 
@@ -71,11 +71,11 @@ firecrawl is genuinely impressive. it's good at what it does.
 
 if your project involves scraping arbitrary websites, not just docs, firecrawl is the right choice. no question.
 
-## where agent cache wins
+## docs bundles need framework-aware cleaning and indexes
 
 but if your need is specifically documentation, agent cache is better. and it's not close.
 
-**purpose-built for docs.** firecrawl treats a docs site like any other website. agent cache knows it's a docs site. it has framework-specific extractors for mintlify, docusaurus, gitbook, fumadocs, nextra, mdbook. it understand sidebar navigation, version tabs, api reference structures. firecrawl just scrapes html and converts to markdown.
+**purpose-built for docs.** firecrawl treats a docs site like any other website. agent cache knows it's a docs site. it has framework-specific extractors for mintlify, docusaurus, gitbook, fumadocs, nextra, mdbook. it understands sidebar navigation, version tabs, api reference structures. firecrawl just scrapes html and converts to markdown.
 
 **zero pipeline work.** firecrawl gives you raw pages. you still need to figure out which pages to scrape, how to structure them, what to keep, what to strip. agent cache handles all of that. paste url → get structured bundle. done.
 
@@ -85,7 +85,7 @@ but if your need is specifically documentation, agent cache is better. and it's 
 
 **free.** firecrawl costs $83/month for standard usage. agent cache is free. both are open source. but only one is actually free to use.
 
-## the honest relationship
+## firecrawl is also my last-resort extraction tier
 
 here's the thing most people don't know: **agent cache uses firecrawl.**
 
@@ -99,7 +99,7 @@ if agent cache can extract your docs via direct .md endpoint, it takes 20 second
 
 firecrawl is necessary for the edge cases. agent cache is optimal for the common case.
 
-## the "just use firecrawl" fallacy
+## organizing the scraped pages is still work
 
 some people say "just use firecrawl" when i tell them about agent cache. they think it's the same thing.
 
@@ -111,7 +111,7 @@ with agent cache, i paste `docs.stripe.com`. ten minutes later i have a structur
 
 the difference is not the extraction. it's what comes after.
 
-## the bottom line
+## firecrawl for the wider web, agent cache for docs bundles
 
 firecrawl is a web scraping api. it's great at scraping. it's not great at documentation.
 
@@ -128,6 +128,6 @@ use agent cache for the 88% of docs sites that have exposed .md endpoints, githu
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [the acquisition ladder: how agent cache extracts docs](/blog/acquisition-ladder)
-- [i extracted 100 docs sites — here's what broke](/blog/100-docs-sites-what-broke)
+- [agent cache vs context7](/compare/context7)
+- [how agent cache extracts docs before trying firecrawl](/blog/acquisition-ladder)
+- [i extracted 100 docs sites. here's what broke](/blog/100-docs-sites-what-broke)

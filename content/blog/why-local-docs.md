@@ -1,4 +1,4 @@
-# the case for local docs in an api-everything world
+# i'd rather keep my agent's reference docs on disk
 
 **meta title:** why local docs beat remote retrieval for ai agents
 **meta description:** everything is an api now. but for documentation, local ownership beats remote retrieval. here's why your agent needs docs on disk.
@@ -13,7 +13,7 @@ but documentation is different from data. it's reference material, not live info
 
 here's why local docs are better for coding agents than remote retrieval.
 
-## the api-everything problem
+## a docs lookup becomes another network dependency
 
 the api model for docs:
 1. agent encounters an unfamiliar api
@@ -68,7 +68,7 @@ agents don't "search" docs like google. they read files. they scan for relevant 
 
 this is fundamentally a file-reading workflow, not a search workflow. apis add overhead to a file-reading operation.
 
-## the hybrid approach
+## keep stable docs locally, look up fast-changing ones
 
 pure local isn't always right. docs do change. new versions release. the hybrid model:
 
@@ -94,7 +94,7 @@ most docs don't change that much. stripe's core api? stable for months. hono's c
 - teams that don't want to manage local files
 - discovering new libraries you've never used
 
-## the bottom line
+## local by default, remote when freshness matters
 
 the api-everything trend is real and mostly good. but documentation is a unique category. it's reference material, not data.
 
@@ -107,6 +107,6 @@ for most agent workflows, local docs are the right default. use remote retrieval
 ---
 
 **related:**
-- [agent cache vs context7: the comparison](/vs/context7)
-- [how to use agent cache with claude code](/integrations/claude-code)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [agent cache vs context7: the comparison](/compare/context7)
+- [keeping reference docs beside your code](/blog/agentcache-dot-folder)
+- [getting docs onto disk without paid extraction](/blog/acquisition-ladder)

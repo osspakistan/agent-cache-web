@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs content.dev: docs-ready vs build-it-yourself
 **meta description:** content.dev is an open-source toolkit for building docs extraction pipelines. agent cache is a working tool. same extraction, different effort. here's why.
-**slug:** /vs-content-dev
+**slug:** /compare/content-dev
 **target keywords:** agent cache vs content.dev, content.dev alternative, docs extraction toolkit, open source docs extraction
 
 ---
@@ -13,7 +13,7 @@ agent cache is a tool that downloads docs and gives you a zip file.
 
 both extract documentation. content.dev makes you build the tool. agent cache is the tool already built. this is the "build vs buy" debate, except "buy" is free.
 
-## what content.dev actually is
+## content.dev supplies the extraction pieces
 
 content.dev is a collection of open-source packages for extracting documents. it provides parsers, converters, chunkers, and extraction recipes. you configure it. run it. maintain it. troubleshoot when sites change their layout.
 
@@ -23,7 +23,7 @@ it's free (as in open source). you self-host. you manage dependencies. you handl
 
 **but it's not a finished product.** it's a toolkit for building one.
 
-## what agent cache actually does
+## agent cache has the pipeline already built
 
 agent cache is a working product. paste a url. get a zip. that's the whole workflow.
 
@@ -39,7 +39,7 @@ you don't configure any of this. it just works.
 
 **and it's free.**
 
-## the real difference: time
+## building the pipeline takes more than running it
 
 content.dev gives you the ingredients. agent cache gives you the meal.
 
@@ -61,7 +61,7 @@ if you're a developer with time and specific needs, content.dev is great. you ge
 
 if you just want docs and don't want to build a pipeline, agent cache is obvious.
 
-## where content.dev wins
+## content.dev gives you control over each step
 
 **full control.** you own every step. you can modify extraction logic. add custom cleaning rules. integrate with your existing toolchain. 
 
@@ -71,7 +71,7 @@ if you just want docs and don't want to build a pipeline, agent cache is obvious
 
 **internal integration.** if you need to pipe docs extraction into an internal pipeline, deploy it as part of a larger system, content.dev's modular approach fits better.
 
-## where agent cache wins
+## agent cache handles setup and framework quirks
 
 **zero setup.** no dependencies. no configuration. no maintenance. no updates to apply when a framework changes. it just works.
 
@@ -83,7 +83,7 @@ if you just want docs and don't want to build a pipeline, agent cache is obvious
 
 **free.** both are free. but content.dev costs developer time. agent cache costs zero time after extraction.
 
-## the bottom line
+## content.dev for integration, agent cache for a ready zip
 
 content.dev is the right choice if you're building a docs extraction platform or integration pipeline. it's a toolkit for builders.
 
@@ -96,6 +96,6 @@ use agent cache when you want to spend zero time on tooling and get clean docs i
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [agent cache vs firecrawl](/vs/firecrawl)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [agent cache vs context7](/compare/context7)
+- [agent cache vs firecrawl](/compare/firecrawl)
+- [how agent cache chooses an extraction method](/blog/acquisition-ladder)

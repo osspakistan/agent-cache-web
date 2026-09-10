@@ -2,7 +2,7 @@
 
 **meta title:** agent cache vs docsgpt: download docs vs chat with docs
 **meta description:** docsgpt is a chatbot for docs. agent cache is a tool that downloads docs for your agent. completely different workflows.
-**slug:** /vs-docsgpt
+**slug:** /compare/docsgpt
 **target keywords:** agent cache vs docsgpt, docsgpt alternative, docs chatbot vs download, documentation for agents
 
 ---
@@ -13,7 +13,7 @@ agent cache is a tool that downloads docs and gives you a zip file.
 
 both interact with documentation. one talks to you. one gives you files. completely different workflows.
 
-## what docsgpt actually does
+## ask docsgpt a question about the docs
 
 docsgpt is a chat interface on top of documentation. you ask questions. it retrieves relevant sections from the docs. you get an answer. conversation continues.
 
@@ -31,7 +31,7 @@ it's like talking to customer support, except support is an ai that only knows t
 - precise code generation with exact signatures
 - keeping a local copy for version control
 
-## what agent cache actually does
+## give your coding agent files instead of answers
 
 agent cache doesn't chat. it doesn't answer questions. it just downloads docs.
 
@@ -48,7 +48,7 @@ the downloaded docs become reference material for your coding agent. your agent 
 - quick answers without reading
 - non-technical users
 
-## the difference
+## a person asking questions vs an agent reading a reference
 
 docsgpt is for humans who want answers. agent cache is for agents that need reference.
 
@@ -58,7 +58,7 @@ agent cache: your agent reads `stripe/docs/api/authentication.md` → generates 
 
 one is discovery. one is execution.
 
-## where docsgpt wins
+## follow-up questions make docsgpt useful for learning
 
 **discoverability.** learning a new library by asking questions is natural. "what's the difference between these two methods?" docsgpt answers. agent cache gives you both methods and lets you figure it out.
 
@@ -68,7 +68,7 @@ one is discovery. one is execution.
 
 **conversational learning.** follow-up questions. related topics. context accumulation. docsgpt handles this well.
 
-## where agent cache wins
+## code generation needs the details a summary can miss
 
 **code generation.** coding agents need exact api signatures. not summaries. they need to read the actual docs. agent cache gives them the actual docs.
 
@@ -80,7 +80,7 @@ one is discovery. one is execution.
 
 **free.** most docsgpt implementations charge for the underlying llm usage. agent cache is free.
 
-## the bottom line
+## explore with docsgpt, code against downloaded docs
 
 docsgpt is a chatbot. agent cache is a downloader.
 
@@ -95,5 +95,5 @@ most workflows need both at different stages:
 ---
 
 **related:**
-- [agent cache vs context7](/vs/context7)
-- [agent cache vs docuchat](/vs/docuchat)
+- [agent cache vs context7](/compare/context7)
+- [agent cache vs docuchat](/compare/docuchat)

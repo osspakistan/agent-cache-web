@@ -1,7 +1,7 @@
-# the state of documentation for ai agents — 2026 report
+# how readable are docs for ai agents in 2026?
 
 **meta title:** state of documentation for ai agents: 2026 report
-**meta description:** we extracted 100+ documentation sites to understand how docs are adapting for agents. here's what we found — and where we're headed.
+**meta description:** i extracted 100+ documentation sites to understand how docs are adapting for agents. here's what i found, and where i'm headed.
 **slug:** /blog/state-of-docs-for-agents-2026
 **target keywords:** state of documentation 2026, ai agent documentation report, documentation trends, agent-ready docs report
 
@@ -11,7 +11,7 @@ every year, documentation changes. in 2026, the change is about agents.
 
 ai coding agents need to read docs. not humans. not search engines. agents. and most docs sites are not built for this audience.
 
-we extracted 100+ documentation sites. here's what we found.
+i extracted 100+ documentation sites. here's what i found.
 
 ## methodology
 
@@ -23,7 +23,7 @@ we extracted 100+ documentation sites. here's what we found.
 - ai/ml (openai, anthropic, hugging face)
 - productivity tools (linear, notion, slack)
 
-for each site, we recorded:
+for each site, i recorded:
 - what extraction tier worked (llms.txt, github, direct .md, html, or failed)
 - framework used (if detectable)
 - bot protection level
@@ -66,7 +66,7 @@ custom frameworks are 35% of sites. this is the hardest category. every custom f
 
 ## key finding 3: bot protection is increasing
 
-12% of sites failed extraction due to bot protection. this is up from ~5% in our earlier tests.
+12% of sites failed extraction due to bot protection. this is up from ~5% in my earlier tests.
 
 reasons:
 - cloudflare bot fight mode (increased sensitivity)
@@ -102,7 +102,7 @@ but "agent-first" isn't mainstream yet. most docs are still "human-first with ag
 
 ## framework rankings (2026 update)
 
-based on our extraction experience:
+based on my extraction experience:
 
 **tier 1 (easiest):**
 1. github pages (raw markdown files)
@@ -119,7 +119,7 @@ based on our extraction experience:
 8. next.js custom (varies by implementation)
 9. entirely custom (stripe, linear, etc.)
 
-**tier 4 (impossible for us):**
+**tier 4 (impossible for me):**
 10. auth-walled docs
 11. heavily bot-protected sites (datadome, etc.)
 
@@ -141,18 +141,18 @@ based on our extraction experience:
 
 3. **bot protection arms race continues.** as extraction tools proliferate, sites invest more in bot protection. this hurts legitimate use cases.
 
-4. **paid extraction services grow.** firecrawl, context.dev, context7 — these services will grow because free extraction is getting harder.
+4. **paid extraction services grow.** firecrawl, context.dev, context7. these services will grow because free extraction is getting harder.
 
 5. **agent cache becomes unnecessary (for agent-first sites).** if docs frameworks expose markdown natively, extraction tools become less needed. but custom sites will always need work.
 
-## the full dataset
+## what i can share from the extraction dataset
 
 this report is based on 100+ extractions. the dataset is:
 - not public (sites don't necessarily want to be listed)
 - internally maintained at agent cache
-- used to improve our extraction pipeline
+- used to improve my extraction pipeline
 
-if you're a researcher studying docs accessibility, email us. we can share anonymized insights.
+if you're a researcher studying docs accessibility, email me. i can share anonymized insights.
 
 ## methodology notes
 
@@ -161,17 +161,17 @@ if you're a researcher studying docs accessibility, email us. we can share anony
 - extraction defined as: clean markdown for every public docs page, with navigation structure preserved
 - "failed" means: couldn't produce usable markdown for the full site
 
-## bottom line
+## extraction is still needed while frameworks catch up
 
 documentation is changing. slowly. sites are becoming more agent-aware, but most are still built for human eyes only.
 
 the gap between agent-readiness and reality is large. that's the space agent cache operates in. as long as docs sites require extraction, there's work to do.
 
-but the long-term trend is clear: docs will become agent-first. and when that happens, extraction tools like ours will transform from necessity to convenience.
+but the long-term trend is clear: docs will become agent-first. and when that happens, extraction tools like mine will transform from necessity to convenience.
 
 ---
 
 **related:**
 - [framework extractor rankings](/blog/docs-framework-agent-readability)
-- [the acquisition ladder](/blog/acquisition-ladder)
+- [how i choose an extraction method](/blog/acquisition-ladder)
 - [agent cache is going open source](/blog/open-source-direction)
