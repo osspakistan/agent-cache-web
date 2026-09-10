@@ -108,7 +108,7 @@ interface ExtractedHead {
 
 function cleanCandidate(s: string | null | undefined): string | null {
   if (!s) return null
-  let c = s.trim().replace(/^[\s\-]|:•·]+|[\s\-]|:•·]+$/g, '')
+  let c = s.trim().replace(/^[\s-]|:•·]+|[\s-]|:•·]+$/g, '')
   c = c.replace(/\s+(docs|documentation|developer docs|api reference)$/i, '').trim()
   if (!c || GENERIC_WORDS.has(c.toLowerCase())) return null
   return c
@@ -117,7 +117,7 @@ function cleanCandidate(s: string | null | undefined): string | null {
 function extractBrandFromTitle(title: string | undefined): string | null {
   if (!title) return null
   const parts = title
-    .split(/\s+[\-]|:•·]\s+/)
+    .split(/\s+[-]|:•·]\s+/)
     .map((p) => p.trim())
     .filter(Boolean)
   if (parts.length === 1) {

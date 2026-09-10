@@ -1,7 +1,7 @@
-import { Nav } from '../../components/nav'
 import { Footer } from '../../components/footer'
+import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { prefersMarkdown, contentNegotiationVary } from '../../lib/utils/markdown-negotiation'
+import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -63,7 +63,7 @@ For privacy-related inquiries, please contact us via our GitHub repository.
 `
     return c.text(md, 200, {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Vary': contentNegotiationVary(),
+      Vary: contentNegotiationVary(),
     })
   }
 
@@ -72,14 +72,10 @@ For privacy-related inquiries, please contact us via our GitHub repository.
       <Nav active="privacy" />
       <div class="wrap" style="padding:60px 20px;max-width:700px;">
         <h1>Privacy Policy</h1>
-        <p class="lede">
-          Last updated: September 2026
-        </p>
+        <p class="lede">Last updated: September 2026</p>
 
         <h2>Information We Collect</h2>
-        <p>
-          Agent Cache collects minimal data necessary to provide our service:
-        </p>
+        <p>Agent Cache collects minimal data necessary to provide our service:</p>
         <ul>
           <li>
             <strong>URLs you submit</strong> — We process the documentation URLs you provide to
@@ -119,8 +115,12 @@ For privacy-related inquiries, please contact us via our GitHub repository.
         <h2>Third-Party Services</h2>
         <p>We use the following third-party services:</p>
         <ul>
-          <li><strong>Cloudflare R2</strong> — Object storage for processed bundles</li>
-          <li><strong>Turso</strong> — Database for job metadata</li>
+          <li>
+            <strong>Cloudflare R2</strong> — Object storage for processed bundles
+          </li>
+          <li>
+            <strong>Turso</strong> — Database for job metadata
+          </li>
         </ul>
 
         <h2>Your Rights</h2>
@@ -132,9 +132,7 @@ For privacy-related inquiries, please contact us via our GitHub repository.
         </ul>
 
         <h2>Contact</h2>
-        <p>
-          For privacy-related inquiries, please contact us via our GitHub repository.
-        </p>
+        <p>For privacy-related inquiries, please contact us via our GitHub repository.</p>
       </div>
       <Footer />
     </>,

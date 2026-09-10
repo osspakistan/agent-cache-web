@@ -44,8 +44,7 @@ const Layout: LayoutComponent = ({ children }) => {
                 '@type': 'Organization',
                 name: 'Agent Cache',
                 url: 'https://agentcache.run',
-                description:
-                  'Turn any documentation site into clean, agent-ready markdown docs.',
+                description: 'Turn any documentation site into clean, agent-ready markdown docs.',
                 logo: 'https://agentcache.run/favicon.svg',
                 sameAs: ['https://github.com/agentcache/agent-cache'],
                 contactPoint: {

@@ -164,12 +164,17 @@ export const GET = async (c: AppContext) => {
                           <span
                             class="mono card-pages-badge"
                             style="font-size: 11.5px; color: var(--ink-soft); background: var(--secondary); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; cursor: help; position: relative;"
-                            title={count > 1 ? `${count} variants · ${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}` : `${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}`}
+                            title={
+                              count > 1
+                                ? `${count} variants · ${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}`
+                                : `${formatBytes(j.zip_size_bytes).full} ZIP · ${j.strategy || 'html-purify'}`
+                            }
                           >
                             {j.page_count} {j.page_count === 1 ? 'page' : 'pages'}
                             {count > 1 && (
                               <span class="card-tooltip">
-                                {count} variants · {formatBytes(j.zip_size_bytes).full} ZIP · {j.strategy || 'html-purify'}
+                                {count} variants · {formatBytes(j.zip_size_bytes).full} ZIP ·{' '}
+                                {j.strategy || 'html-purify'}
                               </span>
                             )}
                           </span>

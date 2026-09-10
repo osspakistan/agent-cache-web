@@ -1,7 +1,7 @@
-import { Nav } from '../../components/nav'
 import { Footer } from '../../components/footer'
+import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { prefersMarkdown, contentNegotiationVary } from '../../lib/utils/markdown-negotiation'
+import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -44,7 +44,7 @@ Have questions or feedback? Reach out via [our contact page](https://agentcache.
 `
     return c.text(md, 200, {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Vary': contentNegotiationVary(),
+      Vary: contentNegotiationVary(),
     })
   }
 
@@ -99,8 +99,8 @@ Have questions or feedback? Reach out via [our contact page](https://agentcache.
 
         <h2>Contact</h2>
         <p>
-          Have questions or feedback? Reach out via{' '}
-          <a href="/contact">our contact page</a> or open an issue on GitHub.
+          Have questions or feedback? Reach out via <a href="/contact">our contact page</a> or open
+          an issue on GitHub.
         </p>
       </div>
       <Footer />

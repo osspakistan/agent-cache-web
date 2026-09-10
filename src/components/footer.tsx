@@ -7,63 +7,243 @@ export function Footer() {
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; margin-bottom: 48px;">
           {/* product */}
           <div>
-            <p class="mono" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;">
+            <p
+              class="mono"
+              style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;"
+            >
               product
             </p>
             <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
-              <li><a href="/" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">add docs</a></li>
-              <li><a href="/docs" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">library</a></li>
-              <li><a href="/pricing" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">pricing</a></li>
-              <li><a href="/frameworks" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">supported frameworks</a></li>
-              <li><a href="/use-cases" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">use cases</a></li>
-              <li><a href="/changelog" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">changelog</a></li>
-              <li><a href="/roadmap" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">roadmap</a></li>
+              <li>
+                <a
+                  href="/"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  add docs
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/docs"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  library
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/pricing"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  pricing
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/frameworks"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  supported frameworks
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/use-cases"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  use cases
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/changelog"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  changelog
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/roadmap"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  roadmap
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* integrations */}
           <div>
-            <p class="mono" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;">
+            <p
+              class="mono"
+              style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;"
+            >
               integrations
             </p>
             <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
-              <li><a href="/integrations/claude-code" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">claude code</a></li>
-              <li><a href="/integrations/cursor" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">cursor</a></li>
-              <li><a href="/integrations/codex" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">openai codex</a></li>
-              <li><a href="/integrations/windsurf" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">windsurf</a></li>
+              <li>
+                <a
+                  href="/integrations/claude-code"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  claude code
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/integrations/cursor"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  cursor
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/integrations/codex"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  openai codex
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/integrations/windsurf"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  windsurf
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* resources */}
           <div>
-            <p class="mono" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;">
+            <p
+              class="mono"
+              style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;"
+            >
               resources
             </p>
             <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
-              <li><a href="/blog" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">blog</a></li>
-              <li><a href="/compare" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">compare</a></li>
-              <li><a href="/vs/context7" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">vs context7</a></li>
-              <li><a href="/vs/firecrawl" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">vs firecrawl</a></li>
-              <li><a href="/vs/tavily" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">vs tavily</a></li>
-              <li><a href="/llms.txt" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">llms.txt</a></li>
+              <li>
+                <a
+                  href="/blog"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  blog
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/compare"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  compare
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/vs/context7"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  vs context7
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/vs/firecrawl"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  vs firecrawl
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/vs/tavily"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  vs tavily
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/llms.txt"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  llms.txt
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* company */}
           <div>
-            <p class="mono" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;">
+            <p
+              class="mono"
+              style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 16px;"
+            >
               company
             </p>
             <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
-              <li><a href="/about" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">about</a></li>
-              <li><a href="/contact" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">contact</a></li>
-              <li><a href="/privacy" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">privacy</a></li>
-              <li><a href="https://github.com/agentcache/agent-cache" class="mono" style="font-size: 13px; color: var(--body); text-decoration: none;">github</a></li>
+              <li>
+                <a
+                  href="/about"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  about
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/contact"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  contact
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/privacy"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  privacy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/agentcache/agent-cache"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  github
+                </a>
+              </li>
             </ul>
           </div>
         </div>
 
-        <!-- bottom bar -->
+        {/* bottom bar */}
         <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border);">
           <div style="display: flex; align-items: center; gap: 12px;">
             <BrandMark size="sm" px={20} />

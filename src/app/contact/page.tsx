@@ -1,7 +1,7 @@
-import { Nav } from '../../components/nav'
 import { Footer } from '../../components/footer'
+import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { prefersMarkdown, contentNegotiationVary } from '../../lib/utils/markdown-negotiation'
+import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -32,7 +32,7 @@ We aim to respond to all inquiries within 2-3 business days. For urgent issues, 
 `
     return c.text(md, 200, {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Vary': contentNegotiationVary(),
+      Vary: contentNegotiationVary(),
     })
   }
 
@@ -41,9 +41,7 @@ We aim to respond to all inquiries within 2-3 business days. For urgent issues, 
       <Nav active="contact" />
       <div class="wrap" style="padding:60px 20px;max-width:700px;">
         <h1>Contact</h1>
-        <p class="lede">
-          Have questions, feedback, or need help? Here's how to reach us.
-        </p>
+        <p class="lede">Have questions, feedback, or need help? Here's how to reach us.</p>
 
         <h2>GitHub Issues</h2>
         <p>
