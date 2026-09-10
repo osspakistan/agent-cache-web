@@ -96,6 +96,7 @@ Only copy what the Dockerfile needs:
 ssh -p 2222 root@161.97.122.33 'mkdir -p /var/www/agent-cache-project/agent-cache-web'
 
 # Copy production files (exclude dev/research files)
+# ⚠️ Do NOT add --exclude='content' here — content/ (blog+compare) MUST ship, or /blog & /compare go empty.
 rsync -avz -e 'ssh -p 2222' \
   --exclude='.wtf' \
   --exclude='.agentcache' \
@@ -170,6 +171,7 @@ mkdir -p /var/www/agent-cache-project/agent-cache-web
 Only copy what the Dockerfile needs:
 
 ```bash
+# ⚠️ Do NOT add --exclude='content' here — content/ (blog+compare) MUST ship, or /blog & /compare go empty.
 rsync -avz -e 'ssh -p 2222' \
   --exclude='.wtf' \
   --exclude='.agentcache' \
