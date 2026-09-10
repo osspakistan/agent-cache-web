@@ -9,30 +9,19 @@ export function Nav(props: {
         <div style="display: flex; align-items: center; gap: 16px;">
           <a
             href="/"
-            style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink);"
+            style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--foreground);"
           >
             <BrandMark size="sm" px={22} />
             <span class="wordmark">agent-cache</span>
           </a>
-          <nav style="display: flex; align-items: center; gap: 12px; margin-left: 12px;">
-            <a
-              href="/"
-              class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${
-                props.active === 'home'
-                  ? 'color: var(--ink); font-weight: 600; background: var(--secondary);'
-                  : 'color: var(--ink-soft);'
-              }`}
-            >
-              add
-            </a>
+          <nav style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
             <a
               href="/docs"
               class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${
+              style={`font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 6px; ${
                 props.active === 'docs'
-                  ? 'color: var(--ink); font-weight: 600; background: var(--secondary);'
-                  : 'color: var(--ink-soft);'
+                  ? 'color: var(--foreground); font-weight: 600; background: var(--secondary);'
+                  : 'color: var(--muted-foreground);'
               }`}
             >
               library
@@ -40,45 +29,32 @@ export function Nav(props: {
             <a
               href="/blog"
               class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${props.active === 'blog' ? 'color: var(--ink); font-weight: 600; background: var(--secondary);' : 'color: var(--ink-soft);'}`}
+              style={`font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 6px; ${props.active === 'blog' ? 'color: var(--foreground); font-weight: 600; background: var(--secondary);' : 'color: var(--muted-foreground);'}`}
             >
               blog
             </a>
             <a
               href="/compare"
               class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${props.active === 'compare' ? 'color: var(--ink); font-weight: 600; background: var(--secondary);' : 'color: var(--ink-soft);'}`}
+              style={`font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 6px; ${props.active === 'compare' ? 'color: var(--foreground); font-weight: 600; background: var(--secondary);' : 'color: var(--muted-foreground);'}`}
             >
               compare
-            </a>
-            <a
-              href="/about"
-              class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${
-                props.active === 'about'
-                  ? 'color: var(--ink); font-weight: 600; background: var(--secondary);'
-                  : 'color: var(--ink-soft);'
-              }`}
-            >
-              about
-            </a>
-            <a
-              href="/contact"
-              class="mono"
-              style={`font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; ${
-                props.active === 'contact'
-                  ? 'color: var(--ink); font-weight: 600; background: var(--secondary);'
-                  : 'color: var(--ink-soft);'
-              }`}
-            >
-              contact
             </a>
           </nav>
         </div>
 
-        <button class="toggle" id="theme-toggle" type="button">
-          theme
-        </button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <a
+            href="/"
+            class="mono"
+            style="font-size: 13px; font-weight: 600; text-decoration: none; padding: 8px 16px; border-radius: 8px; background: var(--primary); color: var(--primary-foreground);"
+          >
+            add docs
+          </a>
+          <button class="toggle" id="theme-toggle" type="button">
+            theme
+          </button>
+        </div>
       </div>
     </header>
   )
