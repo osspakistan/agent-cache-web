@@ -19,6 +19,8 @@ export interface ContentPost {
   description: string
   sourceSlug?: string
   keywords?: string
+  /** optional **date:** meta line, used for feed pubDate when present */
+  date?: string
   html: string
   body: string
   file: string
@@ -97,6 +99,7 @@ async function load(): Promise<Record<ContentSection, ContentPost[]>> {
         description: meta['meta description'],
         sourceSlug: meta.slug,
         keywords: meta['target keywords'],
+        date: meta.date,
         html: await renderHtml(body),
         body,
         file,

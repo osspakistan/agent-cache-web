@@ -2,4 +2,9 @@ User-agent: *
 Allow: /
 
 # agent docs for agent tools — our product is its own best demo
-Sitemap: http://localhost:10901/llms.txt
+Sitemap: https://agentcache.run/sitemap.xml
+
+# feeds for humans and readers
+# blog:    https://agentcache.run/blog/feed.xml
+# compare: https://agentcache.run/compare/feed.xml
+# site:    https://agentcache.run/feed.xml
