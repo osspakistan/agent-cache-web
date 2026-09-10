@@ -114,10 +114,16 @@ export const GET = async (c: AppContext) => {
           </div>
         ) : (
           <>
-            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 48px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 48px; align-items: start;">
               {paged.map(({ latest: j, count }) => {
                 return (
-                  <div key={j.id} style="position: relative; break-inside: avoid; min-width: 0;">
+                  <div
+                    key={j.id}
+                    style={`
+                    position: relative;
+                    ${count > 1 ? 'margin-right: 8px; margin-bottom: 8px;' : ''}
+                  `}
+                  >
                     {count > 1 && (
                       <div
                         style="position: absolute; inset: 0; transform: translate(8px, 8px); background: var(--border-soft); border: 1px solid var(--border); border-radius: var(--radius);"
