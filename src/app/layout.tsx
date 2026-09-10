@@ -24,7 +24,11 @@ const Layout: LayoutComponent = ({ children }) => {
           <meta property="og:title" content={meta.title} />
           <meta property="og:description" content={meta.description} />
           <meta property="og:type" content="website" />
+          {meta.canonical && <meta property="og:url" content={meta.canonical} />}
           {meta.image && <meta property="og:image" content={meta.image} />}
+          {meta.image && <meta property="og:image:type" content="image/png" />}
+          {meta.image && <meta property="og:image:width" content="1200" />}
+          {meta.image && <meta property="og:image:height" content="630" />}
           <meta name="twitter:card" content="summary_large_image" />
           {meta.image && <meta name="twitter:image" content={meta.image} />}
           {meta.canonical && <link rel="canonical" href={meta.canonical} />}
@@ -52,6 +56,11 @@ const Layout: LayoutComponent = ({ children }) => {
                   '@type': 'ContactPoint',
                   contactType: 'customer support',
                   url: 'https://agentcache.run/contact',
+                  email: 'hi@agentcache.run',
+                },
+                address: {
+                  '@type': 'PostalAddress',
+                  addressCountry: 'US',
                 },
               }),
             }}

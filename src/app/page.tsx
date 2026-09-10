@@ -16,17 +16,18 @@ import { Manifesto } from './_sections/manifesto'
  */
 export const GET = (c: Context) => {
   setPageMeta({
-    title: 'Agent Cache // give your agents the docs',
+    title: 'Agent Cache - Turn Any Docs Site Into Agent-Ready Markdown',
     description:
-      'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
+      'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
     image: '/og?title=Agent+Cache&subtitle=Give+your+agents+the+docs',
+    canonical: 'https://agentcache.run',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
       name: 'Agent Cache',
       applicationCategory: 'DeveloperApplication',
       description:
-        'Paste a docs URL. The whole site comes back as clean markdown your agent can read.',
+        'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
       url: 'https://agentcache.run',
       operatingSystem: 'Linux, macOS, Windows',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },

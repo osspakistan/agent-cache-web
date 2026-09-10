@@ -3,11 +3,7 @@ import { PillForm } from '../../components/pill-form'
 export function Hero(props: { captured?: string }) {
   return (
     <div class="hero">
-      <h1>
-        Give your agents
-        <br />
-        the docs.
-      </h1>
+      <h1>Give your agents the docs.</h1>
       <p class="lede">
         Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners,
         nav, cookie popups all stripped.{' '}

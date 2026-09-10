@@ -1,5 +1,51 @@
+import type { AppContext } from '../lib/utils/types'
+
+/**
+ * 404 route handler - returns proper HTTP 404.
+ * Agents requesting text/markdown get a markdown body with site map links.
+ * Browsers get the standard HTML page.
+ */
+export const GET = (c: AppContext) => {
+  const accept = c.req.header('Accept') || ''
+  const wantsMarkdown =
+    accept.includes('text/markdown') &&
+    (!accept.includes('text/html') || accept.indexOf('text/markdown') < accept.indexOf('text/html'))
+
+  if (wantsMarkdown) {
+    const md = `# 404 - Page Not Found
+
+The path \`${c.req.path}\` does not exist on agentcache.run.
+
+## Where to look next
+
+- [Home](https://agentcache.run/) — Submit a docs URL for processing
+- [Library](https://agentcache.run/docs) — Browse completed doc bundles
+- [llms.txt](https://agentcache.run/llms.txt) — Agent-readable site index with all API endpoints
+- [OpenAPI Spec](https://agentcache.run/openapi.json) — Full API specification (OpenAPI 3.0)
+- [Sitemap](https://agentcache.run/sitemap.xml) — All indexable URLs
+- [Health Check](https://agentcache.run/health) — Service status (JSON)
+
+## API Quick Reference
+
+- \`POST /api/jobs\` — Submit a documentation URL for crawling
+- \`GET /api/jobs/{id}\` — Poll job status
+- \`GET /api/jobs/{id}/tree\` — Get the navigation tree for a completed job
+- \`POST /api/probe\` — Test a URL without starting a job
+`
+    return new Response(md, {
+      status: 404,
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        Vary: 'Accept, Accept-Encoding',
+      },
+    })
+  }
+
+  return NotFoundPage(c)
+}
+
 /** 404 component - full page (wrapped in layout by the router). */
-export default function NotFound() {
+export default function NotFoundPage(_c?: AppContext) {
   return (
     <div class="wrap" style="padding:96px 20px;text-align:center">
       <h1>404 - not here.</h1>

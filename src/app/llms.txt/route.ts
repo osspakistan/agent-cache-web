@@ -21,6 +21,30 @@ export const GET = async (_c: AppContext) => {
 
 > Turn any documentation site into clean, agent-ready markdown docs. Paste a docs URL, get the whole site back as plain markdown files a coding agent can read.
 
+## When to Use Agent Cache
+
+Use Agent Cache when:
+
+- You need offline, complete documentation for an unfamiliar library or API to include in an agent conversation or repository.
+- You are integrating a library and want the full docs in plain markdown, not just snippets or search results.
+- You want a deterministic, reproducible documentation artifact — same URL always produces the same output.
+- You need docs for a library that Context7 doesn't index, or for a specific pinned version of docs.
+
+**Do NOT use** Agent Cache for:
+- Real-time web search (use a search tool instead).
+- Pages behind authentication (the crawler cannot log in).
+- General web scraping (this is purpose-built for documentation sites).
+
+## How to Call the API
+
+1. Submit a docs URL: \`POST /api/jobs\` with body \`{"url": "https://docs.example.com"}\`
+2. Receive a job ID in the response: \`{"ok": true, "job": {"id": "ac-xxxx"}, "links": {...}}\`
+3. Poll for completion: \`GET /api/jobs/{id}\` until \`status === "complete"\`
+4. Browse online at \`/docs/{id}\` or download the ZIP at \`/docs/{id}/download\`
+5. Extract the ZIP's \`.agentcache/docs/{name}/docs/\` folder into your repo
+
+Full API spec: https://agentcache.run/openapi.json
+
 ## How It Works
 
 1. Submit a docs URL via \`POST /api/jobs\` with \`{"url": "https://docs.example.com"}\`
@@ -38,6 +62,13 @@ No LLM in the pipeline. Structure comes from URL topology. Output is determinist
 - \`GET /api/jobs/{id}/tree\` - Get job navigation tree
 - \`POST /api/probe\` - Probe a URL without starting a job
 - \`GET /openapi.json\` - OpenAPI 3.0 specification
+
+## Developer Resources
+
+- [OpenAPI Specification](https://agentcache.run/openapi.json) - Full API documentation in OpenAPI 3.0 format
+- [llms.txt](https://agentcache.run/llms.txt) - This file: agent-readable site index
+- [llms-full.txt](https://agentcache.run/llms-full.txt) - Full text of all content on this site
+- [Health Check](https://agentcache.run/health) - Service status as JSON
 
 ## Blog
 
@@ -65,6 +96,7 @@ ${compareList}
 - [Comparisons](${BASE}/compare): All comparisons
 - [About](${BASE}/about): About Agent Cache
 - [Contact](${BASE}/contact): Get in touch
+- [Privacy](${BASE}/privacy): Privacy policy
 - [Health](${BASE}/health): Service status (JSON)
 - [Sitemap](${BASE}/sitemap.xml): XML sitemap
 - [Full index](${BASE}/llms-full.txt): This site's writing, full text in one file

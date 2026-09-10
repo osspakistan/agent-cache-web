@@ -27,6 +27,7 @@ export const POST = async (c: AppContext) => {
       {
         ok: false,
         error: 'Missing required field "url" in request body',
+        code: 'MISSING_URL',
       },
       400,
     )
@@ -58,6 +59,7 @@ export const POST = async (c: AppContext) => {
       {
         ok: false,
         error: message,
+        code: 'PROBE_ERROR',
       },
       500,
     )

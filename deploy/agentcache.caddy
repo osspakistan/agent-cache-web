@@ -1,3 +1,7 @@
+www.agentcache.run {
+    redir https://agentcache.run{uri} permanent
+}
+
 agentcache.run {
     encode gzip zstd
 
@@ -11,7 +15,10 @@ agentcache.run {
     @static path *.js *.css *.woff* *.ttf *.otf *.eot *.ico *.png *.jpg *.jpeg *.gif *.svg *.webp
     header @static Cache-Control "public, max-age=31536000, immutable"
 
+    header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     header X-Content-Type-Options "nosniff"
     header X-Frame-Options "DENY"
     header Referrer-Policy "strict-origin-when-cross-origin"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'"
+    header Permissions-Policy "camera=(), microphone=(), geolocation=()"
 }

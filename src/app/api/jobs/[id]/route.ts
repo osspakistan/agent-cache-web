@@ -8,13 +8,13 @@ import type { AppContext } from '../../../../lib/utils/types'
 export const GET = async (c: AppContext) => {
   const id = c.req.param('id')
   if (!id) {
-    return c.json({ ok: false, error: 'Missing job ID' }, 400)
+    return c.json({ ok: false, error: 'Missing job ID', code: 'MISSING_JOB_ID' }, 400)
   }
 
   try {
     const job = await getJobById(id)
     if (!job) {
-      return c.json({ ok: false, error: `Job not found: ${id}` }, 404)
+      return c.json({ ok: false, error: `Job not found: ${id}`, code: 'JOB_NOT_FOUND' }, 404)
     }
 
     const publicZipUrl =
@@ -49,6 +49,6 @@ export const GET = async (c: AppContext) => {
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Error retrieving job'
-    return c.json({ ok: false, error: message }, 500)
+    return c.json({ ok: false, error: message, code: 'SERVER_ERROR' }, 500)
   }
 }

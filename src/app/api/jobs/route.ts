@@ -28,6 +28,7 @@ export const POST = async (c: AppContext) => {
       {
         ok: false,
         error: 'Missing required field "url" in request body',
+        code: 'MISSING_URL',
       },
       400,
     )
@@ -87,7 +88,7 @@ export const POST = async (c: AppContext) => {
     )
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Server error creating job'
-    return c.json({ ok: false, error: message }, 500)
+    return c.json({ ok: false, error: message, code: 'SERVER_ERROR' }, 500)
   }
 }
 
@@ -122,6 +123,6 @@ export const GET = async (c: AppContext) => {
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to retrieve jobs'
-    return c.json({ ok: false, error: message }, 500)
+    return c.json({ ok: false, error: message, code: 'SERVER_ERROR' }, 500)
   }
 }

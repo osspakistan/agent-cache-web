@@ -42,6 +42,7 @@ export async function buildApp(
 
   // optional root components (not-found / error / root layout)
   let NotFound: (() => JSXNode) | undefined
+  let NotFoundGET: ((c: AppContext) => unknown) | undefined
   let ErrorComp: ErrorComponent | undefined
   let rootLayout: LayoutComponent | undefined
   const optional: Array<{ file: string; set: (mod: Record<string, unknown>) => void }> = [
@@ -49,6 +50,10 @@ export async function buildApp(
       file: 'not-found.tsx',
       set: (mod) => {
         NotFound = mod.default as () => JSXNode
+        // Optional GET export enables content negotiation (e.g. markdown for agents)
+        if (typeof mod.GET === 'function') {
+          NotFoundGET = mod.GET as (c: AppContext) => unknown
+        }
       },
     },
     {
@@ -107,8 +112,19 @@ export async function buildApp(
     }
   }
 
-  // 404
-  app.notFound((c) => {
+  // 404 - supports optional GET export on not-found.tsx for content negotiation
+  app.notFound(async (c) => {
+    if (NotFoundGET) {
+      const out = await NotFoundGET(c)
+      // GET returned a Response directly (e.g. markdown for agents) - pass through
+      if (out instanceof Response) return out
+      // GET returned JSX - render through layout
+      if (NotFound || out) {
+        const node = (out ?? (NotFound ? NotFound() : null)) as JSXNode
+        const html = rootLayout ? renderWithLayouts([rootLayout], node) : node
+        return htmlResponse(c, html, 404)
+      }
+    }
     if (NotFound) {
       const html = rootLayout ? renderWithLayouts([rootLayout], NotFound()) : NotFound()
       return htmlResponse(c, html, 404)
