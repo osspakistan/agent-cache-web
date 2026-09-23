@@ -12,16 +12,27 @@ export const GET = (c: AppContext) => {
       description:
         'Turn any documentation site into clean, agent-ready markdown docs. Paste a docs URL, get the whole site back as plain markdown files a coding agent can read.',
       version: '1.0.0',
+      'x-api-versioning': {
+        strategy: 'path-and-header',
+        current_version: 'v1',
+        version_prefix: '/api/v1',
+        deprecation_policy:
+          'When breaking changes are introduced, prior API versions remain fully operational for at least 12 months with Sunset and Deprecation HTTP response headers (RFC 8594) signaled at least 180 days prior to retirement.',
+      },
       contact: {
         name: 'Agent Cache',
         url: 'https://agentcache.run',
+        email: 'hi@agentcache.run',
       },
       license: {
         name: 'MIT',
         url: 'https://github.com/agentcache/agent-cache/blob/main/LICENSE',
       },
     },
-    servers: [{ url: 'https://agentcache.run', description: 'Production' }],
+    servers: [
+      { url: 'https://agentcache.run/api/v1', description: 'Production API v1 (Canonical)' },
+      { url: 'https://agentcache.run', description: 'Production Base (Direct & Unversioned)' },
+    ],
     paths: {
       '/health': {
         get: {

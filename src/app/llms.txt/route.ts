@@ -54,13 +54,15 @@ Full API spec: https://agentcache.run/openapi.json
 
 No LLM in the pipeline. Structure comes from URL topology. Output is deterministic: same input, same output.
 
-## API Endpoints
+## API Endpoints (v1 & unversioned)
 
-- \`POST /api/jobs\` - Submit a new crawl job
-- \`GET /api/jobs\` - List jobs
-- \`GET /api/jobs/{id}\` - Get job details
-- \`GET /api/jobs/{id}/tree\` - Get job navigation tree
-- \`POST /api/probe\` - Probe a URL without starting a job
+All endpoints support both \`/api/v1\` (versioned) and \`/api\`:
+
+- \`POST /api/v1/jobs\` (or \`POST /api/jobs\`) - Submit a new crawl job
+- \`GET /api/v1/jobs\` (or \`GET /api/jobs\`) - List jobs
+- \`GET /api/v1/jobs/{id}\` (or \`GET /api/jobs/{id}\`) - Get job details
+- \`GET /api/v1/jobs/{id}/tree\` (or \`GET /api/jobs/{id}/tree\`) - Get job navigation tree
+- \`POST /api/v1/probe\` (or \`POST /api/probe\`) - Probe a URL without starting a job
 - \`GET /openapi.json\` - OpenAPI 3.0 specification
 
 ## Developer Resources

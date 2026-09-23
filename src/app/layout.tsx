@@ -85,12 +85,6 @@ const Layout: LayoutComponent = ({ children }) => {
             href="/.well-known/agent-skills/index.json"
             type="application/json"
           />
-          <link
-            rel="service-desc"
-            href="/.well-known/mcp/server-card.json"
-            type="application/json"
-          />
-          <link rel="authorizing-agent" href="/auth.md" type="text/markdown" />
 
           <link
             rel="preload"

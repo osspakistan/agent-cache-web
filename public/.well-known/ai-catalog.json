@@ -18,17 +18,6 @@
       ]
     },
     {
-      "identifier": "urn:air:agentcache.run:mcp:server",
-      "displayName": "Agent Cache MCP Server",
-      "type": "application/mcp-server-card+json",
-      "url": "https://agentcache.run/.well-known/mcp/server-card.json",
-      "representativeQueries": [
-        "agent cache model context protocol",
-        "mcp tools for documentation extraction",
-        "fetch documentation via mcp"
-      ]
-    },
-    {
       "identifier": "urn:air:agentcache.run:skills:index",
       "displayName": "Agent Cache Skills Index",
       "type": "application/json",

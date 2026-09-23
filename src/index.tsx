@@ -29,8 +29,6 @@ const DISCOVERY_LINK_HEADER = [
   '</llms.txt>; rel="service-doc"',
   '</.well-known/ai-catalog.json>; rel="ai-catalog"',
   '</.well-known/agent-skills/index.json>; rel="describedby"',
-  '</.well-known/mcp/server-card.json>; rel="service-desc"; type="application/json"',
-  '</auth.md>; rel="authorizing-agent"',
 ].join(', ')
 
 app.use('*', async (c, next) => {

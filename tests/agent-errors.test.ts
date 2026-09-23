@@ -48,4 +48,20 @@ describe('Agent Readiness: 404 & Content Negotiation', () => {
     const html = await res.text()
     expect(html).toContain('404')
   })
+
+  it('supports versioned /api/v1 endpoints with identical routing to /api', async () => {
+    const resV1 = await app.request('/api/v1/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level: 'info', message: 'test' }),
+    })
+    expect(resV1.status).toBe(200)
+    expect(resV1.headers.get('content-type')).toContain('application/json')
+
+    const res404 = await app.request('/api/v1/nonexistent')
+    expect(res404.status).toBe(404)
+    expect(res404.headers.get('content-type')).toContain('application/json')
+    const json = (await res404.json()) as { error: { code: string } }
+    expect(json.error.code).toBe('NOT_FOUND')
+  })
 })

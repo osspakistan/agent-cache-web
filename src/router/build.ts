@@ -109,6 +109,15 @@ export async function buildApp(
       if (file.path !== '/' && !file.path.endsWith('/')) {
         app.on(method, `${file.path}/`, wrapped)
       }
+
+      // API Versioning: Support /api/v1/* as canonical versioned paths alongside unversioned /api/*
+      if (file.path.startsWith('/api/')) {
+        const v1Path = file.path.replace(/^\/api\//, '/api/v1/')
+        app.on(method, v1Path, wrapped)
+        if (!v1Path.endsWith('/')) {
+          app.on(method, `${v1Path}/`, wrapped)
+        }
+      }
     }
   }
 
