@@ -81,4 +81,36 @@ describe('Markdown Twin / Dualmark AEO compliance', () => {
     const body = await res.text();
     expect(body).toContain('# Agent Cache');
   });
+
+  it('HTML response includes Vary: Accept (html.vary check)', async () => {
+    const res = await app.request('/');
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/html');
+    const vary = res.headers.get('vary') || '';
+    expect(vary.toLowerCase()).toContain('accept');
+  });
+
+  it('GPTBot User-Agent receives text/markdown (negotiation.botUa check)', async () => {
+    const res = await app.request('/', {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)',
+      },
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/markdown');
+    expect(res.headers.get('x-aeo-version')).toBe('1.0');
+    const body = await res.text();
+    expect(body).toContain('# Agent Cache');
+  });
+
+  it('Accept header excluding html and markdown returns 406 (negotiation.notAcceptable check)', async () => {
+    const res = await app.request('/', {
+      headers: {
+        Accept: 'application/json, image/webp',
+      },
+    });
+    expect(res.status).toBe(406);
+    expect(res.headers.get('vary')).toContain('Accept');
+  });
 });

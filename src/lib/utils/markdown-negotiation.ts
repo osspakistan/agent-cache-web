@@ -1,11 +1,51 @@
+const AI_AGENT_UAS = [
+  'gptbot',
+  'chatgpt-user',
+  'claudebot',
+  'claude-web',
+  'anthropic-ai',
+  'perplexitybot',
+  'google-extended',
+  'gemini',
+  'deepseekbot',
+  'ora-agent',
+  'meta-externalagent',
+  'bytespider',
+  'amazonbot',
+  'applebot-extended',
+]
+
+export function isAIAgentUA(ua = ''): boolean {
+  const lower = ua.toLowerCase()
+  return AI_AGENT_UAS.some((bot) => lower.includes(bot))
+}
+
+/**
+ * Validates if the requested Accept header can be satisfied with HTML or Markdown.
+ * Returns false if the client strictly demanded another content type (requires 406).
+ */
+export function isAcceptable(accept = ''): boolean {
+  if (!accept || accept.trim() === '' || accept.includes('*/*')) return true
+  return (
+    accept.includes('text/html') || accept.includes('text/markdown') || accept.includes('text/*')
+  )
+}
+
 /**
  * Markdown content negotiation helper.
- * Returns true if the client prefers markdown over HTML.
+ * Returns true if the client prefers markdown over HTML or is a known AI agent crawler.
  */
 export function prefersMarkdown(c: {
   req: { header: (name: string) => string | undefined }
 }): boolean {
   const accept = c.req.header('Accept') || ''
+  const ua = c.req.header('User-Agent') || ''
+
+  // If User-Agent is an AI Agent (e.g. GPTBot) and did not explicitly prioritize HTML
+  if (isAIAgentUA(ua) && !accept.includes('text/html')) {
+    return true
+  }
+
   // Check if text/markdown is preferred over text/html
   const mdIndex = accept.indexOf('text/markdown')
   const htmlIndex = accept.indexOf('text/html')

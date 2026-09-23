@@ -7,6 +7,7 @@ import type { Hono, MiddlewareHandler } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { ErrorFactory } from '../lib/utils/errors'
 import { Logger } from '../lib/utils/logger'
+import { isAcceptable } from '../lib/utils/markdown-negotiation'
 import type { AppContext, JSXNode } from '../lib/utils/types'
 import {
   type ErrorComponent,
@@ -22,6 +23,7 @@ const ROUTER_METHODS = ['GET', 'POST'] as const
 
 /** render a JSX node through c.html - JSX trees are string-branded by hono */
 function htmlResponse(c: AppContext, node: JSXNode, status?: ContentfulStatusCode): Response {
+  c.header('Vary', 'Accept, Accept-Encoding')
   return c.html(node as unknown as string, status)
 }
 
@@ -131,6 +133,21 @@ export async function buildApp(
       claimed.set(key, relFile)
 
       const wrapped = async (c: AppContext): Promise<Response> => {
+        if (file.kind === 'page' && method === 'GET') {
+          const accept = c.req.header('Accept') || ''
+          if (!isAcceptable(accept)) {
+            return new Response(
+              'Not Acceptable: Available representations are text/html and text/markdown.',
+              {
+                status: 406,
+                headers: {
+                  'Content-Type': 'text/plain; charset=utf-8',
+                  Vary: 'Accept, Accept-Encoding',
+                },
+              },
+            )
+          }
+        }
         const out = await fn(c)
         if (out instanceof Response) return out
         const html = file.kind === 'page' ? renderWithLayouts(chain, out) : out
