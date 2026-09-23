@@ -23,6 +23,10 @@
     "skill": "https://agentcache.run/auth.md",
     "register_uri": "https://agentcache.run/api/agent/register",
     "claim_uri": "https://agentcache.run/api/agent/claim",
+    "revocation_uri": "https://agentcache.run/api/agent/revoke",
+    "events_supported": [
+      "revocation"
+    ],
     "identity_types_supported": [
       "anonymous",
       "identity_assertion"
@@ -35,7 +39,8 @@
       "credential_types_supported": [
         "api_key"
       ],
-      "claim_uri": "https://agentcache.run/api/agent/claim"
+      "claim_uri": "https://agentcache.run/api/agent/claim",
+      "revocation_uri": "https://agentcache.run/api/agent/revoke"
     },
     "anonymous": {
       "credential_types_supported": [

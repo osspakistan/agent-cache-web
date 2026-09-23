@@ -19,9 +19,10 @@ Most core Agent Cache endpoints are open and do not require authorization:
 
 ## Authentication Metadata
 
-For protected agent workflows or higher-throughput authenticated tier limits:
-- **Protected Resource Metadata**: `/.well-known/oauth-protected-resource` (RFC 9728)
-- **Authorization Server Metadata**: `/.well-known/oauth-authorization-server` (RFC 8414)
+For protected agent workflows or higher-throughput authenticated tier limits, inspect the OAuth discovery endpoints:
+- **Protected Resource Metadata**: [/.well-known/oauth-protected-resource](https://agentcache.run/.well-known/oauth-protected-resource) (RFC 9728)
+- **Authorization Server Metadata**: [/.well-known/oauth-authorization-server](https://agentcache.run/.well-known/oauth-authorization-server) (RFC 8414)
+- **OpenID Configuration**: [/.well-known/openid-configuration](https://agentcache.run/.well-known/openid-configuration)
 - **Token Type**: Bearer tokens passed via HTTP `Authorization: Bearer <token>` header.
 
 ## Registration Endpoints
@@ -29,6 +30,7 @@ For protected agent workflows or higher-throughput authenticated tier limits:
 Agents can register or provision access credentials programmatically:
 - **Registration URI**: `https://agentcache.run/api/agent/register`
 - **Claim URI**: `https://agentcache.run/api/agent/claim`
+- **Revocation URI**: `https://agentcache.run/api/agent/revoke`
 - **Supported Identity Types**: `anonymous`, `identity_assertion`
 - **Supported Assertion Types**: `urn:ietf:params:oauth:token-type:id-jag`, `verified_email`
 - **Supported Credential Types**: `api_key`
