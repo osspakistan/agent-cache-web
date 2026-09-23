@@ -1,7 +1,32 @@
 User-agent: *
 Allow: /
 
-# agent docs for agent tools — our product is its own best demo
+# Explicit AI Agent and Crawler Reachability
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: DeepSeekBot
+Allow: /
+
+User-agent: ora-agent
+Allow: /
+
+# AI Content Signals (IETF draft-romm-aipref-contentsignals)
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+# ARD Agentmap discovery directive
+Agentmap: https://agentcache.run/.well-known/ai-catalog.json
+
+# Sitemaps and agent discovery
 Sitemap: https://agentcache.run/sitemap.xml
 
 # feeds for humans and readers

@@ -21,17 +21,28 @@ export const GET = (c: Context) => {
       'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
     image: '/og?title=Agent+Cache&subtitle=Give+your+agents+the+docs',
     canonical: 'https://agentcache.run',
-    jsonLd: {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'Agent Cache',
-      applicationCategory: 'DeveloperApplication',
-      description:
-        'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
-      url: 'https://agentcache.run',
-      operatingSystem: 'Linux, macOS, Windows',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    },
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Agent Cache',
+        alternateName: ['AgentCache', 'agentcache.run', 'Agent Cache Web'],
+        url: 'https://agentcache.run',
+        description: 'Turn any documentation site into clean, agent-ready markdown docs.',
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Agent Cache',
+        alternateName: ['AgentCache', 'agentcache.run'],
+        applicationCategory: 'DeveloperApplication',
+        description:
+          'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
+        url: 'https://agentcache.run',
+        operatingSystem: 'Linux, macOS, Windows',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      },
+    ],
   })
 
   // Markdown content negotiation

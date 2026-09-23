@@ -7,6 +7,43 @@ import type { AppContext } from '../lib/utils/types'
  */
 export const GET = (c: AppContext) => {
   const accept = c.req.header('Accept') || ''
+  const isApi = c.req.path.startsWith('/api/') || c.req.path === '/api'
+  const wantsJson =
+    accept.includes('application/json') ||
+    accept.includes('+json') ||
+    (isApi && !accept.includes('text/html'))
+
+  if (wantsJson) {
+    return c.json(
+      {
+        error: {
+          code: 'NOT_FOUND',
+          message: `The requested path '${c.req.path}' was not found.`,
+          resolution_hints: [
+            'Check the endpoint spelling against the OpenAPI spec at https://agentcache.run/openapi.json',
+            'Refer to machine-readable site index at https://agentcache.run/llms.txt',
+            'To probe a documentation site, send POST to https://agentcache.run/api/probe with { "url": "https://docs.example.com" }',
+            'To submit a crawl job, send POST to https://agentcache.run/api/jobs with { "url": "https://docs.example.com" }',
+            'Check system status at https://agentcache.run/health',
+          ],
+          links: {
+            home: 'https://agentcache.run/',
+            library: 'https://agentcache.run/docs',
+            llms_txt: 'https://agentcache.run/llms.txt',
+            openapi: 'https://agentcache.run/openapi.json',
+            sitemap: 'https://agentcache.run/sitemap.xml',
+            health: 'https://agentcache.run/health',
+            api_catalog: 'https://agentcache.run/.well-known/api-catalog',
+          },
+        },
+      },
+      404,
+      {
+        Vary: 'Accept, Accept-Encoding',
+      },
+    )
+  }
+
   const wantsMarkdown =
     accept.includes('text/markdown') &&
     (!accept.includes('text/html') || accept.indexOf('text/markdown') < accept.indexOf('text/html'))

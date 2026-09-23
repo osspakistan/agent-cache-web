@@ -22,6 +22,24 @@ const app = await buildApp(join(import.meta.dir, 'app'), {
 // htmx served from the npm package (htmx.org@4) - no vendored copies
 app.get('/js/htmx.esm.min.js', serveStatic({ path: 'node_modules/htmx.org/dist/htmx.esm.min.js' }))
 
+// RFC 8288 Link header middleware for Agent Discovery
+const DISCOVERY_LINK_HEADER = [
+  '</.well-known/api-catalog>; rel="api-catalog"',
+  '</openapi.json>; rel="service-desc"; type="application/json"',
+  '</llms.txt>; rel="service-doc"',
+  '</.well-known/ai-catalog.json>; rel="ai-catalog"',
+  '</.well-known/agent-skills/index.json>; rel="describedby"',
+  '</.well-known/mcp/server-card.json>; rel="service-desc"; type="application/json"',
+  '</auth.md>; rel="authorizing-agent"',
+].join(', ')
+
+app.use('*', async (c, next) => {
+  await next()
+  if (c.req.path === '/' && c.req.method === 'GET') {
+    c.header('Link', DISCOVERY_LINK_HEADER)
+  }
+})
+
 // static assets - serveStatic passes through to routes when a file doesn't exist
 app.use('/*', serveStatic({ root: './public' }))
 

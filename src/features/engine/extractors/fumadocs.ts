@@ -78,7 +78,8 @@ function extractJsonAfterKey(text: string, key: string): string | null {
 // ---------------------------------------------------------------------------
 
 interface FdNode {
-  type: 'root' | 'folder' | 'page' | 'separator'
+  type?: 'root' | 'folder' | 'page' | 'separator'
+  $id?: string
   name?: string
   url?: string
   index?: { url?: string }
@@ -226,28 +227,30 @@ function parseFumadocsTree(html: string, docsUrl: string): NavHierarchy | null {
       const sanitized = byVersionRaw.replace(/:\s*\$undefined/g, ': null')
       const parsed = JSON.parse(sanitized) as Record<string, FdNode>
       const root = parsed.latest ?? Object.values(parsed)[0]
-      if (root?.type === 'root') {
+      if (root?.type === 'root' || root?.$id) {
         const hier = buildHierarchyFromRoot(root, origin, docsUrl)
         if (hier && hier.sections.length > 0) return hier
       }
     } catch {}
   }
 
-  // Step 3: Try pageTree (non-versioned)
-  const treeRaw = extractJsonAfterKey(searchBase, '"pageTree":')
-  if (treeRaw) {
-    try {
-      const sanitized = treeRaw.replace(/:\s*\$undefined/g, ': null')
-      const root = JSON.parse(sanitized) as FdNode
-      if (root?.type === 'root') {
-        const hier = buildHierarchyFromRoot(root, origin, docsUrl)
-        if (hier && hier.sections.length > 0) return hier
-      }
-    } catch {}
+  // Step 3: Try pageTree (non-versioned) or "tree" (Geistdocs/Fumadocs variant)
+  for (const treeKey of ['"pageTree":', '"tree":']) {
+    const treeRaw = extractJsonAfterKey(searchBase, treeKey)
+    if (treeRaw) {
+      try {
+        const sanitized = treeRaw.replace(/:\s*\$undefined/g, ': null')
+        const root = JSON.parse(sanitized) as FdNode
+        if (root?.type === 'root' || root?.$id) {
+          const hier = buildHierarchyFromRoot(root, origin, docsUrl)
+          if (hier && hier.sections.length > 0) return hier
+        }
+      } catch {}
+    }
   }
 
   // Step 4: Fallback - try parsing doubly-escaped JSON (from raw html without RSC decode)
-  for (const key of ['"pageTreesByVersion":', '"pageTree":']) {
+  for (const key of ['"pageTreesByVersion":', '"pageTree":', '"tree":']) {
     const escapedKey = key.replace(/"/g, '\\"')
     const idx = html.indexOf(escapedKey)
     if (idx !== -1) {
@@ -260,13 +263,13 @@ function parseFumadocsTree(html: string, docsUrl: string): NavHierarchy | null {
           if (key.includes('sByVersion')) {
             const parsed = JSON.parse(sanitized) as Record<string, FdNode>
             const root = parsed.latest ?? Object.values(parsed)[0]
-            if (root?.type === 'root') {
+            if (root?.type === 'root' || root?.$id) {
               const hier = buildHierarchyFromRoot(root, origin, docsUrl)
               if (hier && hier.sections.length > 0) return hier
             }
           } else {
             const root = JSON.parse(sanitized) as FdNode
-            if (root?.type === 'root') {
+            if (root?.type === 'root' || root?.$id) {
               const hier = buildHierarchyFromRoot(root, origin, docsUrl)
               if (hier && hier.sections.length > 0) return hier
             }
@@ -286,7 +289,9 @@ export const fumadocsExtractor: DocExtractor = {
     return (
       html.includes('pageTreesByVersion') ||
       html.includes('"pageTree"') ||
-      html.includes('fd-sidebar')
+      html.includes('"tree":') ||
+      html.includes('fd-sidebar') ||
+      html.includes('data-geistdocs-container')
     )
   },
 

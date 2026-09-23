@@ -48,10 +48,12 @@ const Layout: LayoutComponent = ({ children }) => {
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
                 name: 'Agent Cache',
+                alternateName: ['AgentCache', 'agentcache.run', 'Agent Cache Web'],
+                legalName: 'Agent Cache',
                 url: 'https://agentcache.run',
                 description: 'Turn any documentation site into clean, agent-ready markdown docs.',
                 logo: 'https://agentcache.run/favicon.svg',
-                sameAs: ['https://github.com/agentcache/agent-cache'],
+                sameAs: ['https://github.com/agentcache/agent-cache', 'https://agentcache.run'],
                 contactPoint: {
                   '@type': 'ContactPoint',
                   contactType: 'customer support',
@@ -72,6 +74,23 @@ const Layout: LayoutComponent = ({ children }) => {
 
           {/* Favicon - SVG, no PNG fallbacks */}
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+          {/* RFC 8288 / Agent Discovery Link Relations */}
+          <link rel="api-catalog" href="/.well-known/api-catalog" type="application/linkset+json" />
+          <link rel="service-desc" href="/openapi.json" type="application/json" />
+          <link rel="service-doc" href="/llms.txt" type="text/plain" />
+          <link rel="ai-catalog" href="/.well-known/ai-catalog.json" type="application/json" />
+          <link
+            rel="describedby"
+            href="/.well-known/agent-skills/index.json"
+            type="application/json"
+          />
+          <link
+            rel="service-desc"
+            href="/.well-known/mcp/server-card.json"
+            type="application/json"
+          />
+          <link rel="authorizing-agent" href="/auth.md" type="text/markdown" />
 
           <link
             rel="preload"

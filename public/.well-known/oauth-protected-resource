@@ -1,0 +1,13 @@
+{
+  "resource": "https://agentcache.run",
+  "authorization_servers": [
+    "https://agentcache.run"
+  ],
+  "scopes_supported": [
+    "docs:read",
+    "docs:crawl"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}

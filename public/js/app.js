@@ -148,3 +148,93 @@
   })
 })()
 
+/**
+ * WebMCP: Expose agent tools to browser-based AI agents (e.g. Chrome / WebMCP extensions)
+ * Compliant with W3C/WebMCP draft specification for navigator.modelContext
+ */
+;(function () {
+  var tools = [
+    {
+      name: 'probe_documentation_url',
+      description: 'Probe a documentation URL to detect platform (Mintlify, Fumadocs, Docusaurus, Nextra, GitBook, etc.), sitemap, llms.txt, and page topology.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            format: 'uri',
+            description: 'The documentation root URL to probe (e.g. https://docs.example.com)',
+          },
+        },
+        required: ['url'],
+      },
+      execute: async function (params) {
+        var res = await fetch('/jobs/probe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: params.url }),
+        })
+        if (!res.ok) {
+          throw new Error('Probe failed with HTTP ' + res.status)
+        }
+        return await res.json()
+      },
+    },
+    {
+      name: 'crawl_documentation_bundle',
+      description: 'Trigger a crawl job to convert an entire documentation website into an agent-ready markdown bundle and ZIP archive.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            format: 'uri',
+            description: 'The documentation URL to crawl and convert.',
+          },
+        },
+        required: ['url'],
+      },
+      execute: async function (params) {
+        var body = new URLSearchParams()
+        body.append('url', params.url)
+        var res = await fetch('/jobs/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+        })
+        if (!res.ok) {
+          throw new Error('Crawl job creation failed with HTTP ' + res.status)
+        }
+        var text = await res.text()
+        return { status: 'job_initiated', response: text }
+      },
+    },
+  ]
+
+  // Register with navigator.modelContext if available (WebMCP standard)
+  if (typeof navigator !== 'undefined' && 'modelContext' in navigator && navigator.modelContext) {
+    try {
+      if (typeof navigator.modelContext.registerTool === 'function') {
+        tools.forEach(function (tool) {
+          navigator.modelContext.registerTool(tool)
+        })
+      } else if (typeof navigator.modelContext.provideContext === 'function') {
+        navigator.modelContext.provideContext({
+          tools: tools,
+        })
+      }
+    } catch (e) {
+      console.warn('[WebMCP] Failed to register tools on navigator.modelContext', e)
+    }
+  }
+
+  // Also expose under window.__webmcp or window.agentTools for browser agent testing
+  if (typeof window !== 'undefined') {
+    window.__webmcp = {
+      version: '1.0.0',
+      tools: tools,
+    }
+  }
+})()
+
+

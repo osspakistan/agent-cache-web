@@ -1,0 +1,42 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Agent Cache",
+    "identifier": "did:web:agentcache.run"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:agentcache.run:service:crawl-docs",
+      "displayName": "Documentation Crawl & Markdown Bundler",
+      "type": "application/json",
+      "url": "https://agentcache.run/openapi.json",
+      "representativeQueries": [
+        "turn doc site into markdown",
+        "download full documentation as zip",
+        "fetch clean markdown docs for coding agents",
+        "crawl docs site for llm context"
+      ]
+    },
+    {
+      "identifier": "urn:air:agentcache.run:mcp:server",
+      "displayName": "Agent Cache MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://agentcache.run/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "agent cache model context protocol",
+        "mcp tools for documentation extraction",
+        "fetch documentation via mcp"
+      ]
+    },
+    {
+      "identifier": "urn:air:agentcache.run:skills:index",
+      "displayName": "Agent Cache Skills Index",
+      "type": "application/json",
+      "url": "https://agentcache.run/.well-known/agent-skills/index.json",
+      "representativeQueries": [
+        "agent skills for agent cache",
+        "crawl docs skill definition"
+      ]
+    }
+  ]
+}

@@ -21,4 +21,7 @@ agentcache.run {
     header Referrer-Policy "strict-origin-when-cross-origin"
     header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'"
     header Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+    @root path /
+    header @root Link "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/json\", </llms.txt>; rel=\"service-doc\", </.well-known/ai-catalog.json>; rel=\"ai-catalog\", </.well-known/agent-skills/index.json>; rel=\"describedby\", </.well-known/mcp/server-card.json>; rel=\"service-desc\"; type=\"application/json\", </auth.md>; rel=\"authorizing-agent\""
 }

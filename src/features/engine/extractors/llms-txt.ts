@@ -161,8 +161,41 @@ export function parseHierarchicalLlmsTxt(
   }
 
   // Filter empty sections and ensure at least 2 valid sections
-  const validSections = sections.filter((s) => s.items.length > 0)
+  let validSections = sections.filter((s) => s.items.length > 0)
   if (validSections.length < 2) return null
+
+  // If every section has exactly 1 item (flat tree), re-group by URL path
+  // prefix to recover hierarchy that the llms.txt didn't express
+  const allSingle = validSections.every((s) => s.items.length === 1 && !s.items[0].items)
+  if (allSingle && validSections.length >= 4) {
+    const groupMap = new Map<string, NavSection>()
+    for (const sec of validSections) {
+      const item = sec.items[0]
+      const url = item.url || ''
+      const pathMatch = url.match(/\/docs\/([^/]+)/)
+      const groupKey = pathMatch ? pathMatch[1] : 'top-level'
+      const groupTitle = groupKey.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+      let group = groupMap.get(groupKey)
+      if (!group) {
+        group = {
+          title: groupTitle,
+          slug: groupKey.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          order: groupMap.size + 1,
+          items: [],
+        }
+        groupMap.set(groupKey, group)
+      }
+      group.items.push({
+        ...item,
+        order: group.items.length + 1,
+      })
+    }
+    validSections = Array.from(groupMap.values()).map((s, idx) => ({
+      ...s,
+      order: idx + 1,
+    }))
+  }
 
   // Re-order sections cleanly
   validSections.forEach((s, idx) => {

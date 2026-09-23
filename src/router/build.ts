@@ -151,6 +151,70 @@ export async function buildApp(
     })
 
     const status = (appErr.statusCode || 500) as ContentfulStatusCode
+    const accept = c.req.header('Accept') || ''
+    const isApi = c.req.path.startsWith('/api/') || c.req.path === '/api'
+    const wantsJson =
+      accept.includes('application/json') ||
+      accept.includes('+json') ||
+      (isApi && !accept.includes('text/html'))
+
+    if (wantsJson) {
+      return c.json(
+        {
+          error: {
+            code: appErr.code,
+            message: appErr.human,
+            machine: appErr.machine,
+            status_code: appErr.statusCode,
+            resolution_hints: [
+              'Review the error message and verify your request parameters.',
+              'Check system status at https://agentcache.run/health',
+              'Review the API specification at https://agentcache.run/openapi.json',
+            ],
+            links: {
+              health: 'https://agentcache.run/health',
+              openapi: 'https://agentcache.run/openapi.json',
+              llms_txt: 'https://agentcache.run/llms.txt',
+            },
+          },
+        },
+        status,
+        {
+          Vary: 'Accept, Accept-Encoding',
+        },
+      )
+    }
+
+    const wantsMarkdown =
+      accept.includes('text/markdown') &&
+      (!accept.includes('text/html') ||
+        accept.indexOf('text/markdown') < accept.indexOf('text/html'))
+
+    if (wantsMarkdown) {
+      const md = `# Error ${status} - ${appErr.code}
+
+${appErr.human}
+
+## Technical Details
+
+- **Code**: \`${appErr.code}\`
+- **Path**: \`${c.req.path}\`
+- **Method**: \`${c.req.method}\`
+
+## Useful Resources
+
+- [Health Check](https://agentcache.run/health) — Service health status
+- [OpenAPI Spec](https://agentcache.run/openapi.json) — Full API specification
+- [llms.txt](https://agentcache.run/llms.txt) — Machine-readable site index
+`
+      return new Response(md, {
+        status,
+        headers: {
+          'Content-Type': 'text/markdown; charset=utf-8',
+          Vary: 'Accept, Accept-Encoding',
+        },
+      })
+    }
 
     if (ErrorComp) {
       const bare = ErrorComp({ message: appErr.human })

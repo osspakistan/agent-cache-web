@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "crawl-docs",
+      "type": "skill-md",
+      "description": "Submit a documentation site URL to Agent Cache to crawl, clean, and convert into agent-ready markdown docs and a downloadable ZIP archive.",
+      "url": "https://agentcache.run/.well-known/agent-skills/crawl-docs/SKILL.md",
+      "digest": "sha256:0ee79de1a5a65e89f5d9d19535fd3cd43c91c9346c7173999f02f7ba22887930"
+    }
+  ]
+}
