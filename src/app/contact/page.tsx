@@ -1,6 +1,6 @@
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -29,10 +29,7 @@ For general inquiries, you can reach us via email. Check our GitHub repository f
 
 We aim to respond to all inquiries within 2-3 business days. For urgent issues, please note this in your message subject.
 `
-    return c.text(md, 200, {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      Vary: contentNegotiationVary(),
-    })
+    return createMarkdownResponse(md)
   }
 
   return c.html(

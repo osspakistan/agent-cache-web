@@ -4,10 +4,12 @@ import { getJobById } from '../../../features/jobs'
 import { getFromR2, getPublicR2Url, listCompletedJobs } from '../../../lib/clients'
 import { setPageMeta } from '../../../lib/page-meta'
 import { formatBytes, nakedDomain } from '../../../lib/utils'
+import { createMarkdownResponse, prefersMarkdown } from '../../../lib/utils/markdown-negotiation'
 import type { AppContext, NavHierarchy } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
-  const id = c.req.param('id') || ''
+  const rawId = c.req.param('id') || ''
+  const id = rawId.replace(/\.md$/, '')
   const job = await getJobById(id)
 
   if (!job) {
@@ -141,6 +143,30 @@ export const GET = async (c: AppContext) => {
   const product =
     job.product_name ||
     (job.resolved_url ? new URL(job.resolved_url).hostname.replace(/^www\./, '') : job.id)
+
+  if (prefersMarkdown(c)) {
+    const md = `# ${job.title || `${product} Documentation`}
+
+${job.description || `Documentation for ${product}, packaged as clean markdown for coding agents.`}
+
+## Summary
+
+- **Product**: ${product}
+- **Pages**: ${job.page_count}
+- **Strategy**: ${job.strategy || 'html-purify'}
+- **ZIP Download**: ${directR2Download}
+- **Original URL**: ${job.resolved_url || job.input_url}
+- **Created**: ${fmtDate(job.created_at)}
+
+## Resources
+
+- [ZIP Bundle](${directR2Download})
+- [Audit Logs](/dingdong/${id})
+- [All Doc Bundles](/docs)
+`
+    return createMarkdownResponse(md)
+  }
+
   setPageMeta({
     title: `${product} docs // Agent Cache`,
     description:

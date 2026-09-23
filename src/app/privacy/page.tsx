@@ -1,6 +1,6 @@
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -60,10 +60,7 @@ You have the right to:
 
 For privacy-related inquiries, please contact us via our GitHub repository.
 `
-    return c.text(md, 200, {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      Vary: contentNegotiationVary(),
-    })
+    return createMarkdownResponse(md)
   }
 
   return c.html(

@@ -34,8 +34,15 @@ const DISCOVERY_LINK_HEADER = [
 
 app.use('*', async (c, next) => {
   await next()
-  if (c.req.path === '/' && c.req.method === 'GET') {
-    c.header('Link', DISCOVERY_LINK_HEADER)
+  if (c.req.method === 'GET') {
+    const p = c.req.path
+    if (p === '/') {
+      const twinLink = '</index.md>; rel="alternate"; type="text/markdown"'
+      c.header('Link', `${twinLink}, ${DISCOVERY_LINK_HEADER}`)
+    } else if (!p.endsWith('.md') && !p.startsWith('/api') && !p.startsWith('/.')) {
+      const clean = p.replace(/\/$/, '')
+      c.header('Link', `<${clean}.md>; rel="alternate"; type="text/markdown"`)
+    }
   }
 })
 

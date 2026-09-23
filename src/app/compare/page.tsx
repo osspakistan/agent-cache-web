@@ -1,14 +1,30 @@
 import { Nav } from '../../components/nav'
 import { getContent } from '../../lib/content'
 import { setPageMeta } from '../../lib/page-meta'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 /**
  * GET /compare - list of all comparison pages.
  * Reads content/compare/*.md via the content registry.
  */
-export const GET = async (_c: AppContext) => {
+export const GET = async (c: AppContext) => {
   const pages = await getContent('compare')
+
+  if (prefersMarkdown(c)) {
+    const list = pages
+      .map((p) => `- [${p.title}](${p.route})${p.description ? ` — ${p.description}` : ''}`)
+      .join('\n')
+    const md = `# Agent Cache Comparisons
+
+Honest comparisons of Agent Cache against alternatives (Context7, Firecrawl, Tavily, etc.).
+
+## Comparisons
+
+${list}
+`
+    return createMarkdownResponse(md)
+  }
 
   setPageMeta({
     title: 'Compare // Agent Cache',

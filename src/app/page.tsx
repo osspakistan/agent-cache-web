@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import { Nav } from '../components/nav'
 import { setPageMeta } from '../lib/page-meta'
-import { contentNegotiationVary, prefersMarkdown } from '../lib/utils/markdown-negotiation'
+import { createMarkdownResponse, prefersMarkdown } from '../lib/utils/markdown-negotiation'
 import { Batteries } from './_sections/batteries'
 import { Demo } from './_sections/demo'
 import { GetStarted } from './_sections/get-started'
@@ -71,10 +71,7 @@ Turn any documentation site into clean, agent-ready markdown docs.
 - [OpenAPI Spec](/openapi.json) - API documentation
 - [llms.txt](/llms.txt) - Agent-readable site index
 `
-    return c.text(md, 200, {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      Vary: contentNegotiationVary(),
-    })
+    return createMarkdownResponse(md)
   }
 
   const captured = c.req.query('captured')

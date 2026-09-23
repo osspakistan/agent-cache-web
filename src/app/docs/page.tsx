@@ -3,6 +3,7 @@ import { initDb, listCompletedJobs } from '../../features/jobs'
 import { setPageMeta } from '../../lib/page-meta'
 import { formatBytes } from '../../lib/utils'
 import { nakedDomain } from '../../lib/utils/id'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext, JobRecord } from '../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
@@ -33,6 +34,27 @@ export const GET = async (c: AppContext) => {
       }
     })
     .sort((a, b) => b.latest.created_at - a.latest.created_at)
+
+  if (prefersMarkdown(c)) {
+    const bundles = grouped
+      .map(({ latest: j }) => {
+        const title = j.title || j.product_name || j.id
+        return `- [${title}](/docs/${j.id}) — ${j.page_count} pages, ${formatBytes(j.zip_size_bytes).full} ZIP (${j.strategy || 'html-purify'})`
+      })
+      .join('\n')
+    const md = `# Packaged Documentation Bundles
+
+Ready-to-use doc bundles pre-converted for coding agents.
+
+## Available Bundles
+
+${bundles || 'No bundles available yet.'}
+
+## Browse Online
+View all bundles at https://agentcache.run/docs
+`
+    return createMarkdownResponse(md)
+  }
 
   const totalPages = Math.max(1, Math.ceil(grouped.length / perPage))
   const safePage = Math.min(page, totalPages)

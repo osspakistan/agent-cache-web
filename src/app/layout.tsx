@@ -32,6 +32,18 @@ const Layout: LayoutComponent = ({ children }) => {
           <meta name="twitter:card" content="summary_large_image" />
           {meta.image && <meta name="twitter:image" content={meta.image} />}
           {meta.canonical && <link rel="canonical" href={meta.canonical} />}
+          <link
+            rel="alternate"
+            type="text/markdown"
+            href={
+              meta.canonical
+                ? meta.canonical === 'https://agentcache.run' ||
+                  meta.canonical === 'https://agentcache.run/'
+                  ? 'https://agentcache.run/index.md'
+                  : `${meta.canonical.replace(/\/$/, '')}.md`
+                : '/index.md'
+            }
+          />
           {meta.jsonLd && (
             <script
               type="application/ld+json"

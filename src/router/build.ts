@@ -49,6 +49,24 @@ export async function buildApp(
     c.header('X-RateLimit-Reset', '60')
   })
 
+  // RFC 8288 Link header for Dualmark markdown twins on GET requests
+  app.use('*', async (c, next) => {
+    await next()
+    if (c.req.method === 'GET') {
+      const p = c.req.path
+      if (p === '/') {
+        const existing = c.res.headers.get('link')
+        const twinLink = '</index.md>; rel="alternate"; type="text/markdown"'
+        c.header('Link', existing ? `${twinLink}, ${existing}` : twinLink)
+      } else if (!p.endsWith('.md') && !p.startsWith('/api') && !p.startsWith('/.')) {
+        const clean = p.replace(/\/$/, '')
+        const existing = c.res.headers.get('link')
+        const twinLink = `<${clean}.md>; rel="alternate"; type="text/markdown"`
+        c.header('Link', existing ? `${twinLink}, ${existing}` : twinLink)
+      }
+    }
+  })
+
   const files: LoadedFile[] = await scan(appDir)
 
   const claimed = new Map<string, string>()
@@ -121,6 +139,34 @@ export async function buildApp(
       app.on(method, file.path, wrapped)
       if (file.path !== '/' && !file.path.endsWith('/')) {
         app.on(method, `${file.path}/`, wrapped)
+      }
+
+      // Markdown Twins (Dualmark / AEO Spec v1.0):
+      // For any page handler on GET, register twin endpoints (.md and /index.md for root)
+      if (file.kind === 'page' && method === 'GET') {
+        const mdTwin = async (c: AppContext): Promise<Response> => {
+          c.req.raw.headers.set('accept', 'text/markdown')
+          return wrapped(c)
+        }
+        if (file.path === '/') {
+          app.on('GET', '/index.md', mdTwin)
+        } else {
+          const cleanPath = file.path.replace(/\/$/, '')
+          // In Hono, a path like /blog/:slug.md creates a param named "slug.md" instead of "slug".
+          // If the last segment is dynamic, we integrate \\.md into the regex constraint:
+          // 1) :param{[regex]} -> :param{[regex]\\.md}
+          // 2) :param           -> :param{.+\\.md}
+          // 3) static path      -> static.md
+          let mdPath = cleanPath
+          if (/:[a-zA-Z0-9_]+\{[^}]+\}$/.test(cleanPath)) {
+            mdPath = cleanPath.replace(/:([a-zA-Z0-9_]+)\{([^}]+)\}$/, ':$1{$2\\.md}')
+          } else if (/:[a-zA-Z0-9_]+$/.test(cleanPath)) {
+            mdPath = cleanPath.replace(/:([a-zA-Z0-9_]+)$/, ':$1{.+\\.md}')
+          } else {
+            mdPath = `${cleanPath}.md`
+          }
+          app.on('GET', mdPath, mdTwin)
+        }
       }
 
       // API Versioning: Support /api/v1/* as canonical versioned paths alongside unversioned /api/*

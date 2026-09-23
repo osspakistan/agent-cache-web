@@ -1,14 +1,30 @@
 import { Nav } from '../../components/nav'
 import { getContent } from '../../lib/content'
 import { setPageMeta } from '../../lib/page-meta'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 /**
  * GET /blog - list of all blog posts.
  * Reads content/blog/*.md via the content registry and renders a clean list.
  */
-export const GET = async (_c: AppContext) => {
+export const GET = async (c: AppContext) => {
   const posts = await getContent('blog')
+
+  if (prefersMarkdown(c)) {
+    const list = posts
+      .map((p) => `- [${p.title}](${p.route})${p.description ? ` — ${p.description}` : ''}`)
+      .join('\n')
+    const md = `# Agent Cache Blog
+
+Writing on docs for agents, extraction mechanics, and building documentation that coding agents can actually read.
+
+## Articles
+
+${list}
+`
+    return createMarkdownResponse(md)
+  }
 
   setPageMeta({
     title: 'Blog // Agent Cache',

@@ -2,6 +2,7 @@ import { raw } from 'hono/html'
 import { Nav } from '../../../components/nav'
 import { getPost } from '../../../lib/content'
 import { setPageMeta } from '../../../lib/page-meta'
+import { createMarkdownResponse, prefersMarkdown } from '../../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
@@ -9,13 +10,22 @@ import type { AppContext } from '../../../lib/utils/types'
  * via the content registry + comark HTML renderer.
  */
 export const GET = async (c: AppContext) => {
-  const slug = c.req.param('slug') || ''
+  const rawSlug = c.req.param('slug') || ''
+  const slug = rawSlug.replace(/\.md$/, '')
   const post = await getPost('blog', slug)
 
   if (!post) return c.notFound()
 
   if (slug !== post.slug) {
     return c.redirect(`${post.route}${new URL(c.req.url).search}`, 301)
+  }
+
+  if (prefersMarkdown(c)) {
+    const md = `# ${post.title}
+
+${post.description ? `> ${post.description}\n\n` : ''}${post.body}
+`
+    return createMarkdownResponse(md)
   }
 
   setPageMeta({

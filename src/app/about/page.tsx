@@ -1,6 +1,6 @@
 import { Nav } from '../../components/nav'
 import { setPageMeta } from '../../lib/page-meta'
-import { contentNegotiationVary, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
+import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
 
 export const GET = (c: AppContext) => {
@@ -41,10 +41,7 @@ Agent Cache is open source (MIT license). The web app, CLI, and MCP server are a
 
 Have questions or feedback? Reach out via [our contact page](https://agentcache.run/contact) or open an issue on GitHub.
 `
-    return c.text(md, 200, {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      Vary: contentNegotiationVary(),
-    })
+    return createMarkdownResponse(md)
   }
 
   return c.html(
