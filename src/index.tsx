@@ -24,6 +24,7 @@ app.get('/js/htmx.esm.min.js', serveStatic({ path: 'node_modules/htmx.org/dist/h
 
 // RFC 8288 Link header middleware for Agent Discovery
 const DISCOVERY_LINK_HEADER = [
+  '</.well-known/agent-card.json>; rel="agent-card"',
   '</.well-known/api-catalog>; rel="api-catalog"',
   '</openapi.json>; rel="service-desc"; type="application/json"',
   '</llms.txt>; rel="service-doc"',

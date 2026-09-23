@@ -48,11 +48,17 @@ export const GET = (_c: AppContext) => {
         ],
       },
       {
-        anchor: 'https://agentcache.run/mcp',
+        anchor: 'https://agentcache.run/api',
         'service-desc': [
           {
-            href: 'https://agentcache.run/.well-known/mcp/server-card.json',
+            href: 'https://agentcache.run/.well-known/agent-card.json',
             type: 'application/json',
+          },
+        ],
+        'service-doc': [
+          {
+            href: 'https://agentcache.run/llms.txt',
+            type: 'text/markdown',
           },
         ],
       },

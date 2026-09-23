@@ -1,0 +1,78 @@
+{
+  "$schema": "https://a2a-protocol.org/schemas/agent-card.json",
+  "name": "Agent Cache",
+  "version": "1.0.0",
+  "description": "Turn any documentation site into clean, agent-ready markdown docs and downloadable zip archives.",
+  "url": "https://agentcache.run",
+  "defaultInputModes": [
+    "application/json",
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "application/json",
+    "text/markdown",
+    "application/zip"
+  ],
+  "supportedInterfaces": [
+    {
+      "url": "https://agentcache.run/api",
+      "protocolBinding": "HTTP_JSON",
+      "protocolVersion": "1.0"
+    },
+    {
+      "url": "https://agentcache.run/api/v1",
+      "protocolBinding": "HTTP_JSON",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "skills": [
+    {
+      "id": "crawl-docs",
+      "name": "Crawl Documentation",
+      "description": "Crawl a documentation website URL, clean the layout into pure markdown, generate navigation tree metadata, and package it into a zip archive.",
+      "tags": [
+        "documentation",
+        "crawler",
+        "markdown",
+        "llm-context"
+      ],
+      "examples": [
+        "Crawl https://hono.dev and turn it into agent-ready markdown",
+        "Bundle documentation for offline agent context"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json",
+        "text/markdown",
+        "application/zip"
+      ]
+    },
+    {
+      "id": "probe-docs",
+      "name": "Probe Documentation URL",
+      "description": "Probe a documentation URL before crawling to inspect tech stack, sitemap, llms.txt availability, and estimate page counts.",
+      "tags": [
+        "probe",
+        "discovery",
+        "inspection"
+      ],
+      "examples": [
+        "Probe https://docs.anthropic.com to inspect crawlability",
+        "Check if documentation site has llms.txt or open markdown endpoints"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ]
+    }
+  ]
+}

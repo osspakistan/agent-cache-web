@@ -76,6 +76,7 @@ const Layout: LayoutComponent = ({ children }) => {
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
           {/* RFC 8288 / Agent Discovery Link Relations */}
+          <link rel="agent-card" href="/.well-known/agent-card.json" type="application/json" />
           <link rel="api-catalog" href="/.well-known/api-catalog" type="application/linkset+json" />
           <link rel="service-desc" href="/openapi.json" type="application/json" />
           <link rel="service-doc" href="/llms.txt" type="text/plain" />

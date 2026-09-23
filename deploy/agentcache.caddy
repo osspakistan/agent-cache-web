@@ -23,5 +23,5 @@ agentcache.run {
     header Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
     @root path /
-    header @root Link "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/json\", </llms.txt>; rel=\"service-doc\", </.well-known/ai-catalog.json>; rel=\"ai-catalog\", </.well-known/agent-skills/index.json>; rel=\"describedby\""
+    header @root Link "</.well-known/agent-card.json>; rel=\"agent-card\", </.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/json\", </llms.txt>; rel=\"service-doc\", </.well-known/ai-catalog.json>; rel=\"ai-catalog\", </.well-known/agent-skills/index.json>; rel=\"describedby\""
 }

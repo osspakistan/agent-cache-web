@@ -64,4 +64,31 @@ describe('Agent Readiness: 404 & Content Negotiation', () => {
     const json = (await res404.json()) as { error: { code: string } }
     expect(json.error.code).toBe('NOT_FOUND')
   })
+
+  it('serves valid A2A Agent Card with required fields at /.well-known/agent-card.json', async () => {
+    const res = await app.request('/.well-known/agent-card.json')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('application/json')
+    const card = (await res.json()) as {
+      name: string
+      version: string
+      description: string
+      supportedInterfaces: Array<{ url: string; protocolBinding: string; protocolVersion: string }>
+      capabilities: Record<string, unknown>
+      skills: Array<{ id: string; name: string; description: string }>
+    }
+    expect(card.name).toBe('Agent Cache')
+    expect(card.version).toBe('1.0.0')
+    expect(card.description).toBeTruthy()
+    expect(Array.isArray(card.supportedInterfaces)).toBe(true)
+    expect(card.supportedInterfaces.length).toBeGreaterThan(0)
+    expect(card.supportedInterfaces[0].url).toBeTruthy()
+    expect(card.supportedInterfaces[0].protocolBinding).toBeTruthy()
+    expect(typeof card.capabilities).toBe('object')
+    expect(Array.isArray(card.skills)).toBe(true)
+    expect(card.skills.length).toBeGreaterThan(0)
+    expect(card.skills[0].id).toBeTruthy()
+    expect(card.skills[0].name).toBeTruthy()
+    expect(card.skills[0].description).toBeTruthy()
+  })
 })
