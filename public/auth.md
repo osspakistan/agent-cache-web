@@ -28,8 +28,47 @@ For protected agent workflows or higher-throughput authenticated tier limits:
 
 Agents can register or provision access credentials programmatically:
 - **Registration URI**: `https://agentcache.run/api/agent/register`
+- **Claim URI**: `https://agentcache.run/api/agent/claim`
 - **Supported Identity Types**: `anonymous`, `identity_assertion`
 - **Supported Assertion Types**: `urn:ietf:params:oauth:token-type:id-jag`, `verified_email`
+- **Supported Credential Types**: `api_key`
 - **Scopes**: `docs:read`, `docs:crawl`, `docs:write`
+
+### Registration Flows
+
+#### 1. Anonymous Registration
+- Submit POST to `https://agentcache.run/api/agent/register` with:
+  ```json
+  { "identity_type": "anonymous" }
+  ```
+- Receive provisional token or claim challenge, then claim credentials via `POST https://agentcache.run/api/agent/claim`.
+
+#### 2. ID-JAG (Identity Assertion)
+- Submit POST to `https://agentcache.run/api/agent/register` with:
+  ```json
+  {
+    "identity_type": "identity_assertion",
+    "assertion_type": "urn:ietf:params:oauth:token-type:id-jag",
+    "assertion": "<jwt-assertion>"
+  }
+  ```
+
+#### 3. Verified Email
+- Submit POST to `https://agentcache.run/api/agent/register` with:
+  ```json
+  {
+    "identity_type": "identity_assertion",
+    "assertion_type": "verified_email",
+    "email": "agent-operator@example.com"
+  }
+  ```
+- Complete email verification and claim credentials at `https://agentcache.run/api/agent/claim`.
+
+### Credential Usage
+
+Include the provisioned `api_key` or OAuth access token in the `Authorization` HTTP header for all protected API calls:
+```http
+Authorization: Bearer <token>
+```
 
 For developer inquiries or key issues, contact `hi@agentcache.run`.

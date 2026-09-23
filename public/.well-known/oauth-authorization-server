@@ -20,8 +20,9 @@
     "docs:crawl"
   ],
   "agent_auth": {
-    "skill": "https://agentcache.run/.well-known/agent-skills/crawl-docs/SKILL.md",
+    "skill": "https://agentcache.run/auth.md",
     "register_uri": "https://agentcache.run/api/agent/register",
+    "claim_uri": "https://agentcache.run/api/agent/claim",
     "identity_types_supported": [
       "anonymous",
       "identity_assertion"
@@ -30,12 +31,17 @@
       "assertion_types_supported": [
         "urn:ietf:params:oauth:token-type:id-jag",
         "verified_email"
-      ]
+      ],
+      "credential_types_supported": [
+        "api_key"
+      ],
+      "claim_uri": "https://agentcache.run/api/agent/claim"
     },
     "anonymous": {
       "credential_types_supported": [
         "api_key"
-      ]
+      ],
+      "claim_uri": "https://agentcache.run/api/agent/claim"
     }
   }
 }

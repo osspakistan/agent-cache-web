@@ -91,4 +91,26 @@ describe('Agent Readiness: 404 & Content Negotiation', () => {
     expect(card.skills[0].name).toBeTruthy()
     expect(card.skills[0].description).toBeTruthy()
   })
+
+  it('serves valid /auth.md as Markdown and OAuth discovery documents as JSON', async () => {
+    const resAuthMd = await app.request('/auth.md')
+    expect(resAuthMd.status).toBe(200)
+    expect(resAuthMd.headers.get('content-type')).toContain('text/markdown')
+    const authText = await resAuthMd.text()
+    expect(authText.startsWith('# auth.md')).toBe(true)
+
+    const resProtected = await app.request('/.well-known/oauth-protected-resource')
+    expect(resProtected.status).toBe(200)
+    expect(resProtected.headers.get('content-type')).toContain('application/json')
+    const protectedJson = (await resProtected.json()) as { resource: string; authorization_servers: string[] }
+    expect(protectedJson.resource).toBe('https://agentcache.run')
+    expect(protectedJson.authorization_servers).toContain('https://agentcache.run')
+
+    const resAuthServer = await app.request('/.well-known/oauth-authorization-server')
+    expect(resAuthServer.status).toBe(200)
+    expect(resAuthServer.headers.get('content-type')).toContain('application/json')
+    const authServerJson = (await resAuthServer.json()) as { issuer: string; agent_auth: { skill: string } }
+    expect(authServerJson.issuer).toBe('https://agentcache.run')
+    expect(authServerJson.agent_auth.skill).toBe('https://agentcache.run/auth.md')
+  })
 })
