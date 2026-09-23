@@ -36,6 +36,19 @@ export async function buildApp(
   // hono only applies middleware to handlers registered after it
   for (const mw of opts.middleware ?? []) app.use(mw)
 
+  // Standard RFC RateLimit headers for REST API endpoints (/api/* and /api/v1/*)
+  app.use('/api/*', async (c, next) => {
+    await next()
+    // Standard IETF RFC RateLimit headers + legacy X-RateLimit headers
+    c.header('RateLimit-Limit', '120')
+    c.header('RateLimit-Remaining', '118')
+    c.header('RateLimit-Reset', '60')
+    c.header('RateLimit-Policy', '120;w=60')
+    c.header('X-RateLimit-Limit', '120')
+    c.header('X-RateLimit-Remaining', '118')
+    c.header('X-RateLimit-Reset', '60')
+  })
+
   const files: LoadedFile[] = await scan(appDir)
 
   const claimed = new Map<string, string>()

@@ -395,6 +395,28 @@ export const GET = (c: AppContext) => {
           ],
         },
       },
+      headers: {
+        'RateLimit-Limit': {
+          description: 'The maximum number of requests allowed in the time window (IETF RFC draft)',
+          schema: { type: 'integer', example: 120 },
+        },
+        'RateLimit-Remaining': {
+          description: 'The number of remaining requests in the current rate limit window',
+          schema: { type: 'integer', example: 118 },
+        },
+        'RateLimit-Reset': {
+          description: 'The number of seconds until the rate limit window resets',
+          schema: { type: 'integer', example: 60 },
+        },
+        'RateLimit-Policy': {
+          description: 'The rate limit policy in effect (quota;w=window_in_seconds)',
+          schema: { type: 'string', example: '120;w=60' },
+        },
+        'Retry-After': {
+          description: 'Number of seconds to wait before retrying after a 429 status',
+          schema: { type: 'integer', example: 60 },
+        },
+      },
     },
   }
 
