@@ -135,8 +135,8 @@ export const GET = async (c: AppContext) => {
 
   return (
     <>
-      <Nav active="cockpit" />
-      <div class="wrap" style="padding-bottom: 60px;">
+      <Nav active="cockpit" wide={true} />
+      <div class="wrap-wide" style="padding-bottom: 60px;">
         {/* Header Bar */}
         <div
           style="

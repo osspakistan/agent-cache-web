@@ -11,10 +11,14 @@ export function Nav(props: {
     | 'blog'
     | 'compare'
     | 'cockpit'
+  wide?: boolean
 }) {
   return (
     <header style="padding: 20px 0; border-bottom: 1px solid var(--border-soft); margin-bottom: 32px; view-transition-name: site-header;">
-      <div class="wrap" style="display: flex; align-items: center; justify-content: space-between;">
+      <div
+        class={props.wide ? 'wrap-wide' : 'wrap'}
+        style="display: flex; align-items: center; justify-content: space-between;"
+      >
         <div style="display: flex; align-items: center; gap: 16px;">
           <a
             href="/"

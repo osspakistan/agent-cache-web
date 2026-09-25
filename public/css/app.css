@@ -58,6 +58,7 @@ body {
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 .wrap { max-width: 76ch; margin: 0 auto; padding: 0 20px; }
+.wrap-wide { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible, input:focus-visible, label:focus-visible,
 input[type="radio"]:focus-visible + .tab {
