@@ -49,7 +49,7 @@ export async function buildApp(
       p.startsWith('/js/') ||
       p.startsWith('/fonts/') ||
       p.startsWith('/api/logs') ||
-      p.startsWith('/api/admin') ||
+      p.startsWith('/api/cockpit') ||
       p.endsWith('/stream') ||
       p === '/favicon.svg' ||
       p === '/robots.txt'

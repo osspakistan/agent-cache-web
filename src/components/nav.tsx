@@ -10,7 +10,7 @@ export function Nav(props: {
     | 'dingdong'
     | 'blog'
     | 'compare'
-    | 'admin'
+    | 'cockpit'
 }) {
   return (
     <header style="padding: 20px 0; border-bottom: 1px solid var(--border-soft); margin-bottom: 32px; view-transition-name: site-header;">

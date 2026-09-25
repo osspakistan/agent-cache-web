@@ -8,8 +8,8 @@ import {
 } from '../../lib/clients'
 import { setPageMeta } from '../../lib/page-meta'
 import { formatBytes } from '../../lib/utils'
-import { isAuthenticated } from '../../lib/utils/admin-auth'
 import { countryFlag } from '../../lib/utils/analytics-detect'
+import { isAuthenticated } from '../../lib/utils/cockpit-auth'
 import type { AppContext, FeedbackRecord, JobRecord, LiveVisitor } from '../../lib/utils/types'
 
 function formatDate(ts: number): string {
@@ -32,7 +32,7 @@ function timeAgo(ts: number): string {
 
 export const GET = async (c: AppContext) => {
   setPageMeta({
-    title: 'Admin Dashboard // Agent Cache',
+    title: 'Cockpit // Agent Cache',
     description: 'Internal admin statistics, jobs monitoring, and user feedback.',
   })
 
@@ -42,7 +42,7 @@ export const GET = async (c: AppContext) => {
     const errorParam = new URL(c.req.url).searchParams.get('error')
     return c.html(
       <>
-        <Nav active="admin" />
+        <Nav active="cockpit" />
         <div class="wrap" style="padding: 60px 20px; max-width: 440px; margin: 0 auto;">
           <div
             style="
@@ -61,15 +61,15 @@ export const GET = async (c: AppContext) => {
                 Restricted
               </span>
             </div>
-            <h1 style="font-size: 22px; margin: 0 0 8px;">Admin Login</h1>
+            <h1 style="font-size: 22px; margin: 0 0 8px;">Cockpit Access</h1>
             <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 24px;">
               Enter your admin password to view system metrics and user reports.
             </p>
 
             <form
               method="post"
-              action="/api/admin/login"
-              hx-post="/api/admin/login"
+              action="/api/cockpit/login"
+              hx-post="/api/cockpit/login"
               hx-swap="none"
               style="display: grid; gap: 16px;"
             >
@@ -135,7 +135,7 @@ export const GET = async (c: AppContext) => {
 
   return c.html(
     <>
-      <Nav active="admin" />
+      <Nav active="cockpit" />
       <div class="wrap" style="padding-bottom: 60px;">
         {/* Header Bar */}
         <div
@@ -154,7 +154,7 @@ export const GET = async (c: AppContext) => {
                 class="mono"
                 style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-ink); font-weight: 600;"
               >
-                Admin Area
+                Cockpit
               </span>
               <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
                 •
@@ -176,7 +176,7 @@ export const GET = async (c: AppContext) => {
             </a>
             <button
               type="button"
-              hx-post="/api/admin/logout"
+              hx-post="/api/cockpit/logout"
               hx-swap="none"
               class="mono"
               style="

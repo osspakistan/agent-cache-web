@@ -1,8 +1,8 @@
-import { getLoginCookieHeader, verifyPassword } from '../../../../lib/utils/admin-auth'
+import { getLoginCookieHeader, verifyPassword } from '../../../../lib/utils/cockpit-auth'
 import type { AppContext } from '../../../../lib/utils/types'
 
 /**
- * POST /api/admin/login - Authenticate admin with password
+ * POST /api/cockpit/login - Authenticate admin with password
  */
 export const POST = async (c: AppContext) => {
   let password = ''
@@ -33,15 +33,15 @@ export const POST = async (c: AppContext) => {
         401,
       )
     }
-    return c.redirect('/admin?error=invalid_password', 303)
+    return c.redirect('/cockpit?error=invalid_password', 303)
   }
 
   c.header('Set-Cookie', getLoginCookieHeader())
 
   if (c.req.header('HX-Request')) {
-    c.header('HX-Redirect', '/admin')
+    c.header('HX-Redirect', '/cockpit')
     return c.text('ok', 200)
   }
 
-  return c.redirect('/admin', 303)
+  return c.redirect('/cockpit', 303)
 }
