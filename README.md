@@ -66,11 +66,11 @@ If a job fails, the UI shows a readable explanation and keeps technical error de
 
 ### Report problems with a bundle
 
-The docs viewer includes a feedback form tied to the bundle. A reader can report missing pages, wrong content, outdated docs, broken links, or another issue. Reports include an email address and details so the project owner can follow up. Submissions are stored with the job ID and appear in the admin dashboard.
+The docs viewer includes a feedback form tied to the bundle. A reader can report missing pages, wrong content, outdated docs, broken links, or another issue. Reports include an email address and details so the project owner can follow up. Submissions are stored with the job ID and appear in the internal Cockpit dashboard.
 
 ### Review usage and job health
 
-The password-gated admin page summarizes jobs, page totals, ZIP sizes, failures, and feedback. It also shows recent traffic, including the human, coding-agent, and bot categories detected by request headers, plus popular paths, actions, referrers, and visitor locations when the hosting proxy provides them.
+The password-gated Cockpit page (`/cockpit`) summarizes jobs, page totals, ZIP sizes, failures, and feedback. It also features a real-time live visitor radar and telemetry, including human vs. coding-agent vs. bot categories detected by request headers, plus top clicked actions, referrers, and visitor locations.
 
 ### Use the service API
 
@@ -112,7 +112,7 @@ cp .env.example .env
 
 Set the Cloudflare R2 account ID, access key, secret key, and bucket in `.env`. Jobs upload their logs, Markdown files, and ZIP archives to R2. Set `R2_PUBLIC_URL` if you want download links to use a public bucket URL.
 
-Set `TAVILY_API_KEY` for the docs resolver. `OPENROUTER_API_KEY` is optional. Without an OpenRouter key, the bundle metadata generator uses its local fallback based on the product name, page titles, and navigation sections.
+Set `TAVILY_API_KEY` for the docs resolver. `OPENROUTER_API_KEY` is optional. Without an OpenRouter key, the bundle metadata generator uses its local fallback based on the product name, page titles, and navigation sections. Set `ADMIN_PASSWORD` to secure access to the internal `/cockpit` dashboard.
 
 The default database is a local SQLite file at `storage/agent-cache.db`. For a remote Turso database, set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`.
 
@@ -134,6 +134,7 @@ Open [http://localhost:10901](http://localhost:10901). The production command is
 | `/api/jobs/:id/tree` | `GET` | Read the discovered navigation tree |
 | `/api/probe` | `POST` | Resolve a docs URL and inspect acquisition options |
 | `/api/feedback` | `POST` | Submit feedback for a bundle |
+| `/api/analytics/click` | `POST` | Client action and telemetry tracking beacon |
 | `/dingdong/:id/stream` | `GET` | Stream job events using Server-Sent Events |
 | `/dingdong/:id/raw-log` | `GET` | Read the job log as plain text |
 | `/docs/:id` | `GET` | Browse a completed bundle |
@@ -211,4 +212,4 @@ bun run check
 
 ## License
 
-This repository does not currently include a license file. Check with the project owner before redistributing it.
+MIT License.
