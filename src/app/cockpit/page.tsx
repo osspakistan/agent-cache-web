@@ -133,11 +133,22 @@ export const GET = async (c: AppContext) => {
   const cookieHeader = c.req.header('cookie') || ''
   const isOptedOut = cookieHeader.includes('ac_optout=1') || cookieHeader.includes('ac_optout=true')
 
+  const rangeParam = c.req.query('range') ?? 'today'
+  const RANGE_OPTIONS: Record<string, { label: string; ms: number }> = {
+    today: { label: 'Today', ms: 24 * 60 * 60 * 1000 },
+    '3d': { label: '3 Days', ms: 3 * 24 * 60 * 60 * 1000 },
+    week: { label: '7 Days', ms: 7 * 24 * 60 * 60 * 1000 },
+    month: { label: '30 Days', ms: 30 * 24 * 60 * 60 * 1000 },
+    all: { label: 'All Time', ms: 10 * 365 * 24 * 60 * 60 * 1000 },
+  }
+  const rangeKey = rangeParam in RANGE_OPTIONS ? rangeParam : 'today'
+  const timeRangeMs = RANGE_OPTIONS[rangeKey]?.ms ?? 24 * 60 * 60 * 1000
+
   const [stats, jobs, feedback, analytics] = await Promise.all([
     getAdminStats(),
     listAllJobs(50),
     listFeedback(100),
-    getAnalyticsSummary(24 * 60 * 60 * 1000),
+    getAnalyticsSummary(timeRangeMs),
   ])
 
   return (
@@ -227,6 +238,43 @@ export const GET = async (c: AppContext) => {
             Logout
           </button>
         </div>
+      </div>
+
+      {/* Time Range Filter Bar */}
+      <div
+        style="
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+          "
+      >
+        <span class="mono" style="font-size: 11px; color: var(--ink-soft); margin-right: 4px;">
+          Range:
+        </span>
+        {Object.entries(RANGE_OPTIONS).map(([key, opt]) => {
+          const isActive = key === rangeKey
+          return (
+            <a
+              href={`/cockpit?range=${key}`}
+              class="mono"
+              style={`
+                  font-size: 12px;
+                  font-weight: ${isActive ? '700' : '500'};
+                  padding: 5px 14px;
+                  border-radius: 999px;
+                  text-decoration: none;
+                  transition: all 0.15s ease;
+                  border: 1px solid ${isActive ? 'var(--accent-ink)' : 'var(--border)'};
+                  background: ${isActive ? 'var(--accent-ink)' : 'transparent'};
+                  color: ${isActive ? '#fff' : 'var(--ink-soft)'};
+                `}
+            >
+              {opt.label}
+            </a>
+          )
+        })}
       </div>
 
       {/* Bento Stats Grid */}

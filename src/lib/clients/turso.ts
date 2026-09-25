@@ -328,7 +328,7 @@ export async function getAnalyticsSummary(
             COUNT(DISTINCT session_id) as total_sessions,
             COUNT(*) as total_hits
           FROM analytics_events 
-          WHERE created_at >= ? AND client_type != 'bot'
+          WHERE created_at >= ? AND client_type != 'bot' AND path NOT LIKE '/health%'
           GROUP BY COALESCE(user_id, session_id) 
           ORDER BY last_active_at DESC 
           LIMIT 50`,
@@ -409,7 +409,7 @@ export async function getAnalyticsSummary(
 
   // Top visited paths (human + agent only)
   const pathsRes = await db.execute({
-    sql: "SELECT path, COUNT(*) as count FROM analytics_events WHERE created_at >= ? AND event_type = 'pageview' AND client_type != 'bot' GROUP BY path ORDER BY count DESC LIMIT 10",
+    sql: "SELECT path, COUNT(*) as count FROM analytics_events WHERE created_at >= ? AND event_type = 'pageview' AND client_type != 'bot' AND path NOT LIKE '/health%' GROUP BY path ORDER BY count DESC LIMIT 10",
     args: [since],
   })
 
