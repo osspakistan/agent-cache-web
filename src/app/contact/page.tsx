@@ -34,7 +34,7 @@ For bug reports and docs crawler suggestions, feel free to open an issue on the 
     return createMarkdownResponse(md)
   }
 
-  return c.html(
+  return (
     <>
       <Nav active="contact" />
       <div class="wrap" style="padding:60px 20px;max-width:700px;">
@@ -76,6 +76,6 @@ For bug reports and docs crawler suggestions, feel free to open an issue on the 
           .
         </p>
       </div>
-    </>,
+    </>
   )
 }

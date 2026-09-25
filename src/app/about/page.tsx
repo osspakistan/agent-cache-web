@@ -53,7 +53,7 @@ Have questions, ideas, or feedback? Reach out directly via email at [hello@agent
     return createMarkdownResponse(md)
   }
 
-  return c.html(
+  return (
     <>
       <Nav active="about" />
       <div class="wrap" style="padding:60px 20px;max-width:700px;">
@@ -189,6 +189,6 @@ Have questions, ideas, or feedback? Reach out directly via email at [hello@agent
           , or check <a href="/contact">the contact page</a>.
         </p>
       </div>
-    </>,
+    </>
   )
 }

@@ -40,7 +40,7 @@ export const GET = async (c: AppContext) => {
 
   if (!authed) {
     const errorParam = new URL(c.req.url).searchParams.get('error')
-    return c.html(
+    return (
       <>
         <Nav active="cockpit" />
         <div class="wrap" style="padding: 60px 20px; max-width: 440px; margin: 0 auto;">
@@ -121,7 +121,7 @@ export const GET = async (c: AppContext) => {
             </form>
           </div>
         </div>
-      </>,
+      </>
     )
   }
 
@@ -133,7 +133,7 @@ export const GET = async (c: AppContext) => {
     getAnalyticsSummary(24 * 60 * 60 * 1000),
   ])
 
-  return c.html(
+  return (
     <>
       <Nav active="cockpit" />
       <div class="wrap" style="padding-bottom: 60px;">
@@ -963,6 +963,6 @@ export const GET = async (c: AppContext) => {
           </div>
         </section>
       </div>
-    </>,
+    </>
   )
 }
