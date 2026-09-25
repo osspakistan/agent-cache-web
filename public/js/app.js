@@ -237,4 +237,61 @@
   }
 })()
 
+/**
+ * In-House Analytics Auto Click & Action Tracker
+ * Captures button clicks, tabs, copy commands, and downloads without third-party libraries
+ */
+;(function () {
+  if (typeof window === 'undefined') return
+
+  function recordAction(actionLabel, eventType) {
+    try {
+      var payload = JSON.stringify({
+        action_label: actionLabel,
+        event_type: eventType || 'click',
+        path: window.location.pathname,
+      })
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/analytics/click', new Blob([payload], { type: 'application/json' }))
+      } else {
+        fetch('/api/analytics/click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        }).catch(function () {})
+      }
+    } catch (e) {}
+  }
+
+  // Delegated event listener for user actions
+  document.addEventListener('click', function (e) {
+    var target = e.target
+    if (!target) return
+
+    // Track button or link clicks
+    var el = target.closest('button, a, [data-track]')
+    if (!el) return
+
+    var label =
+      el.getAttribute('data-track') ||
+      el.getAttribute('id') ||
+      el.getAttribute('aria-label') ||
+      (el.textContent ? el.textContent.trim().substring(0, 30) : '')
+
+    // Tag specific important actions
+    if (el.id === 'theme-toggle') {
+      recordAction('toggle_theme', 'click')
+    } else if (el.id === 'fb-open') {
+      recordAction('open_feedback_modal', 'click')
+    } else if (el.href && el.href.indexOf('/download') !== -1) {
+      recordAction('click_download_bundle', 'zip_download')
+    } else if (label && label.length > 1 && label.length <= 40) {
+      // Record named action
+      var tagName = el.tagName.toLowerCase()
+      recordAction(tagName + ':' + label, 'click')
+    }
+  })
+})()
+
 

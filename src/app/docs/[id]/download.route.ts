@@ -1,5 +1,10 @@
 import { getJobById } from '../../../features/jobs'
-import { getFromR2, getPublicR2Url } from '../../../lib/clients'
+import { getFromR2, getPublicR2Url, trackEvent } from '../../../lib/clients'
+import {
+  detectClientType,
+  parseGeoHeaders,
+  parseUserAgent,
+} from '../../../lib/utils/analytics-detect'
 import type { AppContext } from '../../../lib/utils/types'
 
 export const GET = async (c: AppContext) => {
@@ -9,6 +14,32 @@ export const GET = async (c: AppContext) => {
   if (!job) {
     return c.text('Not found', 404)
   }
+
+  // Track zip_download event
+  const ua = c.req.header('user-agent') || ''
+  const accept = c.req.header('accept') || ''
+  const clientType = detectClientType(ua, accept)
+  const { os, browser, deviceType } = parseUserAgent(ua)
+  const { countryCode, countryName, city } = parseGeoHeaders(c.req.raw.headers)
+  const cookieHeader = c.req.header('cookie') || ''
+  const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
+  const sessionId = sessionMatch
+    ? sessionMatch[1]
+    : `s_${Math.random().toString(36).substring(2, 12)}`
+
+  trackEvent({
+    sessionId,
+    eventType: 'zip_download',
+    clientType,
+    path: `/docs/${id}/download`,
+    actionLabel: `download_zip:${job.product_name || id}`,
+    countryCode,
+    countryName,
+    city,
+    os,
+    browser,
+    deviceType,
+  }).catch(() => {})
 
   // If public R2 URL is available, redirect directly to fast CDN edge
   const publicUrl =

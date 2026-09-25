@@ -5,6 +5,8 @@ import { join, relative } from 'node:path'
 import type { EvlogVariables } from 'evlog/hono'
 import type { Hono, MiddlewareHandler } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import { trackEvent } from '../lib/clients'
+import { detectClientType, parseGeoHeaders, parseUserAgent } from '../lib/utils/analytics-detect'
 import { ErrorFactory } from '../lib/utils/errors'
 import { Logger } from '../lib/utils/logger'
 import { isAcceptable } from '../lib/utils/markdown-negotiation'
@@ -37,6 +39,55 @@ export async function buildApp(
   // request-scoped middleware (e.g. evlog) MUST register before routes -
   // hono only applies middleware to handlers registered after it
   for (const mw of opts.middleware ?? []) app.use(mw)
+
+  // In-house Analytics Middleware: Tracks pageviews and agent visits
+  app.use('*', async (c, next) => {
+    const p = c.req.path
+    // Skip static assets, internal endpoints, SSE stream, and favicon
+    const isStatic =
+      p.startsWith('/css/') ||
+      p.startsWith('/js/') ||
+      p.startsWith('/fonts/') ||
+      p.startsWith('/api/logs') ||
+      p.startsWith('/api/admin') ||
+      p.endsWith('/stream') ||
+      p === '/favicon.svg' ||
+      p === '/robots.txt'
+
+    if (!isStatic && c.req.method === 'GET') {
+      const ua = c.req.header('user-agent') || ''
+      const accept = c.req.header('accept') || ''
+      const clientType = detectClientType(ua, accept)
+      const { os, browser, deviceType } = parseUserAgent(ua)
+      const { countryCode, countryName, city } = parseGeoHeaders(c.req.raw.headers)
+      const referrer = c.req.header('referer') || c.req.query('ref') || undefined
+
+      // Cookie or IP-based session ID
+      const cookieHeader = c.req.header('cookie') || ''
+      const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
+      let sessionId = sessionMatch ? sessionMatch[1] : ''
+      if (!sessionId) {
+        sessionId = `s_${Math.random().toString(36).substring(2, 12)}`
+        c.header('Set-Cookie', `ac_sid=${sessionId}; Path=/; Max-Age=86400; SameSite=Lax`)
+      }
+
+      trackEvent({
+        sessionId,
+        eventType: 'pageview',
+        clientType,
+        path: p,
+        referrer,
+        countryCode,
+        countryName,
+        city,
+        os,
+        browser,
+        deviceType,
+      }).catch((err) => console.error('[Analytics] Failed to track pageview:', err))
+    }
+
+    await next()
+  })
 
   // Standard RFC RateLimit headers for REST API endpoints (/api/* and /api/v1/*)
   app.use('/api/*', async (c, next) => {

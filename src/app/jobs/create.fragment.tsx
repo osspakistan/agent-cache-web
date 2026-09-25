@@ -1,6 +1,8 @@
 import { PillForm } from '../../components/pill-form'
 import { startJobEngine } from '../../features/engine'
 import { createNewJob } from '../../features/jobs'
+import { trackEvent } from '../../lib/clients'
+import { detectClientType, parseGeoHeaders, parseUserAgent } from '../../lib/utils/analytics-detect'
 import type { AppContext } from '../../lib/utils/types'
 
 function isValidDocsUrl(input: string): boolean {
@@ -106,6 +108,31 @@ export const POST = async (c: AppContext) => {
     startJobEngine(job).catch((err) =>
       console.error('[Jobs/Create] Background engine runner error:', err),
     )
+
+    // Track analytics event
+    const ua = c.req.header('user-agent') || ''
+    const accept = c.req.header('accept') || ''
+    const clientType = detectClientType(ua, accept)
+    const { os, browser, deviceType } = parseUserAgent(ua)
+    const { countryCode, countryName, city } = parseGeoHeaders(c.req.raw.headers)
+    const cookieHeader = c.req.header('cookie') || ''
+    const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
+    const sessionId = sessionMatch ? sessionMatch[1] : `s_${job.id}`
+
+    trackEvent({
+      sessionId,
+      eventType: 'job_create',
+      clientType,
+      path: '/',
+      actionLabel: `crawl_submitted:${new URL(rawUrl).hostname.replace(/^www\./, '')}`,
+      countryCode,
+      countryName,
+      city,
+      os,
+      browser,
+      deviceType,
+    }).catch(() => {})
+
     const targetUrl = `/dingdong/${job.id}`
 
     if (c.req.header('HX-Request')) {

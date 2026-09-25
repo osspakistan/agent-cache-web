@@ -46,6 +46,58 @@ export interface FeedbackRecord {
   created_at: number
 }
 
+export type AnalyticsEventType =
+  | 'pageview'
+  | 'click'
+  | 'job_create'
+  | 'zip_download'
+  | 'feedback_submit'
+export type AnalyticsClientType = 'human' | 'agent' | 'bot'
+
+export interface AnalyticsEventRecord {
+  id: number
+  session_id: string
+  event_type: AnalyticsEventType
+  client_type: AnalyticsClientType
+  path: string
+  action_label?: string
+  referrer?: string
+  country_code?: string
+  country_name?: string
+  city?: string
+  os?: string
+  browser?: string
+  device_type?: string
+  created_at: number
+}
+
+export interface LiveVisitor {
+  session_id: string
+  client_type: AnalyticsClientType
+  current_path: string
+  last_action: string
+  country_code?: string
+  country_name?: string
+  city?: string
+  browser?: string
+  os?: string
+  last_active_at: number
+}
+
+export interface AnalyticsSummary {
+  live_count: number
+  live_visitors: LiveVisitor[]
+  total_events: number
+  human_views: number
+  agent_views: number
+  bot_views: number
+  top_paths: { path: string; count: number }[]
+  top_actions: { action: string; count: number }[]
+  top_referrers: { referrer: string; count: number }[]
+  top_countries: { country: string; count: number }[]
+  recent_events: AnalyticsEventRecord[]
+}
+
 export interface StreamEvent {
   type: 'phase' | 'log' | 'progress' | 'error' | 'complete'
   phase?: string

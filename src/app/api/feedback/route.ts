@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { createFeedback, listFeedback } from '../../../lib/clients'
+import { createFeedback, listFeedback, trackEvent } from '../../../lib/clients'
 import type { AppContext } from '../../../lib/utils/types'
 
 /**
@@ -78,6 +78,18 @@ export const POST = async (c: AppContext) => {
       email,
       details,
     })
+
+    // Track analytics event
+    const cookieHeader = c.req.header('cookie') || ''
+    const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
+    const sessionId = sessionMatch ? sessionMatch[1] : `s_${nanoid(10)}`
+    trackEvent({
+      sessionId,
+      eventType: 'feedback_submit',
+      clientType: 'human',
+      path: jobId ? `/docs/${jobId}` : '/contact',
+      actionLabel: `feedback:${kind}:${email}`,
+    }).catch(() => {})
 
     return c.json(
       {
