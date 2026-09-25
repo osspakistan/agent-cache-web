@@ -1,3 +1,4 @@
+import { raw } from 'hono/html'
 import { Nav } from '../../components/nav'
 import {
   getAdminStats,
@@ -10,7 +11,13 @@ import { setPageMeta } from '../../lib/page-meta'
 import { formatBytes } from '../../lib/utils'
 import { countryFlag } from '../../lib/utils/analytics-detect'
 import { isAuthenticated } from '../../lib/utils/cockpit-auth'
-import type { AppContext, FeedbackRecord, JobRecord, LiveVisitor } from '../../lib/utils/types'
+import type {
+  AnalyticsEventRecord,
+  AppContext,
+  FeedbackRecord,
+  JobRecord,
+  LiveVisitor,
+} from '../../lib/utils/types'
 
 function formatDate(ts: number): string {
   if (!ts) return '-'
@@ -126,6 +133,9 @@ export const GET = async (c: AppContext) => {
   }
 
   await initDb()
+  const cookieHeader = c.req.header('cookie') || ''
+  const isOptedOut = cookieHeader.includes('ac_optout=1') || cookieHeader.includes('ac_optout=true')
+
   const [stats, jobs, feedback, analytics] = await Promise.all([
     getAdminStats(),
     listAllJobs(50),
@@ -166,7 +176,37 @@ export const GET = async (c: AppContext) => {
             <h1 style="font-size: 24px; margin: 4px 0 0;">System & Feedback Overview</h1>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            {/* Founder Device Tracking Opt-out Toggle */}
+            <button
+              type="button"
+              hx-post="/api/cockpit/optout"
+              hx-swap="none"
+              class="mono"
+              title={
+                isOptedOut
+                  ? 'Tracking is currently PAUSED on this device. Click to re-enable.'
+                  : 'Tracking is currently ACTIVE on this device. Click to stop tracking this device.'
+              }
+              style={`
+                font-size: 11.5px;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                background: ${isOptedOut ? 'rgba(239, 68, 68, 0.08)' : 'rgba(22, 163, 74, 0.08)'};
+                border: 1px solid ${isOptedOut ? 'rgba(239, 68, 68, 0.3)' : 'rgba(22, 163, 74, 0.3)'};
+                color: ${isOptedOut ? '#dc2626' : '#16a34a'};
+                font-weight: 600;
+              `}
+            >
+              <span>{isOptedOut ? '🚫' : '🛡️'}</span>
+              <span>{isOptedOut ? 'Device Tracking: Opted Out' : 'Device Tracking: Active'}</span>
+            </button>
+
             <a
               href="/docs"
               class="mono"
@@ -443,22 +483,42 @@ export const GET = async (c: AppContext) => {
                   {analytics.live_visitors.map((v: LiveVisitor) => (
                     <tr style="border-bottom: 1px solid var(--border); vertical-align: middle;">
                       <td style="padding: 10px 14px; white-space: nowrap;">
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                          <span style="font-size: 10px; color: #16a34a;">●</span>
-                          <span
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button
+                            type="button"
+                            onclick={`openUserDossier('${v.codename}')`}
                             class="mono"
-                            style="font-weight: 600; font-size: 11.5px; color: var(--ink);"
+                            title={`Inspect ${v.codename} userflow journey`}
+                            style="
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 5px;
+                              background: var(--secondary);
+                              border: 1px solid var(--border);
+                              border-radius: 6px;
+                              padding: 3px 8px;
+                              cursor: pointer;
+                              font-size: 11.5px;
+                              font-weight: 600;
+                              color: var(--ink);
+                              transition: all 0.15s ease;
+                            "
                           >
-                            {v.session_id.substring(0, 10)}
-                          </span>
+                            <span>{v.emoji}</span>
+                            <span>{v.codename}</span>
+                            <span style="font-size: 10px; color: var(--accent-ink); margin-left: 2px;">
+                              →
+                            </span>
+                          </button>
                           <span
                             class="mono"
                             style="
                               font-size: 10px;
                               padding: 1px 6px;
                               border-radius: 4px;
-                              background: var(--secondary);
-                              border: 1px solid var(--border);
+                              background: var(--background);
+                              border: 1px solid var(--border-soft);
+                              color: var(--ink-soft);
                             "
                           >
                             {v.client_type}
@@ -633,6 +693,138 @@ export const GET = async (c: AppContext) => {
                 </ul>
               )}
             </div>
+          </div>
+
+          {/* Userflow Activity Stream (Recent chronological events with user codenames) */}
+          <div
+            style="
+              margin-top: 24px;
+              background: var(--card);
+              border: 1px solid var(--border);
+              border-radius: var(--radius);
+              padding: 20px;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--border-soft);
+              "
+            >
+              <div>
+                <h3
+                  class="mono"
+                  style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--ink); margin: 0 0 2px;"
+                >
+                  Live Userflow Activity Stream
+                </h3>
+                <p style="font-size: 12px; color: var(--ink-soft); margin: 0;">
+                  Chronological clicks, page navigations, and downloads. Click any user to inspect
+                  their full journey timeline.
+                </p>
+              </div>
+              <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                Latest {analytics.recent_events.length} actions
+              </span>
+            </div>
+
+            {analytics.recent_events.length === 0 ? (
+              <div
+                class="mono"
+                style="padding: 20px; text-align: center; font-size: 12px; color: var(--ink-soft);"
+              >
+                No user activity recorded yet.
+              </div>
+            ) : (
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                  gap: 10px;
+                "
+              >
+                {analytics.recent_events.map((ev: AnalyticsEventRecord) => (
+                  <div
+                    style="
+                      background: var(--background);
+                      border: 1px solid var(--border-soft);
+                      border-radius: 8px;
+                      padding: 10px 12px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 6px;
+                      transition: border-color 0.15s;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                      <button
+                        type="button"
+                        onclick={`openUserDossier('${ev.codename || ev.user_id || ev.session_id}')`}
+                        class="mono"
+                        style="
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 5px;
+                          background: var(--secondary);
+                          border: 1px solid var(--border);
+                          border-radius: 4px;
+                          padding: 2px 7px;
+                          cursor: pointer;
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: var(--ink);
+                        "
+                      >
+                        <span>👤</span>
+                        <span>{ev.codename || ev.session_id.substring(0, 10)}</span>
+                        <span style="font-size: 9px; color: var(--accent-ink);">→</span>
+                      </button>
+                      <span class="mono" style="font-size: 10.5px; color: var(--ink-soft);">
+                        {timeAgo(ev.created_at)}
+                      </span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                      <span
+                        class="mono"
+                        style={`
+                          font-size: 10px;
+                          padding: 1px 5px;
+                          border-radius: 3px;
+                          font-weight: 600;
+                          background: ${
+                            ev.event_type === 'pageview'
+                              ? 'rgba(22, 163, 74, 0.1)'
+                              : 'rgba(217, 119, 6, 0.1)'
+                          };
+                          color: ${ev.event_type === 'pageview' ? '#16a34a' : '#d97706'};
+                        `}
+                      >
+                        {ev.action_label || ev.event_type}
+                      </span>
+                      <span
+                        class="mono"
+                        style="
+                          color: var(--ink);
+                          font-size: 11.5px;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          flex: 1;
+                        "
+                        title={ev.path}
+                      >
+                        {ev.path}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -963,6 +1155,204 @@ export const GET = async (c: AppContext) => {
           </div>
         </section>
       </div>
+
+      {/* Userflow Journey Dossier Modal */}
+      <div
+        id="dossierModal"
+        style="
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(0, 0, 0, 0.45);
+          backdrop-filter: blur(4px);
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        "
+      >
+        <div
+          style="
+            background: var(--paper);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 640px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          "
+        >
+          {/* Modal Header */}
+          <div
+            style="
+              padding: 16px 20px;
+              border-bottom: 1px solid var(--border);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              background: var(--card);
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span id="dossierAvatar" style="font-size: 24px;">
+                👤
+              </span>
+              <div>
+                <h3
+                  id="dossierCodename"
+                  class="mono"
+                  style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ink);"
+                >
+                  Loading...
+                </h3>
+                <div
+                  id="dossierMeta"
+                  class="mono"
+                  style="font-size: 11px; color: var(--ink-soft); margin-top: 2px;"
+                >
+                  User Journey History
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="closeUserDossier()"
+              class="mono"
+              style="
+                background: none;
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 4px 10px;
+                font-size: 12px;
+                cursor: pointer;
+                color: var(--ink-soft);
+              "
+            >
+              ✕ Esc
+            </button>
+          </div>
+
+          {/* Modal Scrollable Timeline Content */}
+          <div id="dossierContent" style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div
+              class="mono"
+              style="text-align: center; padding: 40px; color: var(--ink-soft); font-size: 12.5px;"
+            >
+              Loading user journeys...
+            </div>
+          </div>
+
+          {/* Modal Footer */}
+          <div
+            style="
+              padding: 12px 20px;
+              border-top: 1px solid var(--border);
+              background: var(--card);
+              display: flex;
+              justify-content: flex-end;
+            "
+          >
+            <button
+              type="button"
+              onclick="closeUserDossier()"
+              class="mono"
+              style="
+                font-size: 12px;
+                background: var(--secondary);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 6px 14px;
+                cursor: pointer;
+                color: var(--ink);
+                font-weight: 600;
+              "
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {raw(`
+        <script>
+          async function openUserDossier(id) {
+            const modal = document.getElementById('dossierModal');
+            const avatar = document.getElementById('dossierAvatar');
+            const nameEl = document.getElementById('dossierCodename');
+            const metaEl = document.getElementById('dossierMeta');
+            const contentEl = document.getElementById('dossierContent');
+
+            if (!modal) return;
+            modal.style.display = 'flex';
+            avatar.innerText = '⏳';
+            nameEl.innerText = id;
+            metaEl.innerText = 'Fetching user flow journeys...';
+            contentEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--ink-soft); font-family: monospace; font-size: 12px;">Tracing events & journeys...</div>';
+
+            try {
+              const res = await fetch('/api/cockpit/user/' + encodeURIComponent(id));
+              if (!res.ok) throw new Error('User journeys not found');
+              const json = await res.json();
+              const dossier = json.dossier;
+
+              avatar.innerText = dossier.user.emoji || '👤';
+              nameEl.innerText = dossier.user.codename;
+              metaEl.innerText = (dossier.user.country_name || dossier.user.country_code || 'Global') + ' · ' + (dossier.user.os || '') + ' ' + (dossier.user.browser || '') + ' · ' + dossier.user.total_sessions + ' session(s) · ' + dossier.user.total_events + ' total events';
+
+              if (!dossier.sessions || dossier.sessions.length === 0) {
+                contentEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--ink-soft); font-family: monospace; font-size: 12px;">No recorded sessions for this user.</div>';
+                return;
+              }
+
+              let html = '<div style="display: flex; flex-direction: column; gap: 16px;">';
+              dossier.sessions.forEach((s, idx) => {
+                const sessionDate = new Date(s.started_at).toLocaleString();
+                html += '<div style="background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">';
+                html += '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-soft);">';
+                html += '<span style="font-family: monospace; font-size: 12px; font-weight: 700; color: var(--ink);">Journey #' + (dossier.sessions.length - idx) + ' · ' + sessionDate + '</span>';
+                html += '<span style="font-family: monospace; font-size: 11px; color: var(--accent-ink); background: var(--secondary); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-soft);">' + s.duration_seconds + 's · ' + s.events.length + ' step(s)</span>';
+                html += '</div>';
+
+                html += '<div style="position: relative; padding-left: 18px; margin-left: 6px; border-left: 2px solid var(--border); display: flex; flex-direction: column; gap: 10px;">';
+                s.events.forEach((e) => {
+                  const time = new Date(e.created_at).toTimeString().split(' ')[0];
+                  const isPageView = e.event_type === 'pageview';
+                  const badgeColor = isPageView ? '#16a34a' : '#d97706';
+                  const badgeBg = isPageView ? 'rgba(22, 163, 74, 0.1)' : 'rgba(217, 119, 6, 0.1)';
+
+                  html += '<div style="position: relative; font-family: monospace; font-size: 11.5px;">';
+                  html += '<span style="position: absolute; left: -24px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: ' + badgeColor + '; border: 2px solid var(--paper);"></span>';
+                  html += '<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">';
+                  html += '<span style="color: var(--ink-soft); font-size: 10.5px;">' + time + '</span>';
+                  html += '<span style="font-weight: 700; color: ' + badgeColor + '; background: ' + badgeBg + '; padding: 1px 5px; border-radius: 3px; font-size: 10.5px;">' + (e.action_label || e.event_type) + '</span>';
+                  html += '<span style="color: var(--ink); background: var(--secondary); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border-soft); word-break: break-all;">' + e.path + '</span>';
+                  html += '</div>';
+                  html += '</div>';
+                });
+                html += '</div>';
+                html += '</div>';
+              });
+              html += '</div>';
+
+              contentEl.innerHTML = html;
+            } catch (err) {
+              contentEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc2626; font-family: monospace; font-size: 12px;">Failed to load user journey.</div>';
+            }
+          }
+
+          function closeUserDossier() {
+            const modal = document.getElementById('dossierModal');
+            if (modal) modal.style.display = 'none';
+          }
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeUserDossier();
+          });
+        </script>
+      `)}
     </>
   )
 }

@@ -55,35 +55,59 @@ export async function buildApp(
       p === '/robots.txt'
 
     if (!isStatic && c.req.method === 'GET') {
-      const ua = c.req.header('user-agent') || ''
-      const accept = c.req.header('accept') || ''
-      const clientType = detectClientType(ua, accept)
-      const { os, browser, deviceType } = parseUserAgent(ua)
-      const { countryCode, countryName, city } = parseGeoHeaders(c.req.raw.headers)
-      const referrer = c.req.header('referer') || c.req.query('ref') || undefined
-
-      // Cookie or IP-based session ID
       const cookieHeader = c.req.header('cookie') || ''
-      const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
-      let sessionId = sessionMatch ? sessionMatch[1] : ''
-      if (!sessionId) {
-        sessionId = `s_${Math.random().toString(36).substring(2, 12)}`
-        c.header('Set-Cookie', `ac_sid=${sessionId}; Path=/; Max-Age=86400; SameSite=Lax`)
-      }
+      // Admin/founder opt-out check: ignore if ac_optout=1 or user is admin
+      const isOptedOut =
+        cookieHeader.includes('ac_optout=1') ||
+        cookieHeader.includes('ac_optout=true') ||
+        cookieHeader.includes('ac_admin_session=')
 
-      trackEvent({
-        sessionId,
-        eventType: 'pageview',
-        clientType,
-        path: p,
-        referrer,
-        countryCode,
-        countryName,
-        city,
-        os,
-        browser,
-        deviceType,
-      }).catch((err) => console.error('[Analytics] Failed to track pageview:', err))
+      if (!isOptedOut) {
+        const ua = c.req.header('user-agent') || ''
+        const accept = c.req.header('accept') || ''
+        const clientType = detectClientType(ua, accept)
+        const { os, browser, deviceType } = parseUserAgent(ua)
+        const { countryCode, countryName, city } = parseGeoHeaders(c.req.raw.headers)
+        const referrer = c.req.header('referer') || c.req.query('ref') || undefined
+
+        // Persistent User ID (ac_uid) & Session ID (ac_sid)
+        const userMatch = cookieHeader.match(/ac_uid=([a-zA-Z0-9_-]+)/)
+        let userId = userMatch ? userMatch[1] : ''
+        if (!userId) {
+          userId = `u_${Math.random().toString(36).substring(2, 10)}${Date.now().toString(36).slice(-4)}`
+          c.header('Set-Cookie', `ac_uid=${userId}; Path=/; Max-Age=31536000; SameSite=Lax`, {
+            append: true,
+          })
+        }
+
+        const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
+        let sessionId = sessionMatch ? sessionMatch[1] : ''
+        if (!sessionId) {
+          sessionId = `s_${Math.random().toString(36).substring(2, 12)}`
+          c.header('Set-Cookie', `ac_sid=${sessionId}; Path=/; Max-Age=86400; SameSite=Lax`, {
+            append: true,
+          })
+        }
+
+        const { generateCodename } = await import('../lib/utils/codename')
+        const { codename } = generateCodename(userId)
+
+        trackEvent({
+          sessionId,
+          userId,
+          codename,
+          eventType: 'pageview',
+          clientType,
+          path: p,
+          referrer,
+          countryCode,
+          countryName,
+          city,
+          os,
+          browser,
+          deviceType,
+        }).catch((err) => console.error('[Analytics] Failed to track pageview:', err))
+      }
     }
 
     await next()

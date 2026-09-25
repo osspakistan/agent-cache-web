@@ -57,6 +57,8 @@ export type AnalyticsClientType = 'human' | 'agent' | 'bot'
 export interface AnalyticsEventRecord {
   id: number
   session_id: string
+  user_id?: string
+  codename?: string
   event_type: AnalyticsEventType
   client_type: AnalyticsClientType
   path: string
@@ -73,6 +75,9 @@ export interface AnalyticsEventRecord {
 
 export interface LiveVisitor {
   session_id: string
+  user_id?: string
+  codename: string
+  emoji: string
   client_type: AnalyticsClientType
   current_path: string
   last_action: string
@@ -82,6 +87,34 @@ export interface LiveVisitor {
   browser?: string
   os?: string
   last_active_at: number
+}
+
+export interface UserSessionJourney {
+  session_id: string
+  started_at: number
+  last_active_at: number
+  duration_seconds: number
+  events: AnalyticsEventRecord[]
+}
+
+export interface UserDossier {
+  user: {
+    identifier: string
+    codename: string
+    emoji: string
+    client_type: AnalyticsClientType
+    country_code?: string
+    country_name?: string
+    city?: string
+    browser?: string
+    os?: string
+    device_type?: string
+    first_seen: number
+    last_seen: number
+    total_events: number
+    total_sessions: number
+  }
+  sessions: UserSessionJourney[]
 }
 
 export interface AnalyticsSummary {

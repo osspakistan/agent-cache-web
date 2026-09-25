@@ -10,7 +10,7 @@ const BASE = 'https://agentcache.run'
 export const GET = async (_c: AppContext) => {
   const [blog, compare] = await Promise.all([getContent('blog'), getContent('compare')])
 
-  const section = (title: string, posts: typeof blog) =>
+  const section = (_title: string, posts: typeof blog) =>
     posts
       .map(
         (p) =>

@@ -8,6 +8,8 @@ import type {
   FeedbackRecord,
   JobRecord,
   LiveVisitor,
+  UserDossier,
+  UserSessionJourney,
 } from '../utils/types'
 
 let client: Client | null = null
@@ -93,6 +95,17 @@ export async function initDb(): Promise<void> {
     )
     await db.execute(
       `CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id);`,
+    )
+  } catch {}
+  try {
+    await db.execute(`ALTER TABLE analytics_events ADD COLUMN user_id TEXT;`)
+  } catch {}
+  try {
+    await db.execute(`ALTER TABLE analytics_events ADD COLUMN codename TEXT;`)
+  } catch {}
+  try {
+    await db.execute(
+      `CREATE INDEX IF NOT EXISTS idx_analytics_codename ON analytics_events(codename);`,
     )
   } catch {}
   try {
@@ -252,6 +265,8 @@ export async function listAllJobs(limit = 100): Promise<JobRecord[]> {
 
 export async function trackEvent(event: {
   sessionId: string
+  userId?: string
+  codename?: string
   eventType: AnalyticsEventType
   clientType: AnalyticsClientType
   path: string
@@ -267,9 +282,11 @@ export async function trackEvent(event: {
   const db = getTursoClient()
   const now = Date.now()
   await db.execute({
-    sql: 'INSERT INTO analytics_events (session_id, event_type, client_type, path, action_label, referrer, country_code, country_name, city, os, browser, device_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    sql: 'INSERT INTO analytics_events (session_id, user_id, codename, event_type, client_type, path, action_label, referrer, country_code, country_name, city, os, browser, device_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     args: [
       event.sessionId,
+      event.userId || null,
+      event.codename || null,
       event.eventType,
       event.clientType,
       event.path,
@@ -293,24 +310,54 @@ export async function getAnalyticsSummary(
   const since = Date.now() - timeRangeMs
   const liveThreshold = Date.now() - 5 * 60 * 1000 // active in last 5 minutes
 
-  // Live active visitors
+  // Live active visitors (group by user_id or session_id)
   const liveRes = await db.execute({
-    sql: 'SELECT session_id, client_type, path as current_path, action_label as last_action, country_code, country_name, city, browser, os, MAX(created_at) as last_active_at FROM analytics_events WHERE created_at >= ? GROUP BY session_id ORDER BY last_active_at DESC LIMIT 30',
+    sql: `SELECT 
+            session_id, 
+            user_id, 
+            codename, 
+            client_type, 
+            path as current_path, 
+            action_label as last_action, 
+            country_code, 
+            country_name, 
+            city, 
+            browser, 
+            os, 
+            MAX(created_at) as last_active_at 
+          FROM analytics_events 
+          WHERE created_at >= ? 
+          GROUP BY COALESCE(user_id, session_id) 
+          ORDER BY last_active_at DESC 
+          LIMIT 30`,
     args: [liveThreshold],
   })
 
-  const live_visitors: LiveVisitor[] = liveRes.rows.map((r) => ({
-    session_id: String(r.session_id || ''),
-    client_type: (r.client_type || 'human') as AnalyticsClientType,
-    current_path: String(r.current_path || '/'),
-    last_action: String(r.last_action || 'view'),
-    country_code: r.country_code ? String(r.country_code) : undefined,
-    country_name: r.country_name ? String(r.country_name) : undefined,
-    city: r.city ? String(r.city) : undefined,
-    browser: r.browser ? String(r.browser) : undefined,
-    os: r.os ? String(r.os) : undefined,
-    last_active_at: Number(r.last_active_at || 0),
-  }))
+  const { generateCodename, getEmojiForCodename } = await import('../utils/codename')
+
+  const live_visitors: LiveVisitor[] = liveRes.rows.map((r) => {
+    const rawCodename = r.codename ? String(r.codename) : ''
+    const fallbackId = String(r.user_id || r.session_id || '')
+    const generated = generateCodename(fallbackId)
+    const codename = rawCodename || generated.codename
+    const emoji = getEmojiForCodename(codename)
+
+    return {
+      session_id: String(r.session_id || ''),
+      user_id: r.user_id ? String(r.user_id) : undefined,
+      codename,
+      emoji,
+      client_type: (r.client_type || 'human') as AnalyticsClientType,
+      current_path: String(r.current_path || '/'),
+      last_action: String(r.last_action || 'view'),
+      country_code: r.country_code ? String(r.country_code) : undefined,
+      country_name: r.country_name ? String(r.country_name) : undefined,
+      city: r.city ? String(r.city) : undefined,
+      browser: r.browser ? String(r.browser) : undefined,
+      os: r.os ? String(r.os) : undefined,
+      last_active_at: Number(r.last_active_at || 0),
+    }
+  })
 
   // Volume & Client breakdown
   const countsRes = await db.execute({
@@ -343,9 +390,21 @@ export async function getAnalyticsSummary(
     args: [since],
   })
 
-  // Recent 20 raw events
+  // Recent 30 raw events with codename
   const recentRes = await db.execute({
-    sql: 'SELECT * FROM analytics_events ORDER BY created_at DESC LIMIT 25',
+    sql: 'SELECT * FROM analytics_events ORDER BY created_at DESC LIMIT 30',
+  })
+
+  const recent_events: AnalyticsEventRecord[] = recentRes.rows.map((r) => {
+    const rawCodename = r.codename ? String(r.codename) : ''
+    const fallbackId = String(r.user_id || r.session_id || '')
+    const generated = generateCodename(fallbackId)
+    const codename = rawCodename || generated.codename
+
+    return {
+      ...(r as unknown as AnalyticsEventRecord),
+      codename,
+    }
   })
 
   return {
@@ -371,6 +430,92 @@ export async function getAnalyticsSummary(
       country: String(r.country || ''),
       count: Number(r.count || 0),
     })),
-    recent_events: recentRes.rows as unknown as AnalyticsEventRecord[],
+    recent_events,
+  }
+}
+
+/**
+ * Detailed User Journey Dossier by codename, user_id, or session_id
+ */
+export async function getUserDossier(identifier: string): Promise<UserDossier | null> {
+  const db = getTursoClient()
+  const clean = identifier.trim()
+  if (!clean) return null
+
+  const { generateCodename, getEmojiForCodename } = await import('../utils/codename')
+
+  // Find events matching codename, user_id, or session_id
+  const eventsRes = await db.execute({
+    sql: `SELECT * FROM analytics_events 
+          WHERE codename = ? OR user_id = ? OR session_id = ? OR session_id LIKE ? 
+          ORDER BY created_at ASC LIMIT 500`,
+    args: [clean, clean, clean, `${clean}%`],
+  })
+
+  if (eventsRes.rows.length === 0) {
+    return null
+  }
+
+  const rawEvents = eventsRes.rows as unknown as AnalyticsEventRecord[]
+
+  // Deduce user attributes from first & latest events
+  const firstEv = rawEvents[0]
+  const latestEv = rawEvents[rawEvents.length - 1]
+
+  const uid = firstEv.user_id || firstEv.session_id
+  const codenameObj = generateCodename(uid)
+  const codename = firstEv.codename || latestEv.codename || codenameObj.codename
+  const emoji = getEmojiForCodename(codename)
+
+  // Group events by session_id
+  const sessionMap = new Map<string, AnalyticsEventRecord[]>()
+  for (const ev of rawEvents) {
+    const sId = ev.session_id || 'unknown_session'
+    let list = sessionMap.get(sId)
+    if (!list) {
+      list = []
+      sessionMap.set(sId, list)
+    }
+    list.push({
+      ...ev,
+      codename,
+    })
+  }
+
+  const sessions: UserSessionJourney[] = []
+  for (const [sId, sEvents] of sessionMap.entries()) {
+    const start = sEvents[0].created_at
+    const end = sEvents[sEvents.length - 1].created_at
+    const duration = Math.max(0, Math.round((end - start) / 1000))
+    sessions.push({
+      session_id: sId,
+      started_at: start,
+      last_active_at: end,
+      duration_seconds: duration,
+      events: sEvents,
+    })
+  }
+
+  // Order sessions newest first
+  sessions.sort((a, b) => b.started_at - a.started_at)
+
+  return {
+    user: {
+      identifier: clean,
+      codename,
+      emoji,
+      client_type: latestEv.client_type,
+      country_code: latestEv.country_code,
+      country_name: latestEv.country_name,
+      city: latestEv.city,
+      browser: latestEv.browser,
+      os: latestEv.os,
+      device_type: latestEv.device_type,
+      first_seen: firstEv.created_at,
+      last_seen: latestEv.created_at,
+      total_events: rawEvents.length,
+      total_sessions: sessions.length,
+    },
+    sessions,
   }
 }

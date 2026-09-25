@@ -41,13 +41,30 @@ export const POST = async (c: AppContext) => {
   const referrer = c.req.header('referer') || undefined
 
   const cookieHeader = c.req.header('cookie') || ''
+  const isOptedOut =
+    cookieHeader.includes('ac_optout=1') ||
+    cookieHeader.includes('ac_optout=true') ||
+    cookieHeader.includes('ac_admin_session=')
+
+  if (isOptedOut) {
+    return c.json({ ok: true, ignored: 'opted_out' })
+  }
+
+  const userMatch = cookieHeader.match(/ac_uid=([a-zA-Z0-9_-]+)/)
+  const userId = userMatch ? userMatch[1] : undefined
+
   const sessionMatch = cookieHeader.match(/ac_sid=([a-zA-Z0-9_-]+)/)
   const sessionId = sessionMatch
     ? sessionMatch[1]
     : `s_${Math.random().toString(36).substring(2, 12)}`
 
+  const { generateCodename } = await import('../../../../lib/utils/codename')
+  const { codename } = generateCodename(userId || sessionId)
+
   trackEvent({
     sessionId,
+    userId,
+    codename,
     eventType,
     clientType,
     path: path || '/',
