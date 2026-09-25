@@ -4,3 +4,4 @@ storage/jobs/*
 .env
 .pi
 .mcp.json
+.agents
