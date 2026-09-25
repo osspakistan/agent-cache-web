@@ -73,6 +73,17 @@ export interface AnalyticsEventRecord {
   created_at: number
 }
 
+export interface LivePageRoster {
+  path: string
+  count: number
+  users: {
+    codename: string
+    emoji: string
+    country_code?: string
+    city?: string
+  }[]
+}
+
 export interface LiveVisitor {
   session_id: string
   user_id?: string
@@ -87,6 +98,8 @@ export interface LiveVisitor {
   browser?: string
   os?: string
   last_active_at: number
+  total_visits?: number
+  is_returning?: boolean
 }
 
 export interface UserSessionJourney {
@@ -120,10 +133,15 @@ export interface UserDossier {
 export interface AnalyticsSummary {
   live_count: number
   live_visitors: LiveVisitor[]
+  active_pages: LivePageRoster[]
   total_events: number
   human_views: number
   agent_views: number
   bot_views: number
+  total_visitors: number
+  total_sessions: number
+  new_visitors: number
+  returning_visitors: number
   top_paths: { path: string; count: number }[]
   top_actions: { action: string; count: number }[]
   top_referrers: { referrer: string; count: number }[]

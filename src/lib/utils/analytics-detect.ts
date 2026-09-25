@@ -31,18 +31,10 @@ export function detectClientType(userAgent: string, accept: string): AnalyticsCl
     return 'agent'
   }
 
-  // Crawlers / AI bots
-  if (
-    ua.includes('bot') ||
-    ua.includes('crawl') ||
-    ua.includes('spider') ||
-    ua.includes('slurp') ||
-    ua.includes('gptbot') ||
-    ua.includes('perplexity') ||
-    ua.includes('anthropic-ai') ||
-    ua.includes('bingbot') ||
-    ua.includes('googlebot')
-  ) {
+  // Crawlers / AI bots / CLI tools (curl, wget, scripts, probes)
+  const botPattern =
+    /bot|crawl|spider|slurp|gptbot|perplexity|anthropic-ai|bingbot|googlebot|facebookexternalhit|whatsapp|telegram|discordbot|twitterbot|headless|prerender|lighthouse|pingdom|google-inspectiontool|curl|wget|python|httpclient|postman|insomnia|go-http-client|axios|undici|node-fetch/i
+  if (botPattern.test(ua)) {
     return 'bot'
   }
 
@@ -58,6 +50,18 @@ export function parseUserAgent(userAgent: string): {
   deviceType: string
 } {
   const ua = userAgent || ''
+
+  // CLI / Bots
+  if (
+    /curl|wget|python|httpclient|postman|insomnia|go-http-client|axios|undici|node-fetch/i.test(ua)
+  ) {
+    return {
+      os: 'CLI / Bot',
+      browser: ua.startsWith('curl/') ? ua.split(' ')[0] : 'CLI / Script',
+      deviceType: 'Bot',
+    }
+  }
+
   let os = 'Unknown'
   let browser = 'Unknown'
   let deviceType = 'Desktop'
@@ -79,7 +83,6 @@ export function parseUserAgent(userAgent: string): {
   else if (/chrome|crios/i.test(ua)) browser = 'Chrome'
   else if (/firefox|fxios/i.test(ua)) browser = 'Firefox'
   else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari'
-  else if (/curl|wget|python|httpclient/i.test(ua)) browser = 'CLI/Script'
 
   return { os, browser, deviceType }
 }

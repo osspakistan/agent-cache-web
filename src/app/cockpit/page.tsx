@@ -15,6 +15,7 @@ import type {
   AppContext,
   FeedbackRecord,
   JobRecord,
+  LivePageRoster,
   LiveVisitor,
 } from '../../lib/utils/types'
 
@@ -344,221 +345,515 @@ export const GET = async (c: AppContext) => {
         </div>
       </div>
 
-      {/* Live Traffic Radar & Client Breakdown */}
-      <section style="margin-bottom: 48px;">
-        <div
-          style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 16px;
-            "
-        >
-          <div>
-            <h2 style="font-size: 18px; margin: 0 0 4px;">Live Visitor Radar & Telemetry</h2>
-            <p style="font-size: 12.5px; color: var(--ink-soft); margin: 0;">
-              Real-time active sessions, user locations, device types, and what actions they take
-            </p>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <span
-              class="mono"
-              style="
-                  font-size: 11px;
-                  padding: 3px 8px;
-                  background: var(--secondary);
-                  border: 1px solid var(--border);
-                  border-radius: 999px;
-                  color: var(--ink-soft);
-                "
-            >
-              👤 {analytics.human_views} humans
-            </span>
-            <span
-              class="mono"
-              style="
-                  font-size: 11px;
-                  padding: 3px 8px;
-                  background: var(--secondary);
-                  border: 1px solid var(--border);
-                  border-radius: 999px;
-                  color: var(--accent-ink);
-                "
-            >
-              🤖 {analytics.agent_views} coding agents
-            </span>
-            <span
-              class="mono"
-              style="
-                  font-size: 11px;
-                  padding: 3px 8px;
-                  background: var(--secondary);
-                  border: 1px solid var(--border);
-                  border-radius: 999px;
-                  color: var(--ink-soft);
-                "
-            >
-              🕷️ {analytics.bot_views} bots
-            </span>
-          </div>
-        </div>
-
-        {/* Live Active Sessions Table */}
+      {/* 🟢 SECTION 1: LIVE WHO IS VISITING WHAT RIGHT NOW (Live Page Rosters) */}
+      <section style="margin-bottom: 32px;">
         <div
           style="
               background: var(--card);
               border: 1px solid var(--border);
               border-radius: var(--radius);
-              overflow-x: auto;
-              margin-bottom: 24px;
+              padding: 20px 24px;
             "
         >
-          {analytics.live_visitors.length === 0 ? (
-            <div style="padding: 28px; text-align: center; color: var(--ink-soft);">
-              <p class="mono" style="font-size: 12.5px; margin: 0;">
-                No live visitors active in the last 5 minutes.
-              </p>
+          <div
+            style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--border-soft);
+              "
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span
+                style="
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: #16a34a;
+                    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+                  "
+              />
+              <h2 style="font-size: 16px; margin: 0; font-weight: 700;">
+                Who is visiting what right now?
+              </h2>
             </div>
-          ) : (
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12.5px;">
-              <thead>
-                <tr style="border-bottom: 1px solid var(--border); background: var(--secondary);">
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft);"
-                  >
-                    VISITOR / TYPE
-                  </th>
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft);"
-                  >
-                    CURRENT PAGE
-                  </th>
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft);"
-                  >
-                    LAST ACTION
-                  </th>
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft);"
-                  >
-                    LOCATION
-                  </th>
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft);"
-                  >
-                    DEVICE / BROWSER
-                  </th>
-                  <th
-                    class="mono"
-                    style="padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--ink-soft); text-align: right;"
-                  >
-                    LAST SEEN
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.live_visitors.map((v: LiveVisitor) => (
-                  <tr style="border-bottom: 1px solid var(--border); vertical-align: middle;">
-                    <td style="padding: 10px 14px; white-space: nowrap;">
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <button
-                          type="button"
-                          onclick={`openUserDossier('${v.codename}')`}
-                          class="mono"
-                          title={`Inspect ${v.codename} userflow journey`}
-                          style="
-                              display: inline-flex;
-                              align-items: center;
-                              gap: 5px;
-                              background: var(--secondary);
-                              border: 1px solid var(--border);
-                              border-radius: 6px;
-                              padding: 3px 8px;
-                              cursor: pointer;
-                              font-size: 11.5px;
-                              font-weight: 600;
-                              color: var(--ink);
-                              transition: all 0.15s ease;
-                            "
-                        >
-                          <span>{v.emoji}</span>
-                          <span>{v.codename}</span>
-                          <span style="font-size: 10px; color: var(--accent-ink); margin-left: 2px;">
-                            →
-                          </span>
-                        </button>
-                        <span
-                          class="mono"
-                          style="
-                              font-size: 10px;
-                              padding: 1px 6px;
-                              border-radius: 4px;
-                              background: var(--background);
-                              border: 1px solid var(--border-soft);
-                              color: var(--ink-soft);
-                            "
-                        >
-                          {v.client_type}
-                        </span>
-                      </div>
-                    </td>
-                    <td
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                Live page rosters (last 5 mins)
+              </span>
+              <span
+                class="mono"
+                style="
+                    font-size: 11px;
+                    padding: 2px 8px;
+                    background: var(--secondary);
+                    border: 1px solid var(--border);
+                    border-radius: 999px;
+                    color: #16a34a;
+                    font-weight: 600;
+                  "
+              >
+                ● {analytics.live_count} active
+              </span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            {analytics.active_pages.length === 0 ? (
+              <div
+                class="mono"
+                style="padding: 20px; text-align: center; font-size: 12.5px; color: var(--ink-soft);"
+              >
+                No active human visitors in the last 5 minutes.
+              </div>
+            ) : (
+              analytics.active_pages.map((page: LivePageRoster) => (
+                <div
+                  style="
+                      display: flex;
+                      flex-wrap: wrap;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: 12px;
+                      padding: 10px 14px;
+                      border-radius: 8px;
+                      background: var(--background);
+                      border: 1px solid var(--border-soft);
+                    "
+                >
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span
                       class="mono"
-                      style="padding: 10px 14px; font-size: 12px; color: var(--ink);"
+                      style="
+                          font-size: 12px;
+                          font-weight: 700;
+                          padding: 3px 8px;
+                          border-radius: 6px;
+                          background: var(--secondary);
+                          color: var(--ink);
+                        "
                     >
-                      {v.current_path}
-                    </td>
-                    <td style="padding: 10px 14px; font-size: 12px;">
+                      {page.path}
+                    </span>
+                    <span class="mono" style="font-size: 11.5px; color: var(--ink-soft);">
+                      {page.count} active {page.count === 1 ? 'user' : 'users'}
+                    </span>
+                  </div>
+
+                  {/* Avatars Roster */}
+                  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">
+                    {page.users.map((u) => (
+                      <button
+                        type="button"
+                        onclick={`openUserDossier('${u.codename}')`}
+                        class="mono"
+                        title={`Click to view full user journey of ${u.codename}`}
+                        style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 5px;
+                            padding: 3px 8px;
+                            border-radius: 999px;
+                            background: var(--card);
+                            border: 1px solid var(--border);
+                            font-size: 11.5px;
+                            font-weight: 600;
+                            color: var(--ink);
+                            cursor: pointer;
+                            transition: all 0.15s ease;
+                          "
+                      >
+                        <span>{countryFlag(u.country_code)}</span>
+                        <span>{u.emoji}</span>
+                        <span>{u.codename}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 🔴 SECTION 2: LIVE STREAM (1 COL) & ACTIVE & RECENT JOURNEYS (2 COLS) */}
+      <section style="margin-bottom: 40px;">
+        <div
+          style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+              gap: 20px;
+            "
+        >
+          {/* Live Activity Stream (1 Column) */}
+          <div
+            style="
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 20px 22px;
+                display: flex;
+                flex-direction: column;
+                height: 480px;
+              "
+          >
+            <div
+              style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: 8px;
+                  margin-bottom: 14px;
+                  padding-bottom: 10px;
+                  border-bottom: 1px solid var(--border-soft);
+                "
+            >
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 14px;">📡</span>
+                <h3
+                  class="mono"
+                  style="font-size: 13px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--ink);"
+                >
+                  Live Stream
+                </h3>
+              </div>
+              <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                Latest events
+              </span>
+            </div>
+
+            <div
+              style="
+                  flex: 1;
+                  overflow-y: auto;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                  padding-right: 4px;
+                "
+            >
+              {analytics.recent_events.length === 0 ? (
+                <div
+                  class="mono"
+                  style="text-align: center; padding: 40px 10px; color: var(--ink-soft); font-size: 12px;"
+                >
+                  No events recorded yet.
+                </div>
+              ) : (
+                analytics.recent_events.slice(0, 20).map((ev: AnalyticsEventRecord) => (
+                  <div
+                    style="
+                        padding: 8px 10px;
+                        border-radius: 6px;
+                        background: var(--background);
+                        border: 1px solid var(--border-soft);
+                        font-size: 11.5px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                      "
+                  >
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                      <button
+                        type="button"
+                        onclick={`openUserDossier('${ev.codename || ev.session_id}')`}
+                        class="mono"
+                        style="
+                            background: none;
+                            border: none;
+                            padding: 0;
+                            cursor: pointer;
+                            font-weight: 700;
+                            color: var(--ink);
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 4px;
+                            font-size: 11.5px;
+                          "
+                      >
+                        <span>{ev.codename || ev.session_id.substring(0, 10)}</span>
+                      </button>
+                      <span class="mono" style="font-size: 10px; color: var(--ink-soft);">
+                        {timeAgo(ev.created_at)}
+                      </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+                      <span
+                        class="mono"
+                        style={`
+                            font-size: 9.5px;
+                            font-weight: 700;
+                            padding: 1px 5px;
+                            border-radius: 3px;
+                            white-space: nowrap;
+                            background: ${
+                              ev.event_type === 'pageview'
+                                ? 'rgba(22, 163, 74, 0.1)'
+                                : 'rgba(217, 119, 6, 0.1)'
+                            };
+                            color: ${ev.event_type === 'pageview' ? '#16a34a' : '#d97706'};
+                          `}
+                      >
+                        {ev.action_label || ev.event_type}
+                      </span>
                       <span
                         class="mono"
                         style="
                             font-size: 11px;
-                            color: var(--accent-ink);
-                            background: var(--secondary);
-                            border: 1px solid var(--border-soft);
-                            padding: 2px 6px;
-                            border-radius: 4px;
+                            color: var(--ink-soft);
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            flex: 1;
+                          "
+                        title={ev.path}
+                      >
+                        {ev.path}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Active & Recent Journeys Roster (2 Columns) */}
+          <div
+            style="
+                grid-column: span 2;
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 20px 22px;
+                display: flex;
+                flex-direction: column;
+                height: 480px;
+              "
+          >
+            <div
+              style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: 8px;
+                  margin-bottom: 14px;
+                  padding-bottom: 10px;
+                  border-bottom: 1px solid var(--border-soft);
+                "
+            >
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 15px;">👥</span>
+                <h3
+                  class="mono"
+                  style="font-size: 13px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--ink);"
+                >
+                  Active & Recent Journeys
+                </h3>
+              </div>
+              <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+                {analytics.live_visitors.length} visitors in session
+              </span>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
+                <thead style="position: sticky; top: 0; background: var(--secondary); z-index: 2;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <th
+                      class="mono"
+                      style="padding: 8px 12px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase;"
+                    >
+                      User
+                    </th>
+                    <th
+                      class="mono"
+                      style="padding: 8px 10px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase;"
+                    >
+                      Status
+                    </th>
+                    <th
+                      class="mono"
+                      style="padding: 8px 10px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase;"
+                    >
+                      Location
+                    </th>
+                    <th
+                      class="mono"
+                      style="padding: 8px 10px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase;"
+                    >
+                      Current Page
+                    </th>
+                    <th
+                      class="mono"
+                      style="padding: 8px 12px; font-size: 10.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; text-align: right;"
+                    >
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analytics.live_visitors.length === 0 ? (
+                    <tr>
+                      <td
+                        colspan={5}
+                        class="mono"
+                        style="text-align: center; padding: 40px; color: var(--ink-soft);"
+                      >
+                        No active visitor journeys in session.
+                      </td>
+                    </tr>
+                  ) : (
+                    analytics.live_visitors.map((u: LiveVisitor) => (
+                      <tr
+                        style="
+                            border-bottom: 1px solid var(--border-soft);
+                            vertical-align: middle;
                           "
                       >
-                        {v.last_action}
-                      </span>
-                    </td>
-                    <td style="padding: 10px 14px; white-space: nowrap;">
-                      <span style="margin-right: 6px;">{countryFlag(v.country_code)}</span>
-                      <span style="color: var(--ink);">
-                        {v.city ? `${v.city}, ` : ''}
-                        {v.country_name || v.country_code || 'Unknown'}
-                      </span>
-                    </td>
-                    <td
-                      class="mono"
-                      style="padding: 10px 14px; font-size: 11px; color: var(--ink-soft); white-space: nowrap;"
-                    >
-                      {v.os || '-'} · {v.browser || '-'}
-                    </td>
-                    <td
-                      class="mono"
-                      style="padding: 10px 14px; font-size: 11.5px; text-align: right; color: var(--ink-soft); white-space: nowrap;"
-                    >
-                      {timeAgo(v.last_active_at)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                        <td style="padding: 10px 12px; white-space: nowrap;">
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <button
+                              type="button"
+                              onclick={`openUserDossier('${u.codename}')`}
+                              class="mono"
+                              style="
+                                  background: none;
+                                  border: none;
+                                  padding: 0;
+                                  cursor: pointer;
+                                  font-weight: 700;
+                                  color: var(--ink);
+                                  display: inline-flex;
+                                  align-items: center;
+                                  gap: 4px;
+                                  font-size: 12px;
+                                "
+                            >
+                              <span>{u.emoji}</span>
+                              <span>{u.codename}</span>
+                            </button>
+                            <span
+                              class="mono"
+                              style="
+                                  font-size: 9.5px;
+                                  padding: 1px 4px;
+                                  border-radius: 3px;
+                                  background: var(--secondary);
+                                  color: var(--ink-soft);
+                                "
+                            >
+                              {u.client_type}
+                            </span>
+                          </div>
+                          <span
+                            class="mono"
+                            style="font-size: 10.5px; color: var(--ink-soft); display: block; margin-top: 2px;"
+                          >
+                            {u.os || 'Unknown'} · {u.browser || 'Browser'}
+                          </span>
+                        </td>
+                        <td style="padding: 10px 10px; white-space: nowrap;">
+                          {u.is_returning ? (
+                            <span
+                              class="mono"
+                              style="
+                                  font-size: 10px;
+                                  font-weight: 700;
+                                  padding: 2px 6px;
+                                  border-radius: 999px;
+                                  background: rgba(147, 51, 234, 0.1);
+                                  color: #9333ea;
+                                  border: 1px solid rgba(147, 51, 234, 0.2);
+                                "
+                            >
+                              Returner ({u.total_visits}x)
+                            </span>
+                          ) : (
+                            <span
+                              class="mono"
+                              style="
+                                  font-size: 10px;
+                                  font-weight: 700;
+                                  padding: 2px 6px;
+                                  border-radius: 999px;
+                                  background: rgba(22, 163, 74, 0.1);
+                                  color: #16a34a;
+                                  border: 1px solid rgba(22, 163, 74, 0.2);
+                                "
+                            >
+                              New Visitor
+                            </span>
+                          )}
+                        </td>
+                        <td style="padding: 10px 10px; white-space: nowrap;">
+                          <span style="font-size: 12px; margin-right: 4px;">
+                            {countryFlag(u.country_code)}
+                          </span>
+                          <span style="color: var(--ink); font-size: 12px;">
+                            {u.city ? `${u.city}, ` : ''}
+                            {u.country_name || u.country_code || 'Global'}
+                          </span>
+                        </td>
+                        <td style="padding: 10px 10px;">
+                          <span
+                            class="mono"
+                            style="
+                                font-size: 11.5px;
+                                color: var(--ink);
+                                background: var(--secondary);
+                                padding: 2px 6px;
+                                border-radius: 4px;
+                                display: inline-block;
+                                max-width: 180px;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                              "
+                            title={u.current_path}
+                          >
+                            {u.current_path}
+                          </span>
+                        </td>
+                        <td style="padding: 10px 12px; text-align: right; white-space: nowrap;">
+                          <button
+                            type="button"
+                            onclick={`openUserDossier('${u.codename}')`}
+                            class="mono"
+                            style="
+                                font-size: 11px;
+                                font-weight: 600;
+                                padding: 4px 10px;
+                                border-radius: 6px;
+                                background: var(--card);
+                                border: 1px solid var(--border);
+                                color: var(--ink);
+                                cursor: pointer;
+                                transition: all 0.15s ease;
+                              "
+                          >
+                            Inspect Flow →
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Breakdown Bento: Top Pages, Top Clicks/Actions, Top Referrers */}
+      {/* 📊 SECTION 3: TOP PAGES, ACTIONS, REFERRERS, GEOGRAPHY */}
+      <section style="margin-bottom: 48px;">
         <div
           style="
               display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
               gap: 16px;
             "
         >
@@ -587,7 +882,7 @@ export const GET = async (c: AppContext) => {
                   <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
                     <span
                       class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;"
+                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
                     >
                       {p.path}
                     </span>
@@ -613,7 +908,7 @@ export const GET = async (c: AppContext) => {
               class="mono"
               style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 12px;"
             >
-              Buttons & Actions Triggered
+              Buttons & Actions
             </h3>
             {analytics.top_actions.length === 0 ? (
               <div class="mono" style="font-size: 12px; color: var(--ink-soft);">
@@ -625,7 +920,7 @@ export const GET = async (c: AppContext) => {
                   <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
                     <span
                       class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;"
+                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
                     >
                       {a.action}
                     </span>
@@ -638,7 +933,7 @@ export const GET = async (c: AppContext) => {
             )}
           </div>
 
-          {/* Top Discovery Referrers & Countries */}
+          {/* Top Referral Channels */}
           <div
             style="
                 background: var(--card);
@@ -663,7 +958,7 @@ export const GET = async (c: AppContext) => {
                   <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
                     <span
                       class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;"
+                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
                     >
                       {r.referrer}
                     </span>
@@ -675,138 +970,44 @@ export const GET = async (c: AppContext) => {
               </ul>
             )}
           </div>
-        </div>
 
-        {/* Userflow Activity Stream (Recent chronological events with user codenames) */}
-        <div
-          style="
-              margin-top: 24px;
-              background: var(--card);
-              border: 1px solid var(--border);
-              border-radius: var(--radius);
-              padding: 20px;
-            "
-        >
+          {/* Top Countries */}
           <div
             style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 14px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid var(--border-soft);
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 18px 20px;
               "
           >
-            <div>
-              <h3
-                class="mono"
-                style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--ink); margin: 0 0 2px;"
-              >
-                Live Userflow Activity Stream
-              </h3>
-              <p style="font-size: 12px; color: var(--ink-soft); margin: 0;">
-                Chronological clicks, page navigations, and downloads. Click any user to inspect
-                their full journey timeline.
-              </p>
-            </div>
-            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
-              Latest {analytics.recent_events.length} actions
-            </span>
-          </div>
-
-          {analytics.recent_events.length === 0 ? (
-            <div
+            <h3
               class="mono"
-              style="padding: 20px; text-align: center; font-size: 12px; color: var(--ink-soft);"
+              style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 12px;"
             >
-              No user activity recorded yet.
-            </div>
-          ) : (
-            <div
-              style="
-                  display: grid;
-                  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-                  gap: 10px;
-                "
-            >
-              {analytics.recent_events.map((ev: AnalyticsEventRecord) => (
-                <div
-                  style="
-                      background: var(--background);
-                      border: 1px solid var(--border-soft);
-                      border-radius: 8px;
-                      padding: 10px 12px;
-                      display: flex;
-                      flex-direction: column;
-                      gap: 6px;
-                      transition: border-color 0.15s;
-                    "
-                >
-                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                    <button
-                      type="button"
-                      onclick={`openUserDossier('${ev.codename || ev.user_id || ev.session_id}')`}
-                      class="mono"
-                      style="
-                          display: inline-flex;
-                          align-items: center;
-                          gap: 5px;
-                          background: var(--secondary);
-                          border: 1px solid var(--border);
-                          border-radius: 4px;
-                          padding: 2px 7px;
-                          cursor: pointer;
-                          font-size: 11px;
-                          font-weight: 600;
-                          color: var(--ink);
-                        "
-                    >
-                      <span>👤</span>
-                      <span>{ev.codename || ev.session_id.substring(0, 10)}</span>
-                      <span style="font-size: 9px; color: var(--accent-ink);">→</span>
-                    </button>
-                    <span class="mono" style="font-size: 10.5px; color: var(--ink-soft);">
-                      {timeAgo(ev.created_at)}
-                    </span>
-                  </div>
-
-                  <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+              Geographic Traffic
+            </h3>
+            {analytics.top_countries.length === 0 ? (
+              <div class="mono" style="font-size: 12px; color: var(--ink-soft);">
+                No geo data recorded yet.
+              </div>
+            ) : (
+              <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+                {analytics.top_countries.map((c) => (
+                  <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
                     <span
                       class="mono"
-                      style={`
-                          font-size: 10px;
-                          padding: 1px 5px;
-                          border-radius: 3px;
-                          font-weight: 600;
-                          background: ${
-                            ev.event_type === 'pageview'
-                              ? 'rgba(22, 163, 74, 0.1)'
-                              : 'rgba(217, 119, 6, 0.1)'
-                          };
-                          color: ${ev.event_type === 'pageview' ? '#16a34a' : '#d97706'};
-                        `}
+                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
                     >
-                      {ev.action_label || ev.event_type}
+                      {c.country}
                     </span>
-                    <span
-                      class="mono"
-                      style="
-                          color: var(--ink);
-                          font-size: 11.5px;
-                          overflow: hidden;
-                          text-overflow: ellipsis;
-                          white-space: nowrap;
-                          flex: 1;
-                        "
-                      title={ev.path}
-                    >
-                      {ev.path}
+                    <span class="mono" style="color: var(--ink-soft); font-weight: 600;">
+                      {c.count}
                     </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </section>
 

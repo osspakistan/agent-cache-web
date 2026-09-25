@@ -108,7 +108,7 @@ const Layout: LayoutComponent = ({ children }) => {
           />
           <link rel="stylesheet" href="/tokens.css" />
           <link rel="stylesheet" href="/css/fonts.css" />
-          <link rel="stylesheet" href="/css/app.css?v=3" />
+          <link rel="stylesheet" href="/css/app.css" />
           <script
             dangerouslySetInnerHTML={{
               __html: `(function(){var t=localStorage.getItem('ac-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;})();`,

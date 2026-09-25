@@ -43,15 +43,18 @@ export async function buildApp(
   // In-house Analytics Middleware: Tracks pageviews and agent visits
   app.use('*', async (c, next) => {
     const p = c.req.path
-    // Skip static assets, internal endpoints, SSE stream, and favicon
+    // Skip static assets, internal endpoints, health probes, SSE stream, and robots/favicon
     const isStatic =
       p.startsWith('/css/') ||
       p.startsWith('/js/') ||
       p.startsWith('/fonts/') ||
       p.startsWith('/api/logs') ||
       p.startsWith('/api/cockpit') ||
+      p.startsWith('/health') ||
+      p === '/health' ||
       p.endsWith('/stream') ||
       p === '/favicon.svg' ||
+      p === '/favicon.ico' ||
       p === '/robots.txt'
 
     if (!isStatic && c.req.method === 'GET') {
