@@ -358,191 +358,53 @@ input[name="demo"], input[name="install"] {
 /* post footer: internal links from the `related:` block stay as list items */
 
 /* list index page */
-.index-wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 60px; }
-.index-head { padding: 12px 0 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border-soft); }
+.index-wrap { max-width: 76ch; margin: 0 auto; padding: 0 20px 40px; }
+.index-head { padding: 8px 0 6px; }
 .index-head h1 {
-  font-family: var(--serif); font-weight: 500; font-size: 42px; line-height: 1.15;
-  color: var(--ink); margin: 0 0 12px; letter-spacing: -0.015em;
+  font-family: var(--serif); font-weight: 500; font-size: 38px; line-height: 1.12;
+  color: var(--ink); margin: 0 0 10px; letter-spacing: -0.01em;
 }
-.index-head .lede { color: var(--ink-body); max-width: 68ch; font-size: 16px; line-height: 1.6; margin: 0; }
-
-/* Filter Pills */
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
-}
-.filter-btn {
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.filter-btn:hover {
-  border-color: var(--accent-ink);
-  color: var(--ink);
-}
-.filter-btn.active {
-  background: var(--ink);
-  color: var(--background);
-  border-color: var(--ink);
-}
-
-/* Featured Story Card */
-.featured-card {
+.index-head .lede { color: var(--ink-body); max-width: 60ch; }
+.post-item {
   display: block;
+  padding: 24px 0;
   text-decoration: none;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px;
-  margin-bottom: 32px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  position: relative;
-  overflow: hidden;
+  border-bottom: 1px solid var(--border-soft);
+  transition: opacity 0.15s ease;
 }
-.featured-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
-}
-.featured-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--primary);
-  background: var(--accent-wash);
-  padding: 3px 10px;
-  border-radius: 999px;
-  margin-bottom: 16px;
-}
-.featured-card h2 {
-  font-family: var(--serif);
-  font-size: 28px;
-  font-weight: 500;
-  line-height: 1.25;
-  color: var(--ink);
-  margin: 0 0 12px;
+.post-item:first-of-type { padding-top: 28px; }
+.post-item:last-of-type { border-bottom: 0; }
+.post-item:hover h3 { color: var(--accent-ink); }
+.post-item:hover .item-arrow { transform: translateX(3px); color: var(--accent-ink); }
+.post-item h3 {
+  font-family: var(--serif); font-weight: 500; font-size: 21px; line-height: 1.3;
+  color: var(--ink); margin: 0 0 8px; letter-spacing: -0.01em;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
   transition: color 0.15s ease;
 }
-.featured-card:hover h2 {
-  color: var(--accent-ink);
-}
-.featured-card p {
+.post-item .item-arrow {
+  font-family: var(--mono);
   font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink-body);
-  margin: 0 0 20px;
-  max-width: 72ch;
-}
-.featured-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--mono);
-  font-size: 12px;
   color: var(--ink-soft);
+  transition: transform 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
 }
-
-/* 2-Column Responsive Content Grid */
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-@media (max-width: 768px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.content-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-decoration: none;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.content-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-}
-.content-card-top {
-  margin-bottom: 16px;
-}
-.content-card-badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.content-card-badge {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--accent-ink);
-  background: var(--secondary);
-  border: 1px solid var(--border-soft);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-.content-card h3 {
-  font-family: var(--serif);
-  font-size: 19px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--ink);
-  margin: 0 0 10px;
-  transition: color 0.15s ease;
-}
-.content-card:hover h3 {
-  color: var(--accent-ink);
-}
-.content-card p {
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--ink-body);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.content-card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.post-item p { font-size: 14.5px; color: var(--ink-body); margin: 0 0 10px; max-width: 64ch; line-height: 1.55; }
+.post-item .item-meta {
   font-family: var(--mono);
   font-size: 11.5px;
   color: var(--ink-soft);
-  padding-top: 16px;
-  border-top: 1px solid var(--border-soft);
-  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
-.content-card-arrow {
-  color: var(--ink-soft);
-  transition: transform 0.15s ease, color 0.15s ease;
-}
-.content-card:hover .content-card-arrow {
-  transform: translateX(4px);
+.post-item .item-tag {
   color: var(--accent-ink);
+  background: var(--secondary);
+  border: 1px solid var(--border-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
 }
-
 .section-label { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-ink); margin: 0 0 6px; }
 .back-link { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); text-decoration: none; }
 .back-link:hover { color: var(--ink); }
