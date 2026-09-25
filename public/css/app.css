@@ -408,3 +408,4 @@ input[name="demo"], input[name="install"] {
 .section-label { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-ink); margin: 0 0 6px; }
 .back-link { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); text-decoration: none; }
 .back-link:hover { color: var(--ink); }
+.underline {text-decoration: underline;}

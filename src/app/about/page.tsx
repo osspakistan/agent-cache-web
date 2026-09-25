@@ -63,7 +63,7 @@ Have questions, ideas, or feedback? Reach out directly via email at [hello@agent
           docs URL, get the whole site back as plain markdown files a coding agent can read.
         </p>
 
-        <h2>The Mission</h2>
+        <h2>Purpose</h2>
         <p>
           I built Agent Cache because I believe coding agents (Claude Code, Cursor, Codex, Windsurf)
           should have access to complete, accurate documentation for any API you're integrating
@@ -98,7 +98,7 @@ Have questions, ideas, or feedback? Reach out directly via email at [hello@agent
           output.
         </p>
 
-        <h2>The Builder</h2>
+        <h2>Human Behind it</h2>
         <p>
           Agent Cache is built by <strong>Awais Alwaisy</strong> — a developer, tech writer, and
           software craftsman focused on TypeScript, modern web tooling, and developer experience in

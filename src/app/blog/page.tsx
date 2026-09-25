@@ -53,7 +53,7 @@ ${list}
               const readTime = Math.max(1, Math.ceil(words / 200))
               return (
                 <a class="post-item" href={p.route} key={p.slug}>
-                  <h3>
+                  <h3 class="underline">
                     <span>{p.title}</span>
                     <span class="item-arrow">→</span>
                   </h3>

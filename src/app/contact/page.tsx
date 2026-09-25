@@ -38,10 +38,10 @@ For bug reports and docs crawler suggestions, feel free to open an issue on the 
     <>
       <Nav active="contact" />
       <div class="wrap" style="padding:60px 20px;max-width:700px;">
-        <h1>Contact</h1>
+        {/*<h1>Contact</h1>*/}
         <p class="lede">Have questions, feedback, or need help? Here's how to reach me.</p>
 
-        <h2>Direct Email</h2>
+        {/*<h2>Direct Email</h2>*/}
         <p>
           Send an email directly to{' '}
           <a href="mailto:hello@agentcache.run" class="mono">
@@ -50,7 +50,7 @@ For bug reports and docs crawler suggestions, feel free to open an issue on the 
           .
         </p>
 
-        <h2>X / Social</h2>
+        {/*<h2>X / Social</h2>*/}
         <p>
           You can also reach me on X at{' '}
           <a href="https://x.com/alvaisy" target="_blank" rel="noopener">
@@ -67,7 +67,7 @@ For bug reports and docs crawler suggestions, feel free to open an issue on the 
           .
         </p>
 
-        <h2>GitHub Issues</h2>
+        {/*<h2>GitHub Issues</h2>*/}
         <p>
           For bug reports or feature requests, feel free to open an issue on the{' '}
           <a href="https://github.com/agentcache/agent-cache" target="_blank" rel="noopener">
