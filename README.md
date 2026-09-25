@@ -10,6 +10,17 @@ Paste a documentation URL into [agentcache.run](https://agentcache.run). Agent C
 
 The goal is to keep the useful details intact: API references, examples, and the pages around them. A generated bundle is a set of files you can keep in your project and use offline.
 
+## Contents
+
+- [What you can do](#what-you-can-do)
+- [How an extraction runs](#how-an-extraction-runs)
+- [Start locally](#start-locally)
+- [API routes](#api-routes)
+- [Site pages and content](#site-pages-and-content)
+- [Repository map](#repository-map)
+- [Development commands](#development-commands)
+- [License](#license)
+
 ## What you can do
 
 ### Turn a docs URL into a bundle
