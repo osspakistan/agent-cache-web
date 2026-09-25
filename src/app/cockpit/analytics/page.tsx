@@ -722,14 +722,29 @@ export const GET = async (c: AppContext) => {
             ) : (
               <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
                 {analytics.top_paths.map((p) => (
-                  <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
-                    <span
-                      class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
+                  <li style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px;">
+                    <button
+                      type="button"
+                      class="mono url-expand-btn"
+                      onclick="toggleUrlExpand(this)"
+                      title="Click to expand"
+                      style="
+                          background: none;
+                          border: none;
+                          padding: 0;
+                          cursor: pointer;
+                          text-align: left;
+                          color: var(--ink);
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          max-width: 200px;
+                          font-size: 12.5px;
+                        "
                     >
                       {p.path}
-                    </span>
-                    <span class="mono" style="color: var(--accent-ink); font-weight: 600;">
+                    </button>
+                    <span class="mono" style="color: var(--accent-ink); font-weight: 600; flex-shrink: 0;">
                       {p.count}
                     </span>
                   </li>
@@ -760,14 +775,29 @@ export const GET = async (c: AppContext) => {
             ) : (
               <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
                 {analytics.top_actions.map((a) => (
-                  <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
-                    <span
-                      class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
+                  <li style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px;">
+                    <button
+                      type="button"
+                      class="mono url-expand-btn"
+                      onclick="toggleUrlExpand(this)"
+                      title="Click to expand"
+                      style="
+                          background: none;
+                          border: none;
+                          padding: 0;
+                          cursor: pointer;
+                          text-align: left;
+                          color: var(--ink);
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          max-width: 200px;
+                          font-size: 12.5px;
+                        "
                     >
                       {a.action}
-                    </span>
-                    <span class="mono" style="color: #16a34a; font-weight: 600;">
+                    </button>
+                    <span class="mono" style="color: #16a34a; font-weight: 600; flex-shrink: 0;">
                       {a.count}
                     </span>
                   </li>
@@ -798,14 +828,53 @@ export const GET = async (c: AppContext) => {
             ) : (
               <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
                 {analytics.top_referrers.map((r) => (
-                  <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
-                    <span
-                      class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
-                    >
-                      {r.referrer}
-                    </span>
-                    <span class="mono" style="color: var(--ink-soft); font-weight: 600;">
+                  <li style="display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12.5px;">
+                    <div style="display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1;">
+                      <button
+                        type="button"
+                        class="mono url-expand-btn"
+                        onclick="toggleUrlExpand(this)"
+                        title={r.referrer}
+                        style="
+                            background: none;
+                            border: none;
+                            padding: 0;
+                            cursor: pointer;
+                            text-align: left;
+                            color: var(--ink);
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            max-width: 170px;
+                            font-size: 12px;
+                          "
+                      >
+                        {r.referrer}
+                      </button>
+                      <a
+                        href={r.referrer.startsWith('http') ? r.referrer : `https://${r.referrer}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="mono"
+                        title="Open in new tab"
+                        style="
+                            font-size: 10px;
+                            color: var(--ink-soft);
+                            text-decoration: none;
+                            padding: 1px 4px;
+                            border-radius: 3px;
+                            border: 1px solid var(--border);
+                            flex-shrink: 0;
+                            opacity: 0.7;
+                            transition: opacity 0.1s;
+                          "
+                        onmouseover="this.style.opacity='1'"
+                        onmouseout="this.style.opacity='0.7'"
+                      >
+                        ↗
+                      </a>
+                    </div>
+                    <span class="mono" style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;">
                       {r.count}
                     </span>
                   </li>
@@ -836,14 +905,29 @@ export const GET = async (c: AppContext) => {
             ) : (
               <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
                 {analytics.top_countries.map((ctry) => (
-                  <li style="display: flex; align-items: center; justify-content: space-between; font-size: 12.5px;">
-                    <span
-                      class="mono"
-                      style="color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
+                  <li style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px;">
+                    <button
+                      type="button"
+                      class="mono url-expand-btn"
+                      onclick="toggleUrlExpand(this)"
+                      title="Click to expand"
+                      style="
+                          background: none;
+                          border: none;
+                          padding: 0;
+                          cursor: pointer;
+                          text-align: left;
+                          color: var(--ink);
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          max-width: 200px;
+                          font-size: 12.5px;
+                        "
                     >
                       {ctry.country}
-                    </span>
-                    <span class="mono" style="color: var(--ink-soft); font-weight: 600;">
+                    </button>
+                    <span class="mono" style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;">
                       {ctry.count}
                     </span>
                   </li>
@@ -1185,6 +1269,28 @@ export const GET = async (c: AppContext) => {
           document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeUserDossier();
           });
+
+          // Click-to-expand truncated URLs / paths
+          function toggleUrlExpand(btn) {
+            const isExpanded = btn.dataset.expanded === '1';
+            if (isExpanded) {
+              btn.style.whiteSpace = 'nowrap';
+              btn.style.overflow = 'hidden';
+              btn.style.textOverflow = 'ellipsis';
+              btn.style.maxWidth = btn.dataset.origMax || '200px';
+              btn.dataset.expanded = '0';
+              btn.title = btn.dataset.fullText || '';
+            } else {
+              btn.dataset.origMax = btn.style.maxWidth || '200px';
+              btn.dataset.fullText = btn.title;
+              btn.style.whiteSpace = 'normal';
+              btn.style.overflow = 'visible';
+              btn.style.textOverflow = 'unset';
+              btn.style.maxWidth = 'none';
+              btn.dataset.expanded = '1';
+              btn.title = 'Click to collapse';
+            }
+          }
         </script>
       `)}
     </>

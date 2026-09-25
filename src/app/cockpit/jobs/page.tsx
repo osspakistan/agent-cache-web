@@ -1,3 +1,4 @@
+import { raw } from 'hono/html'
 import { initDb, listAllJobs, listFeedback } from '../../../lib/clients'
 import { setPageMeta } from '../../../lib/page-meta'
 import { formatBytes } from '../../../lib/utils'
@@ -192,19 +193,53 @@ export const GET = async (c: AppContext) => {
                         {timeAgo(j.created_at)}
                       </div>
                     </td>
-                    <td style="padding: 12px 16px; max-width: 260px;">
+                    <td style="padding: 12px 16px; max-width: 280px;">
                       <div style="font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         {j.product_name || j.title || 'Unknown'}
                       </div>
-                      <a
-                        href={j.resolved_url || j.input_url}
-                        target="_blank"
-                        rel="noopener"
-                        class="mono"
-                        style="font-size: 11px; color: var(--ink-soft); text-decoration: underline; overflow: hidden; text-overflow: ellipsis; display: block; white-space: nowrap;"
-                      >
-                        {j.resolved_url || j.input_url}
-                      </a>
+                      <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                        <button
+                          type="button"
+                          class="mono url-expand-btn"
+                          onclick="toggleUrlExpand(this)"
+                          title={j.resolved_url || j.input_url}
+                          style="
+                              background: none;
+                              border: none;
+                              padding: 0;
+                              cursor: pointer;
+                              text-align: left;
+                              font-size: 11px;
+                              color: var(--ink-soft);
+                              text-decoration: underline;
+                              overflow: hidden;
+                              text-overflow: ellipsis;
+                              white-space: nowrap;
+                              max-width: 220px;
+                            "
+                        >
+                          {j.resolved_url || j.input_url}
+                        </button>
+                        <a
+                          href={j.resolved_url || j.input_url}
+                          target="_blank"
+                          rel="noopener"
+                          class="mono"
+                          title="Open in new tab"
+                          style="
+                              font-size: 10px;
+                              color: var(--ink-soft);
+                              text-decoration: none;
+                              padding: 1px 4px;
+                              border-radius: 3px;
+                              border: 1px solid var(--border);
+                              flex-shrink: 0;
+                              opacity: 0.7;
+                            "
+                        >
+                          ↗
+                        </a>
+                      </div>
                     </td>
                     <td style="padding: 12px 16px; white-space: nowrap;">
                       <span
@@ -406,6 +441,31 @@ export const GET = async (c: AppContext) => {
           )}
         </div>
       </section>
+
+      {raw(`
+        <script>
+          function toggleUrlExpand(btn) {
+            const isExpanded = btn.dataset.expanded === '1';
+            if (isExpanded) {
+              btn.style.whiteSpace = 'nowrap';
+              btn.style.overflow = 'hidden';
+              btn.style.textOverflow = 'ellipsis';
+              btn.style.maxWidth = btn.dataset.origMax || '220px';
+              btn.dataset.expanded = '0';
+              btn.title = btn.dataset.fullText || '';
+            } else {
+              btn.dataset.origMax = btn.style.maxWidth || '220px';
+              btn.dataset.fullText = btn.title;
+              btn.style.whiteSpace = 'normal';
+              btn.style.overflow = 'visible';
+              btn.style.textOverflow = 'unset';
+              btn.style.maxWidth = 'none';
+              btn.dataset.expanded = '1';
+              btn.title = 'Click to collapse';
+            }
+          }
+        </script>
+      `)}
     </>
   )
 }
