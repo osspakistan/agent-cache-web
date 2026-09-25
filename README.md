@@ -70,7 +70,10 @@ The docs viewer includes a feedback form tied to the bundle. A reader can report
 
 ### Review usage and job health
 
-The password-gated Cockpit page (`/cockpit`) summarizes jobs, page totals, ZIP sizes, failures, and feedback. It also features a real-time live visitor radar and telemetry, including human vs. coding-agent vs. bot categories detected by request headers, plus top clicked actions, referrers, and visitor locations.
+The password-gated Cockpit dashboard (`/cockpit`) provides an operations center organized into dedicated sub-modules:
+- **Cockpit Overview (`/cockpit`)**: Executive bento grid tracking total crawl jobs, pipeline success rates, cached archive volumes, feedback submissions, and live active visitor metrics.
+- **Analytics & User Journeys (`/cockpit/analytics`)**: Real-time visitor radar and session journeys with client type detection (human vs. AI agent vs. bot), time range filters (Today, 3 Days, 7 Days, 30 Days, All Time), live page rosters, click-to-expand breakdown lists for top visited paths, button actions, referrers (with direct jump links), and geographic locations. Also features an interactive user journey flow dossier modal.
+- **Crawl Jobs & Feedback (`/cockpit/jobs`)**: Paginated records of recent crawl jobs with strategies, page counts, ZIP sizes, click-to-expand URLs, and user-submitted feedback reports.
 
 ### Use the service API
 
@@ -157,7 +160,9 @@ The live sitemap lists 58 public URLs: 10 service and index pages, 40 blog artic
 | [About](https://agentcache.run/about) | Project purpose and extraction approach |
 | [Contact](https://agentcache.run/contact) | Contact and issue-reporting options |
 | [Privacy](https://agentcache.run/privacy) | Data collected and retention details |
-| `/cockpit` | Internal job, usage analytics, and feedback dashboard |
+| `/cockpit` | Internal admin dashboard overview |
+| `/cockpit/analytics` | Real-time traffic, user flow journeys, and telemetry |
+| `/cockpit/jobs` | Complete crawl jobs database and user feedback reports |
 
 ### Blog and comparisons
 
