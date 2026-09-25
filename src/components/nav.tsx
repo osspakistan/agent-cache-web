@@ -1,7 +1,16 @@
 import { BrandMark } from './brand-mark'
 
 export function Nav(props: {
-  active?: 'home' | 'docs' | 'about' | 'contact' | 'privacy' | 'dingdong' | 'blog' | 'compare'
+  active?:
+    | 'home'
+    | 'docs'
+    | 'about'
+    | 'contact'
+    | 'privacy'
+    | 'dingdong'
+    | 'blog'
+    | 'compare'
+    | 'admin'
 }) {
   return (
     <header style="padding: 20px 0; border-bottom: 1px solid var(--border-soft); margin-bottom: 32px; view-transition-name: site-header;">

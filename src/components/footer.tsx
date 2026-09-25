@@ -241,6 +241,15 @@ export function Footer() {
               </li>
               <li>
                 <a
+                  href="/admin"
+                  class="mono"
+                  style="font-size: 13px; color: var(--body); text-decoration: none;"
+                >
+                  admin
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://github.com/agentcache/agent-cache"
                   class="mono"
                   style="font-size: 13px; color: var(--body); text-decoration: none;"

@@ -49,13 +49,25 @@ ${list}
           </header>
 
           <div>
-            {pages.map((p) => (
-              <a class="post-item" href={p.route} key={p.slug}>
-                <h3>{p.title}</h3>
-                {p.description && <p>{p.description}</p>}
-                <span class="item-meta">{p.route}</span>
-              </a>
-            ))}
+            {pages.map((p) => {
+              const targetTool = p.slug.replace(/^vs-/, '')
+              const words = p.body.split(/\s+/).length
+              const readTime = Math.max(1, Math.ceil(words / 200))
+              return (
+                <a class="post-item" href={p.route} key={p.slug}>
+                  <h3>
+                    <span>{p.title}</span>
+                    <span class="item-arrow">→</span>
+                  </h3>
+                  {p.description && <p>{p.description}</p>}
+                  <div class="item-meta">
+                    <span class="item-tag">vs {targetTool}</span>
+                    <span>•</span>
+                    <span>{readTime} min read</span>
+                  </div>
+                </a>
+              )
+            })}
           </div>
         </main>
       </div>

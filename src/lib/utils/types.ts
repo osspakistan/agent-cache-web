@@ -37,6 +37,15 @@ export interface JobRecord {
   completed_at: number | null
 }
 
+export interface FeedbackRecord {
+  id: string
+  job_id: string
+  kind: string
+  email: string
+  details: string
+  created_at: number
+}
+
 export interface StreamEvent {
   type: 'phase' | 'log' | 'progress' | 'error' | 'complete'
   phase?: string

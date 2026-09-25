@@ -496,6 +496,7 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
                     what's missing
                   </span>
                   <select
+                    id="fb-kind"
                     name="kind"
                     class="mono"
                     style="
@@ -578,7 +579,8 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
               id="fb-success"
               style="display: none; padding: 12px 24px; font-size: 13px; color: #16a34a; border-top: 1px solid var(--border);"
             >
-              Got it. I will look into this and get back to you soon.
+              Hey human, I'm Awais (@alvaisy). Got it, I will look into this and get back to you
+              soon.
             </div>
             <div
               id="fb-actions"
@@ -639,6 +641,7 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
                 e.preventDefault();
                 var email = document.getElementById('fb-email');
                 var details = document.getElementById('fb-details');
+                var kind = document.getElementById('fb-kind');
                 var errE = document.getElementById('fb-err-email');
                 var errD = document.getElementById('fb-err-details');
                 var ok = true;
@@ -648,10 +651,26 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
                 submit.textContent = 'Sending…';
                 submit.disabled = true;
                 submit.style.opacity = '0.6';
-                setTimeout(function(){
+                fetch('/api/feedback', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    job_id: '${id}',
+                    kind: kind ? kind.value : 'missing-page',
+                    email: email.value.trim(),
+                    details: details.value.trim()
+                  })
+                }).then(function(res){
+                  if(!res.ok) throw new Error('Failed');
+                  return res.json();
+                }).then(function(){
                   document.getElementById('fb-success').style.display = 'block';
                   document.getElementById('fb-actions').style.display = 'none';
-                }, 1200);
+                }).catch(function(){
+                  submit.textContent = 'Failed. Try again';
+                  submit.disabled = false;
+                  submit.style.opacity = '';
+                });
               });
             })();`,
           }}
