@@ -1,9 +1,9 @@
 import { BrandMark } from './brand-mark'
 
-export function Footer() {
+export function Footer(props?: { wide?: boolean }) {
   return (
     <footer style="margin-top: 80px; border-top: 1px solid var(--border-soft); background: var(--secondary);">
-      <div class="wrap" style="padding: 48px 0 32px;">
+      <div class={props?.wide ? 'wrap-wide' : 'wrap'} style="padding: 48px 0 32px;">
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; margin-bottom: 48px;">
           {/* product */}
           <div>
