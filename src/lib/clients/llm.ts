@@ -35,10 +35,7 @@ export class LlmService {
     defaultOrder?: string[]
     defaultIgnore?: string[]
   }) {
-    this.apiKey =
-      opts?.apiKey ||
-      process.env.OPENROUTER_API_KEY ||
-      ''
+    this.apiKey = opts?.apiKey || process.env.OPENROUTER_API_KEY || ''
     this.baseUrl = opts?.baseUrl || 'https://openrouter.ai/api/v1'
     this.defaultModels = opts?.defaultModels || [
       'cohere/north-mini-code:free',
