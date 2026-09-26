@@ -3,9 +3,20 @@ import { BrandMark } from './brand-mark'
 export function Footer(props?: { wide?: boolean }) {
   return (
     <footer style="margin-top: 80px; border-top: 1px solid var(--border-soft); background: var(--secondary);">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .badge-theme-light { display: block; }
+            .badge-theme-dark { display: none; }
+            :root[data-theme="dark"] .badge-theme-light { display: none; }
+            :root[data-theme="dark"] .badge-theme-dark { display: block; }
+          `,
+        }}
+      />
       <div class={props?.wide ? 'wrap-wide' : 'wrap'} style="padding: 48px 0 32px;">
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; margin-bottom: 48px;">
           {/* product */}
+
           <div>
             <p
               class="mono"
@@ -252,61 +263,84 @@ export function Footer(props?: { wide?: boolean }) {
           </div>
         </div>
 
+        {/* badges row */}
+        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--border-soft);">
+          <a
+            href="https://www.listbulb.com/tools/agentcache"
+            target="_blank"
+            rel="noopener"
+            style="display: inline-flex; align-items: center; text-decoration: none;"
+          >
+            <img
+              class="badge-theme-light"
+              src="https://www.listbulb.com/featured-on-listbulb-light.svg"
+              alt="Featured on ListBulb"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px;"
+            />
+            <img
+              class="badge-theme-dark"
+              src="https://www.listbulb.com/featured-on-listbulb-dark.svg"
+              alt="Featured on ListBulb"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px;"
+            />
+          </a>
+          <a
+            href="https://tools.launchllama.co/products/agent-cache?utm_source=badge&utm_medium=referral"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="display: inline-flex; align-items: center; text-decoration: none;"
+          >
+            <img
+              class="badge-theme-light"
+              src="https://tools.launchllama.co/featured-badge-white.jpg?v=5"
+              alt="Featured on Launch Llama Tools"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px; border-radius: 4px;"
+            />
+            <img
+              class="badge-theme-dark"
+              src="https://tools.launchllama.co/featured-badge.png?v=2"
+              alt="Featured on Launch Llama Tools"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px; border-radius: 4px;"
+            />
+          </a>
+          <a
+            href="https://launchon.it/products/agent-cache"
+            target="_blank"
+            rel="noopener"
+            style="display: inline-flex; align-items: center; text-decoration: none;"
+          >
+            <img
+              class="badge-theme-light"
+              src="https://launchon.it/api/badge/agent-cache?theme=light&size=sm&type=featured"
+              alt="Agent Cache on LaunchOn.it"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px;"
+            />
+            <img
+              class="badge-theme-dark"
+              src="https://launchon.it/api/badge/agent-cache?theme=dark&size=sm&type=featured"
+              alt="Agent Cache on LaunchOn.it"
+              height="32"
+              style="height: 32px; width: auto; max-height: 32px;"
+            />
+          </a>
+        </div>
+
         {/* bottom bar */}
-        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 4px; flex-wrap: wrap; gap: 16px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <BrandMark size="sm" px={20} />
             <span class="mono" style="font-size: 12px; color: var(--muted-foreground);">
               agent-cache. turn any docs into agent-ready markdown.
             </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-            <a
-              href="https://www.listbulb.com/tools/agentcache"
-              target="_blank"
-              rel="noopener"
-              style="display: inline-flex; align-items: center; text-decoration: none;"
-            >
-              <img
-                class="theme-light-only"
-                src="https://www.listbulb.com/featured-on-listbulb-light.svg"
-                alt="Featured on ListBulb"
-                height="38"
-                style="height: 38px; width: auto; max-height: 38px;"
-              />
-              <img
-                class="theme-dark-only"
-                src="https://www.listbulb.com/featured-on-listbulb-dark.svg"
-                alt="Featured on ListBulb"
-                height="38"
-                style="height: 38px; width: auto; max-height: 38px;"
-              />
-            </a>
-            <a
-              href="https://tools.launchllama.co/products/agent-cache?utm_source=badge&utm_medium=referral"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="display: inline-flex; align-items: center; text-decoration: none;"
-            >
-              <img
-                class="theme-light-only"
-                src="https://tools.launchllama.co/featured-badge-white.jpg?v=5"
-                alt="Featured on Launch Llama Tools"
-                height="38"
-                style="height: 38px; width: auto; max-height: 38px; border-radius: 6px;"
-              />
-              <img
-                class="theme-dark-only"
-                src="https://tools.launchllama.co/featured-badge.png?v=2"
-                alt="Featured on Launch Llama Tools"
-                height="38"
-                style="height: 38px; width: auto; max-height: 38px; border-radius: 6px;"
-              />
-            </a>
-            <p class="mono" style="font-size: 12px; color: var(--muted-foreground); margin: 0;">
-              (c) 2026 agent cache. mit license.
-            </p>
-          </div>
+          <p class="mono" style="font-size: 12px; color: var(--muted-foreground); margin: 0;">
+            (c) 2026 agent cache. mit license.
+          </p>
         </div>
       </div>
     </footer>
