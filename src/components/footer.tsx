@@ -328,6 +328,21 @@ export function Footer(props?: { wide?: boolean }) {
               style="height: 32px; width: auto; max-height: 32px;"
             />
           </a>
+          <a
+            href="https://codehype.ai/product/agent-cache?utm_source=codehype_badge"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="display: inline-flex; align-items: center; text-decoration: none;"
+          >
+            <img
+              src="https://codehype.ai/badges/agent-cache.svg?variant=find-us&v=20"
+              alt="Featured on CodeHype"
+              height="32"
+              loading="lazy"
+              decoding="async"
+              style="display: inline-block; border: 0; width: auto; height: 32px; max-height: 32px;"
+            />
+          </a>
         </div>
 
         {/* bottom bar */}
