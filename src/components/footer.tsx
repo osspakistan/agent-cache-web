@@ -260,7 +260,7 @@ export function Footer(props?: { wide?: boolean }) {
               agent-cache. turn any docs into agent-ready markdown.
             </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 20px;">
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
             <a
               href="https://www.listbulb.com/tools/agentcache"
               target="_blank"
@@ -271,15 +271,36 @@ export function Footer(props?: { wide?: boolean }) {
                 class="theme-light-only"
                 src="https://www.listbulb.com/featured-on-listbulb-light.svg"
                 alt="Featured on ListBulb"
-                height="48"
-                style="height: 48px; width: auto; max-height: 48px;"
+                height="38"
+                style="height: 38px; width: auto; max-height: 38px;"
               />
               <img
                 class="theme-dark-only"
                 src="https://www.listbulb.com/featured-on-listbulb-dark.svg"
                 alt="Featured on ListBulb"
-                height="48"
-                style="height: 48px; width: auto; max-height: 48px;"
+                height="38"
+                style="height: 38px; width: auto; max-height: 38px;"
+              />
+            </a>
+            <a
+              href="https://tools.launchllama.co/products/agent-cache?utm_source=badge&utm_medium=referral"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display: inline-flex; align-items: center; text-decoration: none;"
+            >
+              <img
+                class="theme-light-only"
+                src="https://tools.launchllama.co/featured-badge-white.jpg?v=5"
+                alt="Featured on Launch Llama Tools"
+                height="38"
+                style="height: 38px; width: auto; max-height: 38px; border-radius: 6px;"
+              />
+              <img
+                class="theme-dark-only"
+                src="https://tools.launchllama.co/featured-badge.png?v=2"
+                alt="Featured on Launch Llama Tools"
+                height="38"
+                style="height: 38px; width: auto; max-height: 38px; border-radius: 6px;"
               />
             </a>
             <p class="mono" style="font-size: 12px; color: var(--muted-foreground); margin: 0;">
