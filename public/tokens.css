@@ -81,3 +81,9 @@
   --input: #322f2b;
   --ring: #7b9ee0;
 }
+
+/* Theme visibility utilities */
+.theme-light-only { display: block; }
+.theme-dark-only { display: none; }
+:root[data-theme="dark"] .theme-light-only { display: none; }
+:root[data-theme="dark"] .theme-dark-only { display: block; }

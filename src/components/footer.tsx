@@ -253,16 +253,39 @@ export function Footer(props?: { wide?: boolean }) {
         </div>
 
         {/* bottom bar */}
-        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 20px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <BrandMark size="sm" px={20} />
             <span class="mono" style="font-size: 12px; color: var(--muted-foreground);">
               agent-cache. turn any docs into agent-ready markdown.
             </span>
           </div>
-          <p class="mono" style="font-size: 12px; color: var(--muted-foreground); margin: 0;">
-            (c) 2026 agent cache. mit license.
-          </p>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <a
+              href="https://www.listbulb.com/tools/agentcache"
+              target="_blank"
+              rel="noopener"
+              style="display: inline-flex; align-items: center; text-decoration: none;"
+            >
+              <img
+                class="theme-light-only"
+                src="https://www.listbulb.com/featured-on-listbulb-light.svg"
+                alt="Featured on ListBulb"
+                height="48"
+                style="height: 48px; width: auto; max-height: 48px;"
+              />
+              <img
+                class="theme-dark-only"
+                src="https://www.listbulb.com/featured-on-listbulb-dark.svg"
+                alt="Featured on ListBulb"
+                height="48"
+                style="height: 48px; width: auto; max-height: 48px;"
+              />
+            </a>
+            <p class="mono" style="font-size: 12px; color: var(--muted-foreground); margin: 0;">
+              (c) 2026 agent cache. mit license.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
