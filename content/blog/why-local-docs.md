@@ -1,17 +1,19 @@
-# i'd rather keep my agent's reference docs on disk
+# should your coding agent use local documentation?
 
-**meta title:** why local docs beat remote retrieval for ai agents
-**meta description:** everything is an api now. but for documentation, local ownership beats remote retrieval. here's why your agent needs docs on disk.
+**meta title:** local documentation for AI coding agents: when it helps
+**meta description:** Explore local and offline documentation for Cursor, Claude Code, Codex, and Windsurf, including the tradeoffs of keeping API docs on disk.
 **slug:** /blog/why-local-docs
-**target keywords:** local documentation, docs for coding agents, offline documentation, agent-ready docs, documentation ownership
+**target keywords:** local documentation, documentation for AI coding agents, local documentation for Cursor, local documentation for Claude Code, local documentation for Codex, local documentation for Windsurf, complete offline documentation, download docs for offline use, download documentation for offline use, save API documentation locally, make a local copy of documentation, use docs with an AI coding assistant
 
 ---
 
-the modern trend is api-everything. need data? call an api. need auth? call an api. need documentation? context7 says call an api.
+When an AI coding assistant needs unfamiliar API details, should it fetch them from a hosted retrieval service or read a local copy? I’m testing the case for local documentation: developers can download docs for offline use, browse the Markdown pages, and save API documentation locally beside a project.
 
-but documentation is different from data. it's reference material, not live information. you don't need it refreshed every second. you need it accurate, complete, and available.
+This is a product hypothesis I’m validating, not a claim that local docs work best for every task. A local bundle can give a coding agent a stable reference and work without a network connection. A hosted service can be easier to set up and may have fresher content. The useful choice depends on the library and workflow.
 
-here's why local docs are better for coding agents than remote retrieval.
+Here are the tradeoffs I’m testing with developers who use Cursor, Claude Code, Codex, Windsurf, or another AI coding assistant.
+
+If you want local documentation for Cursor, Claude Code, Codex, or Windsurf, the key question is whether your agent can find and use the pages in the bundle.
 
 ## a docs lookup becomes another network dependency
 
@@ -26,29 +28,21 @@ this works. it's convenient. no setup needed. but it has real problems.
 
 ## problem 1: latency
 
-every api call adds latency. 50-200ms per request. an agent might query docs 50 times in a session. that's 2-10 seconds of waiting.
-
-with local docs, the agent reads from disk. 0ms. the file is already there.
+Every remote lookup depends on network access and the retrieval service. Local files avoid that lookup, though an agent may still need time to find and read the right page.
 
 ## problem 2: availability
 
-if the api service is down, your agent is blind. maintenance windows. outages. rate limits during peak.
-
-local docs don't have an uptime percentage. they exist.
+Local files can be available without a network connection, as long as the right pages were downloaded and the files remain on the machine.
 
 ## problem 3: cost
 
-context7 charges $10/seat/month for their paid tier. that's $120/year per developer. scale that across a team of 20? $2,400/year.
-
-agent cache is free. the docs are a zip file on disk.
+Costs vary by service and plan. A local copy can reduce repeated hosted lookups, but it may require time to create, store, and refresh the files. I’m validating whether developers value that tradeoff enough to use a dedicated tool.
 
 ## problem 4: completeness
 
-api services return what they have indexed. not the entire site. a docs site with 500 pages might only have 300 indexed. the other 200? your agent never sees them.
+Hosted retrieval services and local bundles can each miss pages. Index coverage depends on the service; an exported bundle depends on the source site's navigation and what the crawler can access. Either way, check whether the pages you need are present.
 
-if a page wasn't indexed, or was indexed incompletely, your agent doesn't know what it missed.
-
-local docs give you everything. every page. every code example. every edge case.
+An exported bundle can include the pages the crawler finds; completeness depends on what the source site exposes and what extraction can reach. Check that the pages you rely on are included before treating a download as complete documentation.
 
 ## problem 5: determinism
 
@@ -58,51 +52,49 @@ api indexes change. ranking changes. content updates. the same query on monday m
 
 for coding agents, this matters. "it worked yesterday" is a frustrating debugging session when the underlying docs changed.
 
-local docs are static. same zip file. same content. always.
+An unchanged local ZIP gives the agent the same source files across runs. Refreshing the bundle changes that snapshot, so teams still need a way to update docs when APIs change.
 
 ## how agents actually use docs
 
-understanding agent behavior clarifies why local is better.
+How well local files work depends on the agent and how it finds relevant pages.
 
-agents don't "search" docs like google. they read files. they scan for relevant content. they match patterns. they reference exact api signatures.
+Some developers already give their coding agent files in the repository; others prefer search or retrieval tools. The product idea is to make a complete docs snapshot easy to create, inspect, and use with whichever agent workflow a developer prefers.
 
-this is fundamentally a file-reading workflow, not a search workflow. apis add overhead to a file-reading operation.
+That makes local Markdown a plausible format for an agent-ready reference, while leaving room for indexing or LLM-assisted navigation if testing shows that browsing a large bundle is cumbersome.
 
-## keep stable docs locally, look up fast-changing ones
+## combine a local snapshot with live lookup when needed
 
-pure local isn't always right. docs do change. new versions release. the hybrid model:
+Local and remote access can work together. A practical workflow to test is:
 
 1. extract docs once → local zip
-2. reference them constantly → zero latency
-3. re-extract when needed → update to latest version
-4. use context7 for bleeding-edge libraries that update daily
+2. let the agent read the local Markdown files when it needs them
+3. refresh the download when needed → update the snapshot
+4. use live retrieval when freshness matters
 
-most docs don't change that much. stripe's core api? stable for months. hono's core? stable. react server components? yeah, those change. that's what context7 is for.
+If you want complete offline documentation for a project, verify that the downloaded bundle includes the pages you rely on. For fast-changing APIs, check whether the snapshot is still current or use live retrieval.
 
-## when local docs win
+## where local documentation may help
 
 - stable apis you reference daily (stripe, hono, supabase)
 - offline development (planes, trains, bad wifi)
 - deterministic builds and ci/cd pipelines
 - cost-conscious teams
-- complete reference (all pages, not indexed subset)
+- a reusable local reference, after checking that the pages you need are included
 
-## when remote retrieval wins
+## where remote retrieval may help
 
 - bleeding-edge libraries (react canary, next.js beta)
 - quick lookups without setup
 - teams that don't want to manage local files
 - discovering new libraries you've never used
 
-## local by default, remote when freshness matters
+## current hypothesis: local files are one useful option
 
-the api-everything trend is real and mostly good. but documentation is a unique category. it's reference material, not data.
+Local docs may offer a reusable snapshot and offline access. Whether those benefits outweigh setup and refresh work is what I'm testing.
 
-local docs give you: speed, reliability, completeness, determinism, and cost savings.
+Remote retrieval may offer convenience and fresher content.
 
-remote retrieval gives you: convenience and freshness.
-
-for most agent workflows, local docs are the right default. use remote retrieval as a supplement, not a replacement.
+The open question is which developers want a durable local copy, which prefer live retrieval, and whether they want both. I’m validating that need before treating local-first as the answer for every agent workflow. The product can evolve, including adding LLM-assisted organization or retrieval if that solves a real problem users report.
 
 ---
 

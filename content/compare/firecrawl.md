@@ -3,11 +3,11 @@
 **meta title:** agent cache vs firecrawl: free docs extraction vs $83/month scraper
 **meta description:** firecrawl is a web scraping api. agent cache is a docs extraction tool. same extraction, completely different use cases. here's the honest breakdown.
 **slug:** /compare/firecrawl
-**target keywords:** agent cache vs firecrawl, firecrawl alternative, firecrawl vs agent cache, docs extraction tool, documentation crawler
+**target keywords:** agent cache vs firecrawl, firecrawl alternative, firecrawl vs agent cache, docs extraction tool, documentation crawler, documentation crawler for AI agents
 
 ---
 
-firecrawl is everywhere. 100,000+ github stars. used by apple, canva, lovable. the "context api to search, scrape, and interact with the web at scale."
+If you're looking for a Firecrawl alternative for documentation, compare a general web extraction API with a docs-focused downloadable bundle. Firecrawl handles broad web extraction; Agent Cache is built around packaging documentation for coding-agent workflows.
 
 agent cache is a tool that turns documentation sites into clean markdown. that's it.
 

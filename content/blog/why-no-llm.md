@@ -1,17 +1,17 @@
-# why i didn't use an llm for documentation extraction (and never will)
+# where LLMs fit in documentation extraction
 
-**meta title:** why i don't use llms for docs extraction (and never will)
-**meta description:** agent cache extracts documentation without any llm calls. here's why deterministic extraction beats ai for docs, and where llms actually help.
+**meta title:** where LLMs fit in documentation extraction
+**meta description:** Documentation should preserve source text accurately. Here's why I started with deterministic extraction and where LLM-assisted organization or retrieval may help.
 **slug:** /blog/why-no-llm-extraction
-**target keywords:** no llm extraction, deterministic documentation extraction, llm vs deterministic extraction, why not llm, docs extraction without ai
+**target keywords:** deterministic documentation extraction, llm-assisted documentation, llm vs deterministic extraction, source-faithful docs, documentation organization
 
 ---
 
-in 2026, the default answer to every problem is "use an llm." it doesn't matter what the problem is. llm is the hammer.
+I started Agent Cache with deterministic extraction because the first job is to preserve the source documentation, including exact API names and code examples. I’m validating the product now, so I’m also testing where an LLM could make the resulting bundle easier to organize or use.
 
-documentation extraction seems like a perfect llm use case. "just send the html to claude and ask for markdown." simple, right?
+Sending a whole documentation site to a model and asking it to rewrite everything is one possible approach, but it risks changing details that should stay exact.
 
-wrong. for docs extraction, llms are slower, more expensive, less reliable, and completely unnecessary. here's why agent cache uses zero llms in the extraction pipeline.
+That does not mean LLMs have no place in the product. It means source capture and model-assisted features have different jobs: extraction should preserve what the docs say, while a model may help with discovery, grouping, or navigation when that adds value.
 
 ## what llms are actually good at
 
@@ -22,38 +22,17 @@ llms are great at:
 - answering questions
 - reasoning across domains
 
-these are genuinely impressive capabilities. but they're not what docs extraction needs.
+These capabilities may help with tasks around documentation, such as finding relevant pages or suggesting useful labels.
 
 ## what docs extraction actually needs
 
-docs extraction needs:
-- **completeness:** every page, every code example, every edge case
-- **accuracy:** exact api signatures, exact parameter names
-- **determinism:** same input → same output, always
-- **speed:** extract 100 pages in seconds, not minutes
-- **cost:** free or near-zero per site
+Source capture needs to preserve page content, including exact API signatures and code examples. A useful bundle also needs clear structure and a way to find relevant pages.
 
-llms fail on almost all of these.
+Using a model to rewrite source pages can make these requirements harder to guarantee, so any model-assisted step should be bounded and checked against the original text.
 
-## problem 1: cost
+## cost and latency depend on the task
 
-consider a 100-page site.
-
-extracting a medium-sized docs site: 100 pages of html. each page is ~50 KB of raw html. total: 5 MB of html.
-
-sending that to an llm for conversion? at $3 per million tokens (typical rate), that's roughly $15-20 per site just for the api calls. and that's assuming one pass. if the output needs cleaning? another pass. another $20.
-
-at 100 sites/month, that's $1,500-2,000 in llm costs alone.
-
-agent cache's approach: the entire extraction pipeline costs $0. no llm calls. pure code.
-
-## problem 2: speed
-
-llms are slow. gpt-4 processes ~10-30 tokens per second. a docs page might be 5,000 tokens. that's 3-5 minutes per page. for 100 pages: 5-8 hours.
-
-agent cache extracts 100 pages in 60 seconds using direct .md endpoints. or 5 minutes using html purification. or 30 seconds via github tree.
-
-llms make extraction 60-500x slower.
+Converting every page through a model adds model calls and depends on the chosen model, page size, and output length. Direct Markdown or HTML conversion can avoid those calls. A smaller task such as suggesting labels or grouping pages may have a different cost and response time, so I’ll evaluate those separately.
 
 ## problem 3: determinism
 
@@ -61,33 +40,25 @@ determinism means: same input, same output, every time.
 
 this is critical for agent cache. if you extract the same docs site twice, you should get the same zip file. your agent should see the same documentation.
 
-llms are non-deterministic. temperature 0 helps but doesn't guarantee it. the same html input can produce slightly different markdown each time. different heading levels. different code block formatting. occasional hallucinations.
+Model output can vary between runs. If the model rewrites source pages, small changes to headings, code, or wording can make it harder to compare bundles. Keeping the original text intact avoids relying on a model to reproduce it.
 
 for a reference pipeline, randomness is a bug, not a feature.
 
 ## problem 4: completeness
 
-llms have context limits. 128k tokens for modern models. sounds like a lot.
-
-but a large docs site is millions of tokens. stripe's docs? ~5 million tokens. context7's index? that's 126,000+ libraries.
-
-even if you chunk the docs, each page sent to an llm independently, the model might skip content. summarize when you need the full text. miss edge cases. drop code examples.
-
-an llm's job is to be helpful, not precise. if a code example seems "obvious," the llm might skip it. but your agent needs that example.
+Models have context limits, so a large site would need to be split into smaller requests. If a model is asked to summarize or rewrite pages, it may omit details. Keeping the source pages available makes those omissions easier to catch and lets an agent consult the original.
 
 ## problem 5: hallucination
 
-llms invent things. confidently. an llm might:
+When asked to generate or rewrite technical content, a model can introduce errors. For example, it might:
 - rename an api parameter (because the real name is "confusing")
 - skip a deprecated method (because "nobody uses it")
 - add fake parameters to "improve" the api
 - change code examples to "cleaner" versions that don't actually work
 
-for creative writing, this is a feature. for api documentation, it's catastrophic.
+That risk matters when a coding agent relies on exact API behavior. Any generated guidance should be checked against the source documentation.
 
-your agent reads the docs and writes code. if the docs are wrong, the code is wrong. hallucinated documentation is worse than no documentation.
-
-## metadata gets one llm call after extraction
+## metadata and organization can use semantic help
 
 metadata generation.
 
@@ -98,11 +69,11 @@ after extraction, agent cache generates `meta.yaml` with:
 - intent_triggers (4-6 natural user questions)
 - ecosystem (4-8 related tools)
 
-these are generated by an llm. why? because they're subjective. they require semantic understanding of what the library does. "keywords" can't be extracted deterministically from a url.
+Metadata such as topic labels and intent triggers benefits from semantic understanding. A model can suggest these after extraction, while the original Markdown remains available for comparison.
 
-this is a single llm call per site. cheap. fast. and the output is human-reviewed before going live.
+That is one candidate use for an LLM; the cost, quality, and need for review should be validated with real users and sites.
 
-## what extraction looks like without llms
+## keep source extraction separate from model-assisted features
 
 agent cache uses pure code:
 - regex for url patterns
@@ -111,37 +82,25 @@ agent cache uses pure code:
 - framework-specific extractors for nav/tab/version structures
 - simple string operations for cleaning
 
-no neural networks. no embeddings. no vector databases.
+The initial extraction path uses ordinary code for parsing and conversion. That gives us a baseline to compare against if we add model-assisted features.
 
-just code. deterministic. fast. free.
+This is the deterministic baseline. It gives us a source bundle to compare with any LLM-assisted discovery or organization feature.
 
 ## when an llm would make sense
 
-there are edge cases where llms could help:
-- custom frameworks with completely unique html structures
-- heavily visual documentation (diagrams, complex tables)
-- multilingual docs where translation is needed
-- missing navigation structure that needs semantic inference
+Potential uses to validate include suggesting groups for pages, helping users find a relevant page, and recovering useful structure when a site's navigation is unclear. Those features should point back to the original Markdown so users can inspect the source.
 
-for these rare cases, an llm could be a fallback. but for 95%+ of docs sites, code is sufficient. and better.
+## preserve source text, then test model assistance where useful
 
-## transform the docs with code; don't ask a model to interpret them
+Documentation extraction needs to preserve the source. Organization and retrieval can benefit from interpretation, if a model can improve the experience without obscuring or altering that source.
 
-llms are amazing tools. but they're not the right tool for documentation extraction.
+The extraction step turns source pages into Markdown. LLM-assisted features could then interpret that content to improve discovery, without replacing the source files.
 
-the job of extraction is transformation, not interpretation. html → markdown. raw → structured. noisy → clean.
-
-code does transformation. llms do interpretation. that's a fundamental mismatch.
-
-agent cache's approach: zero llm calls in the extraction path. 100% deterministic. free. fast. reliable.
-
-use llms for what they're good at: understanding, reasoning, creativity.
-
-use code for what it's good at: precision, speed, determinism.
+The product direction is still being tested. I’m keeping exact source capture as a requirement while exploring whether LLM-assisted organization or retrieval helps developers get useful documentation into their coding agent's context sooner.
 
 ---
 
 **related:**
 - [deterministic extraction vs llm summarization](/blog/deterministic-vs-llm-extraction)
-- [my code-only extraction paths](/blog/acquisition-ladder)
+- [the deterministic extraction baseline](/blog/acquisition-ladder)
 - [html extraction: how i clean docs](/blog/html-to-markdown-extraction)

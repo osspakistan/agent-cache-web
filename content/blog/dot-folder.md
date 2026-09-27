@@ -1,13 +1,15 @@
 # keeping reference docs in .agentcache, beside your code
 
-**meta title:** how i organize local docs in .agentcache
-**meta description:** agent cache outputs to .agentcache/docs/<slug>/, a hidden, gitignore-ready folder structure. here's why dot-folders are right for docs.
+**meta title:** keep API documentation in your repo with .agentcache
+**meta description:** See how a local documentation bundle can live beside your code in a predictable .agentcache folder, ready for an AI coding agent to read.
 **slug:** /blog/agentcache-dot-folder
-**target keywords:** agentcache dot folder, documentation dot folder, gitignore docs, repo documentation folder, local docs repo
+**target keywords:** agentcache dot folder, documentation dot folder, gitignore docs, repo documentation folder, local docs repo, keep API docs in your repo, turn documentation into files for Claude Code, get docs into Cursor, add API docs to a coding agent
 
 ---
 
-agent cache outputs documentation to `.agentcache/docs/<slug>/`.
+Agent Cache's planned local store puts documentation in `.agentcache/docs/<slug>/`. The goal is to keep a library's reference files beside the code, where a developer can point Claude Code, Cursor, or another coding agent at them.
+
+If your goal is to turn documentation into files for Claude Code, download the ZIP, unpack the Markdown files in your project, and point the agent to the relevant folder. This also gets docs into Cursor or another file-reading coding agent. Adding API docs to a coding agent's project context can be as simple as that. Keeping API docs in your repo makes the reference easy to find; the `.agentcache` workflow is still being validated.
 
 it's a dot-folder. hidden. gitignore-ready. and it's deliberate.
 

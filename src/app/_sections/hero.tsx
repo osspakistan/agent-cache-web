@@ -3,11 +3,12 @@ import { PillForm } from '../../components/pill-form'
 export function Hero(props: { captured?: string }) {
   return (
     <div class="hero">
-      <h1>Give your agents the docs.</h1>
+      <h1>Download docs as a ZIP for your coding agent.</h1>
       <p class="lede">
-        Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners,
-        nav, cookie popups all stripped.{' '}
-        <span class="dim">Drop the folder in your repo and point your agent at it.</span>
+        Paste a docs URL to turn a documentation site into Markdown files for your AI coding agent.
+        Browse the pages online or download the Markdown docs as a ZIP for Cursor, Claude Code,
+        Codex, or Windsurf.{' '}
+        <span class="dim">Keep a local copy in your project or read it offline.</span>
       </p>
       <p class="stack-note">
         Works with <b>Claude Code</b>, <b>Codex</b>, <b>Cursor</b>, <b>Windsurf</b>, any agent that

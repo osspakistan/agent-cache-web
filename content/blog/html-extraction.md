@@ -1,13 +1,15 @@
 # from html to markdown: building a documentation html cleaner
 
-**meta title:** how i convert documentation html to clean markdown (jsdom + turndown)
-**meta description:** when raw markdown isn't available, i extract docs using jsdom, turndown, and framework-specific cleaners. here's how my html extraction pipeline works.
+**meta title:** convert a documentation site from HTML to Markdown
+**meta description:** How documentation HTML can be cleaned and converted into Markdown files, preserving useful content while removing navigation and page clutter.
 **slug:** /blog/html-to-markdown-extraction
-**target keywords:** html to markdown extraction, documentation html cleaner, turndown documentation, jsdom documentation extraction, clean markdown from html
+**target keywords:** html to markdown extraction, documentation html cleaner, turndown documentation, jsdom documentation extraction, clean markdown from html, convert a documentation site to Markdown, export docs to Markdown, turn a docs site into Markdown
 
 ---
 
 most modern documentation frameworks expose raw markdown. but 38% of the sites i extract don't. custom frameworks. older docusaurus. proprietary cms systems.
+
+When a source only serves HTML, the crawler has to convert the documentation site to Markdown before the pages can be packaged. The aim is to export docs as readable Markdown files while preserving useful material, including code examples and tables.
 
 for those sites, i fall back to html extraction. fetch the html. parse the dom. strip noise. convert to markdown. it sounds simple. it's not.
 

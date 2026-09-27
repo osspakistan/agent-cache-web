@@ -3,9 +3,11 @@
 **meta title:** agent cache vs context7 (2026): free offline docs vs $10/seat api
 **meta description:** context7 charges $10/seat for 5,000 api calls. agent cache is free. you own the docs. works offline. here's the honest comparison.
 **slug:** /compare/context7
-**target keywords:** agent cache vs context7, context7 alternative, local docs for agents, context7 vs agent cache, context7 pricing
+**target keywords:** agent cache vs context7, context7 alternative, local docs for agents, context7 vs agent cache, context7 pricing, local documentation for AI coding agents
 
 ---
+
+If you're looking for a Context7 alternative, compare the hosted retrieval workflow with a documentation bundle you can download and keep locally. This page looks at the setup, freshness, and ownership tradeoffs for each approach.
 
 context7 is the big name in "docs for agents." built by upstash. 126,000+ libraries indexed. mcp server. plugged into cursor, claude code, codex, devin.
 

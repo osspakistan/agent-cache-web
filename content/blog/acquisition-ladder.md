@@ -3,11 +3,13 @@
 **meta title:** how i extract docs: 6 methods, free ones first
 **meta description:** most docs sites expose raw markdown. i built a 6-tier acquisition ladder that tries free methods first. here's how to extract docs without scraping.
 **slug:** /blog/acquisition-ladder
-**target keywords:** documentation extraction ladder, extract docs without scraping, cheap docs extraction, docs acquisition strategy, markdown extraction
+**target keywords:** documentation extraction ladder, extract docs without scraping, cheap docs extraction, docs acquisition strategy, markdown extraction, documentation crawler for AI agents, download a docs site
 
 ---
 
 when you need a docs site in markdown, the obvious answer is "scrape the html." that's expensive, slow, and fragile.
+
+If you want to download a docs site for an AI coding agent, start by checking for a machine-readable source. A documentation crawler can use the pages it can access to build a Markdown bundle for browsing or download.
 
 here's the secret most people miss: **most modern documentation sites already expose raw markdown.** you just need to know where to look.
 

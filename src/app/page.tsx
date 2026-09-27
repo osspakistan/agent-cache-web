@@ -16,9 +16,9 @@ import { Manifesto } from './_sections/manifesto'
  */
 export const GET = (c: Context) => {
   setPageMeta({
-    title: 'Agent Cache - Turn Any Docs Site Into Agent-Ready Markdown',
+    title: 'Download Docs as ZIP for AI Coding Agents | Agent Cache',
     description:
-      'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
+      'Paste a docs URL to browse the Markdown pages online or download the documentation as a ZIP for Cursor, Claude Code, Codex, Windsurf, or offline use.',
     image: '/og?title=Agent+Cache&subtitle=Give+your+agents+the+docs',
     canonical: 'https://agentcache.run',
     jsonLd: [
@@ -28,7 +28,8 @@ export const GET = (c: Context) => {
         name: 'Agent Cache',
         alternateName: ['AgentCache', 'agentcache.run', 'Agent Cache Web'],
         url: 'https://agentcache.run',
-        description: 'Turn any documentation site into clean, agent-ready markdown docs.',
+        description:
+          'Download a documentation site as a ZIP of Markdown files for AI coding agents.',
       },
       {
         '@context': 'https://schema.org',
@@ -37,7 +38,7 @@ export const GET = (c: Context) => {
         alternateName: ['AgentCache', 'agentcache.run'],
         applicationCategory: 'DeveloperApplication',
         description:
-          'Paste a docs URL. The whole site comes back as clean markdown your agent can read. Banners, nav and cookie popups stripped, every page intact. ZIP + browsable docs.',
+          'Paste a docs URL to browse the Markdown pages online or download the documentation as a ZIP for AI coding agents or offline use.',
         url: 'https://agentcache.run',
         operatingSystem: 'Linux, macOS, Windows',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
