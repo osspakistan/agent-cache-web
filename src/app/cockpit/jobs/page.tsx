@@ -69,7 +69,9 @@ export const GET = async (c: AppContext) => {
             >
               ← Cockpit
             </a>
-            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">/</span>
+            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+              /
+            </span>
             <span
               class="mono"
               style="font-size: 11px; color: var(--accent-ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;"
@@ -189,7 +191,11 @@ export const GET = async (c: AppContext) => {
                       <div class="mono" style="font-weight: 600; color: var(--ink);">
                         {j.id}
                       </div>
-                      <div class="mono" style="font-size: 11px; color: var(--ink-soft);" title={formatDate(j.created_at)}>
+                      <div
+                        class="mono"
+                        style="font-size: 11px; color: var(--ink-soft);"
+                        title={formatDate(j.created_at)}
+                      >
                         {timeAgo(j.created_at)}
                       </div>
                     </td>

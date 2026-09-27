@@ -75,14 +75,18 @@ export const GET = async (c: AppContext) => {
             >
               ← Cockpit
             </a>
-            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">/</span>
+            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+              /
+            </span>
             <span
               class="mono"
               style="font-size: 11px; color: var(--accent-ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;"
             >
               Analytics
             </span>
-            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">•</span>
+            <span class="mono" style="font-size: 11px; color: var(--ink-soft);">
+              •
+            </span>
             <span class="mono" style="font-size: 11px; color: #16a34a;">
               ● Live
             </span>
@@ -161,7 +165,11 @@ export const GET = async (c: AppContext) => {
             value: analytics.returning_visitors ?? 0,
             color: '#9333ea',
           },
-          { label: 'Human Pageviews', value: analytics.human_views ?? 0, color: 'var(--accent-ink)' },
+          {
+            label: 'Human Pageviews',
+            value: analytics.human_views ?? 0,
+            color: 'var(--accent-ink)',
+          },
           { label: 'Agent Views', value: analytics.agent_views ?? 0, color: '#d97706' },
           { label: 'Bot Views', value: analytics.bot_views ?? 0, color: 'var(--ink-soft)' },
         ].map((s) => (
@@ -173,7 +181,10 @@ export const GET = async (c: AppContext) => {
                 padding: 14px 16px;
               "
           >
-            <div class="mono" style="font-size: 10.5px; color: var(--ink-soft); margin-bottom: 4px; text-transform: uppercase;">
+            <div
+              class="mono"
+              style="font-size: 10.5px; color: var(--ink-soft); margin-bottom: 4px; text-transform: uppercase;"
+            >
               {s.label}
             </div>
             <div style={`font-size: 22px; font-weight: 700; color: ${s.color};`}>{s.value}</div>
@@ -744,7 +755,10 @@ export const GET = async (c: AppContext) => {
                     >
                       {p.path}
                     </button>
-                    <span class="mono" style="color: var(--accent-ink); font-weight: 600; flex-shrink: 0;">
+                    <span
+                      class="mono"
+                      style="color: var(--accent-ink); font-weight: 600; flex-shrink: 0;"
+                    >
                       {p.count}
                     </span>
                   </li>
@@ -874,7 +888,10 @@ export const GET = async (c: AppContext) => {
                         ↗
                       </a>
                     </div>
-                    <span class="mono" style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;">
+                    <span
+                      class="mono"
+                      style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;"
+                    >
                       {r.count}
                     </span>
                   </li>
@@ -927,7 +944,10 @@ export const GET = async (c: AppContext) => {
                     >
                       {ctry.country}
                     </button>
-                    <span class="mono" style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;">
+                    <span
+                      class="mono"
+                      style="color: var(--ink-soft); font-weight: 600; flex-shrink: 0;"
+                    >
                       {ctry.count}
                     </span>
                   </li>
@@ -1119,7 +1139,9 @@ export const GET = async (c: AppContext) => {
             "
           >
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span id="dossierAvatar" style="font-size: 24px;">👤</span>
+              <span id="dossierAvatar" style="font-size: 24px;">
+                👤
+              </span>
               <div>
                 <h3
                   id="dossierCodename"

@@ -386,10 +386,7 @@ export const GET = async (c: AppContext) => {
             Live visitor rosters, session journeys, top pages, referrers, and geographic breakdown.
             Filter by time range.
           </p>
-          <span
-            class="mono"
-            style="font-size: 12px; font-weight: 600; color: var(--accent-ink);"
-          >
+          <span class="mono" style="font-size: 12px; font-weight: 600; color: var(--accent-ink);">
             Open Analytics →
           </span>
         </a>
@@ -423,10 +420,7 @@ export const GET = async (c: AppContext) => {
             All crawl jobs with status, pages parsed, strategy, and download links. Plus user
             feedback and bug reports.
           </p>
-          <span
-            class="mono"
-            style="font-size: 12px; font-weight: 600; color: var(--accent-ink);"
-          >
+          <span class="mono" style="font-size: 12px; font-weight: 600; color: var(--accent-ink);">
             Open Jobs →
           </span>
         </a>
