@@ -129,6 +129,25 @@ export async function buildApp(
     c.header('X-RateLimit-Reset', '60')
   })
 
+  // Prevent search engines and crawlers from indexing live job extraction pages
+  app.use('/dingdong/*', async (c, next) => {
+    await next()
+    c.header('X-Robots-Tag', 'noindex, nofollow')
+  })
+  app.use('/dingdong', async (c, next) => {
+    await next()
+    c.header('X-Robots-Tag', 'noindex, nofollow')
+  })
+
+  // Prevent search engines and crawlers from indexing /docs/* subpages while keeping /docs indexed
+  app.use('/docs/*', async (c, next) => {
+    await next()
+    const p = c.req.path
+    if (p !== '/docs' && p !== '/docs/') {
+      c.header('X-Robots-Tag', 'noindex, nofollow')
+    }
+  })
+
   // RFC 8288 Link header for Dualmark markdown twins on GET requests
   app.use('*', async (c, next) => {
     await next()

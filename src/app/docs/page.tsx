@@ -10,6 +10,7 @@ export const GET = async (c: AppContext) => {
   setPageMeta({
     title: 'Agent Cache // packaged docs',
     description: 'Download full doc sites pre-converted for coding agents.',
+    canonical: 'https://agentcache.run/docs',
   })
   await initDb()
   const allJobs = await listCompletedJobs(100)

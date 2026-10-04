@@ -343,6 +343,21 @@ export function Footer(props?: { wide?: boolean }) {
               style="display: inline-block; border: 0; width: auto; height: 32px; max-height: 32px;"
             />
           </a>
+          <a
+            href="https://www.opensourcealternatives.to"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="display: inline-flex; align-items: center; text-decoration: none;"
+          >
+            <img
+              src="https://www.opensourcealternatives.to/badge-osa.svg"
+              alt="Listed on Open Source Alternatives"
+              height="32"
+              loading="lazy"
+              decoding="async"
+              style="display: inline-block; border: 0; width: auto; height: 32px; max-height: 32px;"
+            />
+          </a>
         </div>
 
         {/* bottom bar */}

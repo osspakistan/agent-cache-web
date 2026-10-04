@@ -1,23 +1,51 @@
 User-agent: *
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 # Explicit AI Agent and Crawler Reachability
 User-agent: ChatGPT-User
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 User-agent: GPTBot
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 User-agent: ClaudeBot
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 User-agent: Google-Extended
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 User-agent: DeepSeekBot
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 User-agent: ora-agent
+Disallow: /dingdong/
+Disallow: /docs/
+Allow: /docs$
+Allow: /docs
 Allow: /
 
 # AI Content Signals (IETF draft-romm-aipref-contentsignals)

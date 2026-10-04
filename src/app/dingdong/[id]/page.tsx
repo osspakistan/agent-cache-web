@@ -9,6 +9,11 @@ export const GET = async (c: AppContext) => {
   const job = await getJobById(id)
 
   if (!job) {
+    setPageMeta({
+      title: 'Cache not found // Agent Cache',
+      description: `Documentation cache not found for ${id}.`,
+      noindex: true,
+    })
     return (
       <>
         <Nav active="dingdong" />
@@ -36,6 +41,7 @@ export const GET = async (c: AppContext) => {
     title: `${product} // extraction in progress`,
     description: `Live extraction job for ${product} documentation. ${job.page_count} pages fetched so far.`,
     image: `/og?title=${encodeURIComponent(product)}&subtitle=Extraction+in+progress&pages=${job.page_count}&date=${encodeURIComponent(new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}`,
+    noindex: true,
   })
 
   // Pre-load past events directly from R2 for instant replay

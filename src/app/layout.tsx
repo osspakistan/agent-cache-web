@@ -18,6 +18,7 @@ const Layout: LayoutComponent = ({ children }) => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>{meta.title}</title>
           <meta name="description" content={meta.description} />
+          {meta.noindex && <meta name="robots" content="noindex, nofollow" />}
 
           {/* OpenGraph / Twitter card - link previews */}
           <meta name="og:site_name" content="Agent Cache" />

@@ -13,6 +13,11 @@ export const GET = async (c: AppContext) => {
   const job = await getJobById(id)
 
   if (!job) {
+    setPageMeta({
+      title: 'Documentation Cache Not Found // Agent Cache',
+      description: `Documentation cache not found for ${id}.`,
+      noindex: true,
+    })
     return (
       <>
         <Nav active="docs" />
@@ -45,6 +50,11 @@ export const GET = async (c: AppContext) => {
 
   // If job failed, render recovery state
   if (job.status === 'failed') {
+    setPageMeta({
+      title: `Export stopped · ${id} // Agent Cache`,
+      description: job.error_human || 'Could not complete the documentation extraction.',
+      noindex: true,
+    })
     return (
       <>
         <Nav active="docs" />
@@ -172,6 +182,7 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
     description:
       job.description ||
       `Documentation for ${product}, packaged as clean markdown for coding agents. ${job.page_count} pages.`,
+    noindex: true,
   })
 
   return (
