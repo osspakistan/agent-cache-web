@@ -305,6 +305,39 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
                   </svg>
                   Get ZIP bundle ({formatBytes(job.zip_size_bytes).full})
                 </a>
+
+                <button
+                  type="button"
+                  class="fb-open-btn mono secondary"
+                  style="
+                    margin: 0;
+                    background: var(--card);
+                    color: var(--ink);
+                    border: 1px solid var(--border);
+                    font-weight: 500;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                  "
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  missing pages or broken?
+                </button>
               </div>
 
               <a
@@ -443,6 +476,57 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
             </select>
           </div>
         )}
+
+        {/* Verification banner for feedback */}
+        <div
+          style="
+            background: var(--card);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 12px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              style="color: var(--accent-ink); flex-shrink: 0;"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span style="font-size: 13px; color: var(--ink-body);">
+              Did this extraction miss any dynamic sub-pages or navigation branches?
+            </span>
+          </div>
+          <button
+            type="button"
+            class="fb-open-btn mono"
+            style="
+              background: var(--secondary);
+              color: var(--ink);
+              border: 1px solid var(--border);
+              padding: 4px 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              cursor: pointer;
+              font-weight: 500;
+            "
+          >
+            report missing pages →
+          </button>
+        </div>
 
         {/* Interactive Multi-Nested Documentation Tree & ASCII Map */}
         {mapData ? (
@@ -638,12 +722,14 @@ ${job.description || `Documentation for ${product}, packaged as clean markdown f
             __html: `(function(){
               var d = document.getElementById('fb-dialog');
               var f = document.getElementById('fb-form');
-              var open = document.getElementById('fb-open');
+              var openBtns = document.querySelectorAll('.fb-open-btn, #fb-open');
               var x = document.getElementById('fb-close-x');
               var cancel = document.getElementById('fb-cancel');
               var submit = document.getElementById('fb-submit');
               function close(){ if(d.open) d.close(); }
-              if(open) open.addEventListener('click', function(){ d.showModal(); });
+              openBtns.forEach(function(btn){
+                btn.addEventListener('click', function(){ d.showModal(); });
+              });
               if(x) x.addEventListener('click', close);
               if(cancel) cancel.addEventListener('click', close);
               if(d) d.addEventListener('click', function(e){ if(e.target===d) close(); });
