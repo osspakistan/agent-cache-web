@@ -266,22 +266,22 @@ export function Footer(props?: { wide?: boolean }) {
         {/* badges row */}
         <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--border-soft);">
           <a
-            href="https://www.listbulb.com/tools/agentcache"
+            href="https://www.listbulb.com/launches?week=2026-W41"
             target="_blank"
             rel="noopener"
             style="display: inline-flex; align-items: center; text-decoration: none;"
           >
             <img
               class="badge-theme-light"
-              src="https://www.listbulb.com/featured-on-listbulb-light.svg"
-              alt="Featured on ListBulb"
+              src="https://www.listbulb.com/api/badge/weekly/agentcache?theme=light"
+              alt="#1 Product of the Week on ListBulb"
               height="32"
               style="height: 32px; width: auto; max-height: 32px;"
             />
             <img
               class="badge-theme-dark"
-              src="https://www.listbulb.com/featured-on-listbulb-dark.svg"
-              alt="Featured on ListBulb"
+              src="https://www.listbulb.com/api/badge/weekly/agentcache?theme=dark"
+              alt="#1 Product of the Week on ListBulb"
               height="32"
               style="height: 32px; width: auto; max-height: 32px;"
             />
