@@ -294,4 +294,56 @@
   })
 })()
 
+/**
+ * Client-Side Local Time Formatter:
+ * Converts UTC datetime stamps into the user's browser local time
+ * (e.g. Vietnam ICT, Pakistan PKT, India IST, US EDT).
+ */
+;(function () {
+  function formatLocalTimes() {
+    var elements = document.querySelectorAll('time[data-local]')
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i]
+      var iso = el.getAttribute('datetime') || el.getAttribute('data-local')
+      if (!iso) continue
+      var d = new Date(iso)
+      if (isNaN(d.getTime())) continue
+
+      var prefix = el.getAttribute('data-prefix') || ''
+      var hasTime = iso.indexOf('T') !== -1 || iso.indexOf(':') !== -1
+
+      try {
+        var formatted = ''
+        if (hasTime) {
+          formatted = d.toLocaleString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short',
+          })
+        } else {
+          formatted = d.toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        }
+        el.textContent = prefix + formatted
+        el.setAttribute('title', 'Local: ' + d.toString() + '\nUTC: ' + d.toUTCString())
+      } catch (err) {}
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', formatLocalTimes)
+  } else {
+    formatLocalTimes()
+  }
+
+  // Support htmx navigation or swaps if any
+  document.addEventListener('htmx:afterSettle', formatLocalTimes)
+})()
+
 

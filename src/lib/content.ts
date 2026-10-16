@@ -3,6 +3,7 @@
 // Comparisons use the /compare namespace. All lists, detail pages and the
 // sitemap read this registry so their URLs cannot drift apart.
 
+import { spawnSync } from 'node:child_process'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { renderHtml } from '@comark/html'
@@ -109,8 +110,35 @@ export function validateContentAddresses(posts: Pick<ContentPost, 'route' | 'ali
   }
 }
 
+function getGitCommitDateMap(): Map<string, string> {
+  const map = new Map<string, string>()
+  try {
+    const out = spawnSync('git', ['log', '--name-only', '--format=COMMIT:%cI'], {
+      encoding: 'utf8',
+      cwd: resolve(CONTENT_DIR, '..'),
+    })
+    if (out.stdout) {
+      let currentTime = ''
+      for (const line of out.stdout.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+        if (trimmed.startsWith('COMMIT:')) {
+          currentTime = trimmed.slice(7)
+        } else if (currentTime && !map.has(trimmed)) {
+          map.set(trimmed, currentTime)
+        }
+      }
+    }
+  } catch {
+    // If git is unavailable, map stays empty and metadata is used.
+  }
+  return map
+}
+
 async function load(): Promise<Record<ContentSection, ContentPost[]>> {
   const collections: Record<ContentSection, ContentPost[]> = { blog: [], compare: [] }
+  const gitDates = getGitCommitDateMap()
+
   for (const section of SECTIONS) {
     // Missing shipped content is an error, not a successful empty index.
     const files = (await readdir(join(CONTENT_DIR, section)))
@@ -123,6 +151,11 @@ async function load(): Promise<Record<ContentSection, ContentPost[]>> {
       if (!title || !body || !meta['meta description']) {
         throw new Error(`Incomplete content: ${section}/${file}`)
       }
+      const gitPath = `content/${section}/${file}`
+      const gitTime = gitDates.get(gitPath)
+      const date = meta.date || gitTime
+      const updatedAt = meta['updated at'] || meta.updated || meta.date || gitTime
+
       collections[section].push({
         ...contentAddress(section, file, meta.slug),
         title,
@@ -130,14 +163,22 @@ async function load(): Promise<Record<ContentSection, ContentPost[]>> {
         description: meta['meta description'],
         sourceSlug: meta.slug,
         keywords: meta['target keywords'],
-        date: meta.date,
-        updatedAt: meta['updated at'] || meta.updated,
+        date,
+        updatedAt,
         html: await renderHtml(body),
         body,
         file,
       })
     }
     validateContentAddresses(collections[section])
+
+    // Sort by last updated (newest first). Fallback to date or title.
+    collections[section].sort((a, b) => {
+      const timeA = new Date(a.updatedAt || a.date || 0).getTime()
+      const timeB = new Date(b.updatedAt || b.date || 0).getTime()
+      if (timeA !== timeB) return timeB - timeA
+      return a.title.localeCompare(b.title)
+    })
   }
   return collections
 }

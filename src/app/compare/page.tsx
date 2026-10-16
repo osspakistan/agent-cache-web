@@ -1,5 +1,5 @@
 import { Nav } from '../../components/nav'
-import { getContent } from '../../lib/content'
+import { formatPostDateTime, getContent } from '../../lib/content'
 import { setPageMeta } from '../../lib/page-meta'
 import { createMarkdownResponse, prefersMarkdown } from '../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../lib/utils/types'
@@ -64,6 +64,18 @@ ${list}
                     <span class="item-tag">vs {targetTool}</span>
                     <span>•</span>
                     <span>{readTime} min read</span>
+                    {p.updatedAt && (
+                      <>
+                        <span>•</span>
+                        <time
+                          datetime={p.updatedAt}
+                          data-local={p.updatedAt}
+                          data-prefix="Updated "
+                        >
+                          Updated {formatPostDateTime(p.updatedAt)}
+                        </time>
+                      </>
+                    )}
                   </div>
                 </a>
               )

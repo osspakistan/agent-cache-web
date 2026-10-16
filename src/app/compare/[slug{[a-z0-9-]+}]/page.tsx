@@ -50,13 +50,19 @@ ${post.description ? `> ${post.description}\n\n` : ''}${post.body}
                 {post.date && (
                   <>
                     <span> · </span>
-                    <time datetime={post.date}>Published {formatPostDateTime(post.date)}</time>
+                    <time datetime={post.date} data-local={post.date} data-prefix="Published ">
+                      Published {formatPostDateTime(post.date)}
+                    </time>
                   </>
                 )}
                 {post.updatedAt && (
                   <>
                     <span> · </span>
-                    <time datetime={post.updatedAt}>
+                    <time
+                      datetime={post.updatedAt}
+                      data-local={post.updatedAt}
+                      data-prefix="Updated "
+                    >
                       Updated {formatPostDateTime(post.updatedAt)}
                     </time>
                   </>
