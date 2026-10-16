@@ -5,6 +5,8 @@
 **slug:** /compare/parallel-web
 **target keywords:** agent cache vs parallel web, parallel web alternative, docs extraction vs scraping, parallel scraping engine
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 parallel web is parallel web. it's infrastructure for scraping the web at high concurrency and large scale. designed for speed and volume.

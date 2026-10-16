@@ -5,6 +5,8 @@
 **slug:** /blog/100-docs-sites-what-broke
 **target keywords:** documentation extraction, docs site crawl, why docs extraction fails, documentation crawler, agent docs
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 "any documentation site" is a bold claim. bold claims need evidence. so i tested agent cache on 100 real documentation sites, yc startups, established dev tools, infrastructure companies, open source projects.

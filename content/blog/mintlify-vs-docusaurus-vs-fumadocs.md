@@ -5,6 +5,8 @@
 **slug:** /blog/mintlify-vs-docusaurus-vs-fumadocs
 **target keywords:** mintlify vs docusaurus, fumadocs vs mintlify, best docs framework 2026, documentation framework comparison, docs platform comparison
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 if you're building documentation in 2026, you have three dominant choices: mintlify, docusaurus, and fumadocs.

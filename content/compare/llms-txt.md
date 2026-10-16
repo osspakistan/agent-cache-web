@@ -5,6 +5,8 @@
 **slug:** /compare/llms-txt
 **target keywords:** agent cache vs llms.txt, llms.txt alternative, llms.txt standard, docs for agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 llms.txt is a proposed standard. a text file that sits at the root of a docs site and tells ai agents what documentation is available.

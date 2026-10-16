@@ -5,6 +5,8 @@
 **slug:** /blog/deterministic-vs-llm-extraction
 **target keywords:** deterministic extraction, llm summarization vs extraction, reliable documentation extraction, non-llm extraction, extraction determinism
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 llms are amazing. they understand text. they generate content. they answer questions. they summarize.

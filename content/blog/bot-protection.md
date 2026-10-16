@@ -5,6 +5,8 @@
 **slug:** /blog/bot-protection-docs-extraction
 **target keywords:** bot protection documentation, cloudflare docs extraction, crawl blocked documentation, docs extraction failure, 403 docs crawl
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 you'd think documentation, meant to be read, would be easy to access. but 12% of the sites i tried to extract were blocked by bot protection.

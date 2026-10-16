@@ -5,6 +5,8 @@
 **slug:** /blog/why-local-docs
 **target keywords:** local documentation, documentation for AI coding agents, local documentation for Cursor, local documentation for Claude Code, local documentation for Codex, local documentation for Windsurf, complete offline documentation, download docs for offline use, download documentation for offline use, save API documentation locally, make a local copy of documentation, use docs with an AI coding assistant
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 When an AI coding assistant needs unfamiliar API details, should it fetch them from a hosted retrieval service or read a local copy? I’m testing the case for local documentation: developers can download docs for offline use, browse the Markdown pages, and save API documentation locally beside a project.

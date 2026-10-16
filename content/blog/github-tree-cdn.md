@@ -5,6 +5,8 @@
 **slug:** /blog/github-tree-fast-extraction
 **target keywords:** github tree api documentation, github raw markdown extraction, fast docs extraction github, github cdn documentation, open source docs extraction
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 my fastest extraction ever: 3,848 files in 87 seconds. zero html parsing. zero jsdom. zero bot protection worries.

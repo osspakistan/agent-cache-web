@@ -117,6 +117,11 @@ const Layout: LayoutComponent = ({ children }) => {
           />
           <script type="module" src="/js/htmx.esm.min.js"></script>
           <script src="/js/app.js" defer></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){function formatTimes(){var els=document.querySelectorAll('time[data-local]');for(var i=0;i<els.length;i++){var el=els[i];var iso=el.getAttribute('data-local')||el.getAttribute('datetime');if(!iso)continue;var d=new Date(iso);if(isNaN(d.getTime()))continue;var prefix=el.getAttribute('data-prefix')||'';var hasTime=iso.indexOf('T')!==-1||iso.indexOf(':')!==-1;try{var fmt='';if(hasTime){fmt=d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true,timeZoneName:'short'});}else{fmt=d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}el.textContent=prefix+fmt;el.setAttribute('title','Local: '+d.toString()+'\\nUTC: '+d.toUTCString());}catch(e){}}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',formatTimes);}else{formatTimes();}document.addEventListener('htmx:afterSettle',formatTimes);window.formatLocalTimes=formatTimes;})();`,
+            }}
+          />
           {process.env.DEV_HOT_RELOAD === 'true' && (
             <script
               dangerouslySetInnerHTML={{

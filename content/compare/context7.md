@@ -5,6 +5,8 @@
 **slug:** /compare/context7
 **target keywords:** agent cache vs context7, context7 alternative, local docs for agents, context7 vs agent cache, context7 pricing, local documentation for AI coding agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 If you're looking for a Context7 alternative, compare the hosted retrieval workflow with a documentation bundle you can download and keep locally. This page looks at the setup, freshness, and ownership tradeoffs for each approach.

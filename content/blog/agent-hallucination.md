@@ -5,6 +5,8 @@
 **slug:** /blog/agent-hallucination-docs
 **target keywords:** agent hallucination, ai agent hallucinates api, fix agent hallucination, docs prevent hallucination, coding agent wrong api
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 your agent just wrote:

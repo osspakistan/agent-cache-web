@@ -5,6 +5,8 @@
 **slug:** /blog/head-requests-fail-edge-routes
 **target keywords:** head request fails netlify, head request 502 cloudflare workers, edge route head request, netlify head request error, cloudflare workers head request
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 when probing for raw markdown endpoints, the obvious first step is a head request. check if a resource exists without downloading it. saves bandwidth. faster.

@@ -5,6 +5,8 @@
 **slug:** /blog/why-hono-over-express
 **target keywords:** why hono, hono vs express, hono vs fastify, hono web framework, lightweight typescript framework
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 express is the default for node.js web apps. it's everywhere. tutorials start with express. job descriptions mention express.

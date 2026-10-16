@@ -5,6 +5,8 @@
 **slug:** /blog/agent-first-documentation-future
 **target keywords:** agent first documentation, future of documentation, docs for ai agents, documentation trends 2026, ai readable documentation
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 documentation has always been written for humans. but there's a new reader: ai agents.

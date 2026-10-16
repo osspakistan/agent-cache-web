@@ -5,6 +5,8 @@
 **slug:** /blog/documentation-site-generators-2026
 **target keywords:** documentation site generators, best docs generator 2026, documentation platform comparison, docs framework ranking
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 there are 50+ tools for building documentation sites. i've extracted docs from most of them. here's the truth: most don't matter.

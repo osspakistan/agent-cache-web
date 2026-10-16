@@ -5,6 +5,8 @@
 **slug:** /blog/md-md-extension-bug
 **target keywords:** md.md extension bug, documentation extension normalization, double md extension, markdown extraction bug, url normalization docs
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 a bug that cost hours to debug. the symptom: `404` for urls that should've worked. the cause: double extensions. `page.md.md` instead of `page.md`.

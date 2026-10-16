@@ -5,6 +5,8 @@
 **slug:** /blog/knowledge-base-docs-platforms-compared
 **target keywords:** knowledge base documentation, docs vs knowledge base, ai documentation platform, support portal documentation, documentation platform comparison
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 documentation tools fall on a spectrum. on one end: pure docs. markdown files rendered to html. on the other end: multi-purpose platforms that combine docs with support, chat, ticketing, and ai.

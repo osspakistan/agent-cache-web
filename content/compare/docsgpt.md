@@ -5,6 +5,8 @@
 **slug:** /compare/docsgpt
 **target keywords:** agent cache vs docsgpt, docsgpt alternative, docs chatbot vs download, documentation for agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 docsgpt is a chatbot for documentation sites. you ask it questions like "how do i authenticate with stripe?" it reads the docs and answers. conversation interface.

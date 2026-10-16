@@ -5,6 +5,8 @@
 **slug:** /blog/why-no-llm-extraction
 **target keywords:** deterministic documentation extraction, llm-assisted documentation, llm vs deterministic extraction, source-faithful docs, documentation organization
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 I started Agent Cache with deterministic extraction because the first job is to preserve the source documentation, including exact API names and code examples. I’m validating the product now, so I’m also testing where an LLM could make the resulting bundle easier to organize or use.

@@ -5,6 +5,8 @@
 **slug:** /blog/30-lessons-docs-extraction
 **target keywords:** lessons learned documentation, building documentation tool, docs extraction lessons, documentation crawler lessons, building agent tool
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 i've extracted 100+ docs sites. hit cloudflare walls. debugged .md.md bugs. built the entire pipeline. here are 30 lessons.

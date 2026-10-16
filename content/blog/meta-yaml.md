@@ -5,6 +5,8 @@
 **slug:** /blog/meta-yaml-agent-discovery
 **target keywords:** meta.yaml agent discovery, agent metadata format, documentation metadata, meta.yaml format, agent-friendly metadata
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 when extraction finishes, agent cache creates a `meta.yaml` file. not for humans. for agents.

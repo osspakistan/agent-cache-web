@@ -5,6 +5,8 @@
 **slug:** /blog/browser-rendered-docs-extraction-problem
 **target keywords:** browser rendered docs, docsify extraction problem, markdoc docs extraction, client side rendered documentation, docsify vs static docs
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most documentation sites serve html. the content is in the response. you fetch the url, you get the text.

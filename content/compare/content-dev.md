@@ -5,6 +5,8 @@
 **slug:** /compare/content-dev
 **target keywords:** agent cache vs content.dev, content.dev alternative, docs extraction toolkit, open source docs extraction
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 content.dev is an open-source project that helps developers build documentation extraction pipelines. it's a toolkit. libraries, scripts, configuration options.

@@ -5,6 +5,8 @@
 **slug:** /blog/robots-txt-crawling-ethics
 **target keywords:** robots.txt crawling, crawling ethics, respect robots.txt, documentation crawling policy, ethical web crawling
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 agent cache crawls documentation sites. this raises ethical questions. do i respect robots.txt? what's my rate limit? do i bypass paywalls?

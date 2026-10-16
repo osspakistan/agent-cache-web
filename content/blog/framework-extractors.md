@@ -5,6 +5,8 @@
 **slug:** /blog/docs-framework-agent-readability
 **target keywords:** mintlify agent readability, docusaurus agent readability, gitbook agent readability, docs framework comparison, best docs framework for agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 not all docs frameworks are equal. some expose raw markdown. some hide everything behind javascript. some have clean urls. some require headless browsers.

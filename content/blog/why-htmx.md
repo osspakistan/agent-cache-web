@@ -5,6 +5,8 @@
 **slug:** /blog/why-htmx-over-react
 **target keywords:** htmx vs react, why htmx, htmx documentation tool, server-rendered htmx, htmx hono
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 when developers hear "web app," they reach for react. or next.js. or vue.

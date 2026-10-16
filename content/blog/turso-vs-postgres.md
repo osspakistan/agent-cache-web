@@ -5,6 +5,8 @@
 **slug:** /blog/why-turso-over-postgres
 **target keywords:** turso vs postgresql, turso libsql, sqlite for job metadata, turso database, edge sqlite
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most web apps use postgresql. it's the default. robust, proven, relational.

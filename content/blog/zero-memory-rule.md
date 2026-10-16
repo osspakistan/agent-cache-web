@@ -5,6 +5,8 @@
 **slug:** /blog/zero-memory-architecture
 **target keywords:** zero memory architecture, disk backed processing, append only ledger, stateless documentation extraction, disk backed state
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most web apps hold state in memory. they load things from the database. keep them in ram. update them in ram. write back to disk "later."

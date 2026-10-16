@@ -5,6 +5,8 @@
 **slug:** /blog/state-of-docs-for-agents-2026
 **target keywords:** state of documentation 2026, ai agent documentation report, documentation trends, agent-ready docs report
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 every year, documentation changes. in 2026, the change is about agents.

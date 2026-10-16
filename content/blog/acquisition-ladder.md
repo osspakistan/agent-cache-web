@@ -5,6 +5,8 @@
 **slug:** /blog/acquisition-ladder
 **target keywords:** documentation extraction ladder, extract docs without scraping, cheap docs extraction, docs acquisition strategy, markdown extraction, documentation crawler for AI agents, download a docs site
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 when you need a docs site in markdown, the obvious answer is "scrape the html." that's expensive, slow, and fragile.

@@ -5,6 +5,8 @@
 **slug:** /blog/vemetric-docs-case-study
 **target keywords:** vemetric docs extraction, docs extraction failure case study, documentation crawler debugging, agent cache case study, docs extraction edge case
 
+**date:** 2026-09-10T11:34:56+05:00
+**updated at:** 2026-09-10T11:34:56+05:00
 ---
 
 40 hours. that's what one documentation site cost me this week. vemetric, a small analytics tool with maybe 30 pages of docs. thirty pages. i've extracted 428-page monsters in under a minute. this one refused to die.

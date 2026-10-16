@@ -5,6 +5,8 @@
 **slug:** /blog/agentcache-dot-folder
 **target keywords:** agentcache dot folder, documentation dot folder, gitignore docs, repo documentation folder, local docs repo, keep API docs in your repo, turn documentation into files for Claude Code, get docs into Cursor, add API docs to a coding agent
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 Agent Cache's planned local store puts documentation in `.agentcache/docs/<slug>/`. The goal is to keep a library's reference files beside the code, where a developer can point Claude Code, Cursor, or another coding agent at them.

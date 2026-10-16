@@ -5,6 +5,8 @@
 **slug:** /compare/docuchat
 **target keywords:** agent cache vs docuchat, docuchat alternative, docs chatbot, documentation for agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 docuchat is another docs chatbot. ask questions, get answers. q&a interface layered over documentation.

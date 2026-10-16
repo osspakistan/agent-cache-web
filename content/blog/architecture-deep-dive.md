@@ -5,6 +5,8 @@
 **slug:** /blog/architecture-deep-dive
 **target keywords:** agent cache architecture, zero-memory architecture, disk-backed processing, sse streaming architecture, hono htmx architecture
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most web apps hold state in memory. they hope the process doesn't crash. they hope the server doesn't restart. they hope nothing needs to replay.

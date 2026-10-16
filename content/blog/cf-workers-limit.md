@@ -5,6 +5,8 @@
 **slug:** /blog/cloudflare-workers-50-subrequest-limit
 **target keywords:** cloudflare workers subrequest limit, cloudflare workers 50 subrequest, workers subrequest limit, serverless documentation extraction, cf workers limit
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 cloudflare workers seemed perfect for agent cache. edge computing. global distribution. serverless pricing. zero cold starts. built-in caching.

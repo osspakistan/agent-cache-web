@@ -5,6 +5,8 @@
 **slug:** /blog/concurrency-sweet-spot-extraction
 **target keywords:** concurrency sweet spot, parallel extraction workers, optimal concurrency crawling, worker pool documentation, 8 workers extraction
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 when crawling in parallel, more workers should mean faster extraction, right?

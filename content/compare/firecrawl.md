@@ -5,6 +5,8 @@
 **slug:** /compare/firecrawl
 **target keywords:** agent cache vs firecrawl, firecrawl alternative, firecrawl vs agent cache, docs extraction tool, documentation crawler, documentation crawler for AI agents
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 If you're looking for a Firecrawl alternative for documentation, compare a general web extraction API with a docs-focused downloadable bundle. Firecrawl handles broad web extraction; Agent Cache is built around packaging documentation for coding-agent workflows.

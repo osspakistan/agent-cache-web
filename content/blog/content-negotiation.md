@@ -5,6 +5,8 @@
 **slug:** /blog/content-negotiation-markdown
 **target keywords:** content negotiation markdown, accept header markdown, hidden markdown endpoints, documentation content negotiation, accept text markdown
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most documentation sites serve html. that's the default.

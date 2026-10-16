@@ -5,6 +5,8 @@
 **slug:** /blog/open-source-direction
 **target keywords:** agent cache open source, open source documentation extraction, mit license docs tool, open source crawler, agent cache github
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 agent cache is going open source.

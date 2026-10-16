@@ -5,6 +5,8 @@
 **slug:** /blog/pure-docs-generators-ranked
 **target keywords:** best docs generator, documentation ssg ranking, agent readable documentation, docs framework for ai, static site generator docs
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 a documentation generator turns markdown into a website. that's it. no api testing, no knowledge base features, no ticketing integration. just docs.

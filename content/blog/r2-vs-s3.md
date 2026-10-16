@@ -5,6 +5,8 @@
 **slug:** /blog/r2-vs-s3-storage
 **target keywords:** cloudflare r2 vs s3, r2 documentation storage, zero egress r2, r2 object storage, s3 alternative r2
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 s3 is the default object store. it's everywhere. amazon built it. it works.

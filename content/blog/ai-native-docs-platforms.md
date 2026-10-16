@@ -5,6 +5,8 @@
 **slug:** /blog/ai-native-documentation-platforms
 **target keywords:** ai native documentation, ai docs platform, documentation ai tool, docsalot vs mintlify, hyperdocs documentation
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 2026 is the year of ai-native documentation.

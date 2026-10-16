@@ -5,6 +5,8 @@
 **slug:** /blog/api-documentation-tools-ranked
 **target keywords:** api documentation tools, openapi documentation generator, api docs platform, swagger alternative, graphql documentation tool
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 api documentation is different from product documentation. it's not prose and tutorials. it's schemas, endpoints, parameters, and response objects.

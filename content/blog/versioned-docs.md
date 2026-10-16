@@ -5,6 +5,8 @@
 **slug:** /blog/versioned-documentation
 **target keywords:** versioned documentation, docs versioning, multiple doc versions, api version documentation, docs version selector
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 many documentation sites have version selectors. "v1" vs "v2." "latest" vs "legacy." "api v3" vs "api v4."

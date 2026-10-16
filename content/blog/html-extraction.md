@@ -5,6 +5,8 @@
 **slug:** /blog/html-to-markdown-extraction
 **target keywords:** html to markdown extraction, documentation html cleaner, turndown documentation, jsdom documentation extraction, clean markdown from html, convert a documentation site to Markdown, export docs to Markdown, turn a docs site into Markdown
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-27T09:41:24+05:00
 ---
 
 most modern documentation frameworks expose raw markdown. but 38% of the sites i extract don't. custom frameworks. older docusaurus. proprietary cms systems.

@@ -5,6 +5,8 @@
 **slug:** /blog/dual-layer-error-system
 **target keywords:** dual layer error handling, machine error human error, error handling pattern, witty error messages, developer experience errors
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 most apps have one error message. that message is either too technical for users or too vague for developers. it fails both audiences.

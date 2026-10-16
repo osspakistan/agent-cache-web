@@ -5,6 +5,8 @@
 **slug:** /blog/economics-docs-extraction
 **target keywords:** documentation extraction cost, docs extraction pricing, cost to extract documentation, cheap docs extraction, extraction cost comparison
 
+**date:** 2026-09-10T06:10:06+05:00
+**updated at:** 2026-09-10T09:09:39+05:00
 ---
 
 not all documentation extraction costs the same. some sites expose raw markdown for free. others require headless browsers and paid proxies.
