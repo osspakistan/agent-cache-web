@@ -2,7 +2,7 @@
 
 **meta title:** 11,974 Visitors, Zero Retention: Why I Am Retiring Agent Cache v1
 **meta description:** Real numbers from my Turso database, questions developers asked in private chats, and why manual ZIP downloads fail coding agents.
-**slug:** /blog/co-founder-validation
+**slug:** /blog/retiring-agent-cache-v1
 **target keywords:** agent cache metrics, coding agent documentation, llm crawler retention, developer documentation offline
 **date:** 2026-10-16
 
