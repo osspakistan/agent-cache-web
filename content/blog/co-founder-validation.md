@@ -1,110 +1,146 @@
-# why i built agent cache, why i never built the llm crawler, and what it takes for us to build this together
+# 11,974 Visitors, Zero Retention: Why I Am Retiring Agent Cache v1
 
-**meta title:** why i built agent cache, why i never built the llm crawler, and what it takes for us to build this together
-**meta description:** raw facts on agent cache for a prospective co-founder: live database metrics, why the llm extractor was never built, reddit validation signals, and what we do next.
+**meta title:** 11,974 Visitors, Zero Retention: Why I Am Retiring Agent Cache v1
+**meta description:** Real numbers from my Turso database, questions developers asked in private chats, and why manual ZIP downloads fail coding agents.
 **slug:** /blog/co-founder-validation
-**target keywords:** agent cache cofounder, agent cache validation, llm crawler, documentation extraction, coding agents
-**date:** 2026-10-05
+**target keywords:** agent cache metrics, coding agent documentation, llm crawler retention, developer documentation offline
+**date:** 2026-10-16
 
 ---
 
-to anyone reading this as a prospective co-founder: i am not pitching you. no pitch deck, no tam charts, no hype.
+If you build tools for coding agents, you quickly learn that web traffic is cheap, but workflow retention is brutally expensive.
 
-if we team up, you need ground reality: what works, what broke, live database numbers, why i never implemented the llm extractor, and why i will drop this project if developers do not pull it from our hands.
+Over the past three weeks, 11,974 developers visited agentcache.run. They came looking for clean Markdown documentation to feed into Cursor, Claude Code, Windsurf, and custom agent harnesses. My crawler processed 134 documentation jobs and extracted 23,917 documentation pages into 67.4 MB of compressed archives.
 
-here is the unvarnished brief.
+Yet if someone asks me how many active users Agent Cache retains today, my answer is simple: essentially zero.
 
-## 1. live numbers
+Out of nearly 12,000 unique visitor sessions tracked across 22 days, exactly six people ever returned on more than one distinct day. 99.95% of visitors arrived, tested a link or inspected an archive, and vanished permanently.
 
-the tool is live at [agentcache.run](https://agentcache.run). paste a docs url, get a clean markdown zip with `meta.yaml` and `_map.json`. coding agents read local files offline instead of wasting context on live html.
+Here is an honest breakdown of what my live database reveals, what developers told me in private conversations, why my initial interface hypothesis failed, and why v1 is being retired.
 
-live stats from our turso database:
+## 1. Ground Truth from My Database
 
-- **129 crawl jobs** run.
-- **94 completed**.
-- **18 failed** (dns drops, bot protection, zero discoverable routes).
-- **17 jobs** crawling, pending, or probing.
-- **23,904 pages** extracted to markdown.
-- **70.6 mb** of compressed archives generated.
-- **4,047 unique visitor sessions** across 4,733 logged events.
+I track real usage through Turso SQLite, exposed live via JSON at [/api/stats/public](/api/stats/public). No vanity metrics, no marketing adjustments.
 
-top crawls:
-- stripe: 3,644 pages (9.2 mb)
-- supabase: 864 pages (4.2 mb)
-- paddle: 610 pages (2.6 mb)
-- drizzle orm: 439 pages (1.4 mb)
-- convex: 428 pages (1.4 mb)
-- resend: 392 pages (1.0 mb)
+Live baseline over 22 active days:
 
-inspect the live dashboard yourself: [https://agentcache.run/cockpit/analytics](https://agentcache.run/cockpit/analytics). i will send you the admin password over reddit dm.
+- **11,974 unique visitor sessions** recorded across **13,012 pageviews** and **13,275 total events**.
+- **Daily visitor mean:** 544 visitors per day.
+- **Daily visitor median:** 413 visitors per day.
+- **Daily traffic spread:** Ranges from a low of 251 to a peak of 1,658 visitors in a single 24-hour window.
+- **134 documentation jobs run** (99 completed clean, 18 failed fatally, 17 probing or pending).
+- **23,917 pages rendered into Markdown**, stored across 67.4 MB in Cloudflare R2.
+- **Multi-day returning visitors:** Exactly 6 individuals out of 11,974.
 
-## 2. the accuracy flaw
+Largest documentation bundles generated:
+- Stripe: 3,644 pages (8.8 MB)
+- Supabase: 864 pages (4.0 MB)
+- Paddle: 610 pages (2.5 MB)
+- Drizzle ORM: 439 pages (1.4 MB)
+- Convex: 428 pages (1.4 MB)
+- Resend: 392 pages (1.0 MB)
 
-our pipeline only catches fatal crashes.
+<script>
+fetch("/api/stats/public")
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (!res.ok || !res.data) return;
+    var d = res.data;
+    var el = function(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; };
+    el("stat-sessions", Number(d.total_sessions).toLocaleString());
+    el("stat-views", Number(d.total_pageviews).toLocaleString());
+    el("stat-mean", d.daily_metrics.average_visitors);
+    el("stat-median", d.daily_metrics.median_visitors);
+    el("stat-pages", Number(d.total_pages).toLocaleString());
+    el("stat-returning", d.returning_visitors);
+  })
+  .catch(function() {});
+</script>
 
-if a crawler hits a 403 or dns error, it marks `failed`. but if a site has 200 pages and our crawler grabs only 25 because the rest sit behind dynamic client-side javascript tabs, it still exits clean.
+Search volume is real. Developers want accurate documentation for coding agents. But search interest does not mean you have built a usable product.
 
-the UI says "complete". 85% of the docs are missing.
+## 2. Why Retention Was Zero
 
-a 200 status is an exit code, not an accuracy benchmark. true fidelity requires automated tree diffs against sitemaps and sidebar dom. until we build that audit, completed counts are partially vanity.
+When founders talk about traffic, they often hide behind cumulative pageviews to mask retention failure. Let me be direct about why visitors never returned.
 
-## 3. the llm extractor: why i never wrote a line of it
+Agent Cache v1 was designed as a classic web downloader:
+1. Developer opens agentcache.run in a browser.
+2. Developer pastes a documentation URL.
+3. Server runs a heuristic crawler across navigation trees.
+4. Server bundles Markdown files into a ZIP archive with `meta.yaml` and `_map.json`.
+5. Developer downloads the archive, unzips it locally, and drags the folder into their workspace.
 
-my first impulse to fix missing dynamic pages was an autonomous llm agent: spin up a headless sandbox, click tabs, expand menus, parse dom trees.
+This entire interaction model contains fatal delivery friction.
 
-i stopped before writing any code. here is why:
+Developers work inside code editors. They do not want to switch windows, wait 90 seconds for a web crawler to finish parsing DOM nodes, download an archive file, extract it to disk, and manually configure file paths inside workspace rules.
 
-1. **latency and cost**: our deterministic pipeline costs $0 in inference and runs in seconds. an agent sandbox calling multimodal models blows crawl time from 15 seconds to 4 minutes, and compute costs from pennies to dollars per run.
-2. **premature paywall**: an llm crawler forces credit meters, stripe checkout, and paywalls immediately (like firecrawl at $19-$99/mo or context7 at $10/seat). charging money before validating repeat retention kills adoption.
+Worse, static archives decay immediately. If Stripe or Drizzle ORM publishes an API patch tomorrow, that downloaded folder turns stale. The developer is left holding outdated context, which creates the exact hallucination problems they tried to prevent in the first place.
 
-rule: free tier uses zero-cost primitives only. no paid inference until retention is proven.
+Because there was no recurring daemon, CLI utility, or background synchronization, each visit was a detached, one-off transaction. A web download button is a utility, not a retained product.
 
-## 4. reddit validation
+## 3. What Engineers Actually Told Me
 
-pageviews prove curiosity, not retention. to test real pain, i messaged developers using cursor, claude code, and codex on reddit:
+Over the past two weeks, I spoke with dozens of engineers, users, and prospective technical peers on Reddit and developer forums. Because these respondents are practicing software engineers who build agent systems daily, their objections represent the unvarnished perspective of my target market.
 
-> *"when you use coding agents, do you ever have to fetch or paste library docs yourself, or do they usually get the right docs? i'm researching this workflow before building anything and would value your take. no pitch."*
+Here are four core questions they raised repeatedly.
 
-outreach numbers from our tracker:
-- 21 leads identified
-- 18 contacted 1:1
-- 9 replies (50% response rate)
+### "Why would I download ZIP archives manually in 2026?"
 
-the split:
-- **no pain**: one developer said they never struggle getting docs into agents. standard libraries (react, express) already live in model weights. they do not need this tool.
-- **real friction**: other builders hit walls with fast-moving libraries, hallucinated methods, context limits, and metered cloud query fees. they want local, offline markdown.
+One engineer put it bluntly during a discussion on agent workflows:
 
-if only a tiny fraction feels acute friction, this is a weekend hobby. if that friction grows as agents tackle niche libraries, it is a company.
+> *"Your proposed product involves me going to your site, inputting a URL, getting a zip file, downloading it, and pasting it in my project folder manually. API docs get updated pretty quickly. In this scenario, I would have to constantly download updated zip files manually and place them in my folder, which is quite inconvenient."*
 
-## 5. our next 5 validation moves
+They were right. Asking a modern engineer to manage static ZIP files manually is an obsolete pattern. Unless updates arrive via automated commands or direct agent tool interfaces, developers will abandon the workflow after their first session.
 
-we do not write heavy infra next. we tighten validation:
+### "Why not just let frontier models search live?"
 
-1. **real analytics**: replace our raw sqlite event logging with posthog or plausible to track repeat user retention.
-2. **google search console**: read actual search queries to see which library docs developers search for.
-3. **daily build-in-public posts**: share what breaks across x, reddit, linkedin, and daily.dev.
-4. **move feedback button to the top**: it sits buried at line 458 in `src/app/docs/[id]/page.tsx`. put it in the top header so developers flag bad crawls immediately.
-5. **sitemap accuracy benchmark**: compare extracted files against live sitemaps to score real tree completeness.
+Another engineer questioned why offline caching is even necessary when modern LLMs connect to web search tools:
 
-## 6. bottom line
+> *"As a developer, when I task Claude or ChatGPT with something, I expect them to search relevant content on the fly. Their search always gives me surprisingly good results. Why pay for a middleman or store static files when agents have web browsing tools like Jina or Tavily?"*
 
-the future of the llm feature and this startup depends on user pull.
+This objection highlights a widespread assumption: developers believe live model retrieval is "good enough" until they encounter massive context bills or subtle API hallucinations. However, fighting this assumption through an external web interface requires exhausting persuasion. If a product requires twenty minutes of debate to justify its core existence, the user interface wedge is wrong.
 
-if developers stay indifferent, i will stop the project, open-source the code, and move on. i refuse to build a solution looking for a problem.
+### "Why not just press Ctrl+P on the single page I need?"
 
-if demand holds, we build the lean path first:
-1. `.agentcache/` local project convention
-2. open-source `agentcache` cli
-3. zero-cloud stdio mcp server for cursor and claude code
-4. paid llm extraction later, only for complex enterprise portals users cannot scrape themselves
+A common critique from practicing builders was scope mismatch:
 
-## 7. the co-founder ask
+> *"Your use case is only relevant when I know exactly what I want to scrape. Why wouldn't I just press Ctrl+P on that specific documentation page, save it, and drop that single page into model context?"*
 
-i need a partner who values pragmatism over theater:
-- technical alignment: fast and deterministic beats slow and expensive.
-- brutal honesty: kill weak ideas early.
-- customer curiosity: talk to users, inspect failed crawls, care about ground truth.
+Engineers rarely need an entire 3,000-page enterprise documentation portal to resolve an immediate coding bug. Usually, they need two specific endpoints, a schema definition, or an authentication pattern. Forcing a user to crawl and ingest a massive document hierarchy when they only needed one page introduces unnecessary latency.
 
-the repo is clean, the web app works, 23,000+ pages are cached, and real users are visiting. 
+### "If competitors charge metered credits per page, how does this make financial sense?"
 
-if this sounds like how you build, let's look at the database together and decide the next move.
+When evaluating unit economics, several backend engineers questioned the sustainability of arbitrary web extraction:
+
+> *"Commercial scraping APIs charge roughly 1 credit per page. If a framework documentation site has 500 pages, that is 500 credits consumed on a single run. Why would individual developers pay a subscription for this when documentation is already public on GitHub?"*
+
+They pinpointed an inescapable economic reality: running full-blown headless browsers and deep extraction across arbitrary third-party websites is compute-heavy. Passing those infrastructure costs to individual developers through subscriptions fails because developers expect documentation to be free.
+
+## 4. The Engineering Bottleneck: Arbitrary Crawling is a Sinkhole
+
+Beyond user delivery issues, the technical premise of v1 contained an inherent flaw: **deterministic crawlers cannot reliably discover arbitrary website topologies without infinite edge-case maintenance.**
+
+In my pipeline, HTTP 200 is merely a process exit code; it is not an accuracy score.
+
+When my crawler hits a documentation site with 200 total pages, it might successfully extract 25 pages and exit cleanly with status `complete`. Why? Because the remaining 175 pages sit behind client-side JavaScript routers, nested accordion menus, or custom state machines (such as Mintlify scoped navigation trees or Docusaurus runtime chunks).
+
+To the user, the dashboard displays "Complete." In reality, 85% of the documentation hierarchy is completely missing.
+
+Fixing this deterministically requires writing endless framework-specific extractors for every documentation engine on the internet. But attempting to solve it via autonomous LLM agents (spinning up headless browser instances that click every tab and inspect every DOM tree) destroys performance and unit economics. An extraction run that costs $0 and finishes in 15 seconds balloons into four minutes of compute and several dollars in model calls.
+
+Attempting to support *any arbitrary URL* pasted by random internet visitors turned my engineering attention into an endless cycle of debugging broken DOM trees.
+
+## 5. Effort Is Never Lost: Moving Beyond v1
+
+Deciding to retire an MVP is not failure; it is basic engineering hygiene. Continuing to polish an interface that users do not retain is vanity.
+
+Nothing built here was wasted:
+1. **The domain and search presence are alive.** `agentcache.run` is indexed across major search engines, ranks for developer documentation keywords, and attracts over 500 organic engineering visitors every day.
+2. **The underlying problem remains authentic.** Coding agents still hallucinate library methods, context windows still get choked with raw HTML bloat, and frontier models still waste tokens repeating web searches across third-party documentation portals.
+3. **The failure was the interface, not the problem.** Developers do not want a manual website where they download ZIP files.
+
+I am taking v1's URL-to-ZIP download form offline. 
+
+Whatever shape comes next will not involve manual archive downloads or arbitrary web crawling forms. If software is meant to assist coding agents, it must live inside agent environments: delivered through direct MCP servers, lightweight CLI tools, and pre-verified library indexes that require zero manual handling.
+
+Until then, all my live database telemetry remains publicly visible at [/api/stats/public](/api/stats/public). Inspect the numbers yourself.
