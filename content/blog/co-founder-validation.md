@@ -4,7 +4,8 @@
 **meta description:** Real numbers from my Turso database, questions developers asked in private chats, and why manual ZIP downloads fail coding agents.
 **slug:** /blog/retiring-agent-cache-v1
 **target keywords:** agent cache metrics, coding agent documentation, llm crawler retention, developer documentation offline
-**date:** 2026-10-16
+**date:** 2026-10-16T18:44:00Z
+**updated at:** 2026-10-16T19:14:00Z
 
 ---
 

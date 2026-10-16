@@ -36,6 +36,7 @@ export function buildRssFeed(
     .map((post) => {
       const url = `${opts.baseUrl}${post.route}`
       const pubDate = rfc822(post.date)
+      const lastModDate = rfc822(post.updatedAt)
       return [
         '    <item>',
         `      <title>${xmlEscape(post.title)}</title>`,
@@ -43,6 +44,7 @@ export function buildRssFeed(
         `      <guid isPermaLink="true">${xmlEscape(url)}</guid>`,
         `      <description>${xmlEscape(post.description)}</description>`,
         ...(pubDate ? [`      <pubDate>${pubDate}</pubDate>`] : []),
+        ...(lastModDate ? [`      <atom:updated>${lastModDate}</atom:updated>`] : []),
         '    </item>',
       ].join('\n')
     })

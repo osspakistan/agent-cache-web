@@ -19,11 +19,42 @@ export interface ContentPost {
   description: string
   sourceSlug?: string
   keywords?: string
-  /** optional **date:** meta line, used for feed pubDate when present */
+  /** optional **date:** meta line, used for feed pubDate when present (supports ISO date or date-time) */
   date?: string
+  /** optional **updated:** or **updated at:** meta line (supports ISO date or date-time) */
+  updatedAt?: string
   html: string
   body: string
   file: string
+}
+
+/** Format date/datetime into human-readable string (e.g. 'Oct 16, 2026' or 'Oct 16, 2026 at 19:12 UTC') */
+export function formatPostDateTime(val?: string): string | null {
+  if (!val) return null
+  const d = new Date(val)
+  if (Number.isNaN(d.getTime())) return val
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
+  const dateStr = `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
+  // If val includes time component (e.g. contains 'T' or ':')
+  if (val.includes('T') || val.includes(':')) {
+    const hours = String(d.getUTCHours()).padStart(2, '0')
+    const mins = String(d.getUTCMinutes()).padStart(2, '0')
+    return `${dateStr} at ${hours}:${mins} UTC`
+  }
+  return dateStr
 }
 
 interface ParseResult {
@@ -100,6 +131,7 @@ async function load(): Promise<Record<ContentSection, ContentPost[]>> {
         sourceSlug: meta.slug,
         keywords: meta['target keywords'],
         date: meta.date,
+        updatedAt: meta['updated at'] || meta.updated,
         html: await renderHtml(body),
         body,
         file,

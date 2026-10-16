@@ -1,6 +1,6 @@
 import { raw } from 'hono/html'
 import { Nav } from '../../../components/nav'
-import { getPost } from '../../../lib/content'
+import { formatPostDateTime, getPost } from '../../../lib/content'
 import { setPageMeta } from '../../../lib/page-meta'
 import { createMarkdownResponse, prefersMarkdown } from '../../../lib/utils/markdown-negotiation'
 import type { AppContext } from '../../../lib/utils/types'
@@ -45,7 +45,23 @@ ${post.description ? `> ${post.description}\n\n` : ''}${post.body}
           <article>
             <header class="post-head">
               <h1>{post.title}</h1>
-              <p class="post-meta">agent cache · field notes</p>
+              <p class="post-meta">
+                <span>agent cache · field notes</span>
+                {post.date && (
+                  <>
+                    <span> · </span>
+                    <time datetime={post.date}>Published {formatPostDateTime(post.date)}</time>
+                  </>
+                )}
+                {post.updatedAt && (
+                  <>
+                    <span> · </span>
+                    <time datetime={post.updatedAt}>
+                      Updated {formatPostDateTime(post.updatedAt)}
+                    </time>
+                  </>
+                )}
+              </p>
             </header>
             <hr class="post-title-sep" />
             <div class="prose">{raw(post.html)}</div>
